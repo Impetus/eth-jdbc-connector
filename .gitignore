@@ -1,0 +1,7 @@
+**/.classpath
+**/.project
+**/.cache-main
+**/.settings
+**/dependency-reduced-pom.xml
+**/target
+**/.cache-tests
