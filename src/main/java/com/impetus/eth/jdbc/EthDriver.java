@@ -6,7 +6,6 @@ import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.sql.Statement;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -59,20 +58,16 @@ public class EthDriver implements Driver {
 
 	@Override
 	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public DriverPropertyInfo[] getPropertyInfo(String url, Properties info)
-			throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+	public DriverPropertyInfo[] getPropertyInfo(String url, Properties info){
+	throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean jdbcCompliant() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -95,14 +90,14 @@ public class EthDriver implements Driver {
         if (!"blkchn".equalsIgnoreCase(token.toString())) {
             return null;
         }
-
+       
        
         index=nextColonIndex(url, index, token);
         if (!"ethereum".equalsIgnoreCase(token.toString())) {
             return null;
         }
-
-        
+    
+        index=nextColonIndex(url, index, token);
         index=nextColonIndex(url, index, token);
         String hostName=token.toString(); 
         props.setProperty(DriverConstants.HOSTNAME, hostName);
@@ -128,9 +123,24 @@ public class EthDriver implements Driver {
 	                    break;
 	                }
         
+            if (chAtPos == '/') {
+                if (position < url.length() && url.charAt(position) == '/') {
+                	position++;
+                }
+
+                break;
+            }
+            
 	             token.append(chAtPos);
 	        }
 
 	        return position;
 	    }
+	 
+	 public static void main(String[] args) {
+		String url = "jdbc:blkchn:ethereum://1223.33.44:12123";
+		StringBuilder token= new StringBuilder();
+		Properties index =getPropMap(url);
+		System.out.println("index : "+index+" token : "+token);
+	}
 	}

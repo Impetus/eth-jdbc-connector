@@ -81,6 +81,7 @@ public abstract class AbstractResultSet implements ResultSet {
 
 	@Override
 	public Array getArray(int columnIndex) throws SQLException {
+		
 		throw new UnsupportedOperationException();
 	}
 

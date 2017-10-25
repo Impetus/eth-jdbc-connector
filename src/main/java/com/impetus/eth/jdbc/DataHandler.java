@@ -5,6 +5,6 @@ import java.util.List;
 
 public interface DataHandler {
 	
-	public ArrayList<ArrayList> convertToObjArray(List rows);
+	public ArrayList<Object[]> convertToObjArray(List<?> rows);
 
 }

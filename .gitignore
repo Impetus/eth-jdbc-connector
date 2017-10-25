@@ -5,3 +5,4 @@
 **/dependency-reduced-pom.xml
 **/target
 **/.cache-tests
+/target/

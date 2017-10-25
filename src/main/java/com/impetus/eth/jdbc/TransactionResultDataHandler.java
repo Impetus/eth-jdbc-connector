@@ -35,31 +35,32 @@ public class TransactionResultDataHandler implements DataHandler {
 	}
 
 	@Override
-	public ArrayList<ArrayList> convertToObjArray(List rows) {
-		ArrayList<ArrayList> result = new ArrayList<ArrayList>();
+	public ArrayList<Object[]> convertToObjArray(List<?> rows) {
+
+		ArrayList<Object[]> result = new ArrayList<Object[]>();
 		for (Object t : rows) {
-			ArrayList arr = new ArrayList();
+			Object[] arr = new Object[columnNamesMap.size()];
 			TransactionObject tr = (TransactionObject) t;
-			arr.add(tr.getBlockHash());
-			arr.add(tr.getBlockNumberRaw());
-			arr.add(tr.getCreates());
-			arr.add(tr.getFrom());
-			arr.add(tr.getGasRaw());
-			arr.add(tr.getGasPriceRaw());
-			arr.add(tr.getHash());
-			arr.add(tr.getInput());
-			arr.add(tr.getNonceRaw());
-			arr.add(tr.getPublicKey());
-			arr.add(tr.getR());
-			arr.add(tr.getRaw());
-			arr.add(tr.getS());
-			arr.add(tr.getTo());
-			arr.add(tr.getTransactionIndexRaw());
-			arr.add(tr.getV());
-			arr.add(tr.getValueRaw());
+			
+			arr[0]=tr.getBlockHash();
+			arr[1]=tr.getBlockNumberRaw();
+			arr[2]=tr.getCreates();
+			arr[3]=tr.getFrom();
+			arr[4]=tr.getGasRaw();
+			arr[5]=tr.getGasPriceRaw();
+			arr[6]=tr.getHash();
+			arr[7]=tr.getInput();
+			arr[8]=tr.getNonceRaw();
+			arr[9]=tr.getPublicKey();
+			arr[10]=tr.getR();
+			arr[11]=tr.getRaw();
+			arr[12]=tr.getS();
+			arr[13]=tr.getTo();
+			arr[14]=tr.getTransactionIndexRaw();
+			arr[15]=tr.getV();
+			arr[16]=tr.getValueRaw();
 			result.add(arr);
 		}
 		return result;
 	}
-
 }
