@@ -73,4 +73,11 @@ public class BlockResultDataHandler implements DataHandler {
 		return result;
 	}
 
+
+	@Override
+	public String getTableName() {
+		
+		return "blocks";
+	}
+
 }

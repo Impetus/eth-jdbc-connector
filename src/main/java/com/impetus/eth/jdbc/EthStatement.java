@@ -14,6 +14,7 @@ import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult;
+import org.web3j.protocol.core.methods.response.Transaction;
 
 public class EthStatement implements Statement {
   
@@ -129,7 +130,7 @@ public class EthStatement implements Statement {
 		
 	    List<TransactionResult> trans = getTransactions("1876545");
 	   	TransactionResultDataHandler dataHandler = new TransactionResultDataHandler();
-		queryResultSet = new EthResultSet(dataHandler.convertToObjArray(trans), dataHandler.getColumnNamesMap(),rSetType,rSetConcurrency);
+		queryResultSet = new EthResultSet(dataHandler.convertToObjArray(trans), dataHandler.getColumnNamesMap(),rSetType,rSetConcurrency,dataHandler.getTableName());
 		
 		
 		/*
@@ -137,8 +138,23 @@ public class EthStatement implements Statement {
 		List<Block> blkl= new ArrayList<Block>();
 		blkl.add(blk);
 		BlockResultDataHandler blockDataHandler= new BlockResultDataHandler();
-		queryResultSet= new EthResultSet(blockDataHandler.convertToObjArray(blkl), BlockResultDataHandler.getColumnNamesMap(),rSetType,rSetConcurrency);
-		*/
+		queryResultSet= new EthResultSet(blockDataHandler.convertToObjArray(blkl), BlockResultDataHandler.getColumnNamesMap(),rSetType,rSetConcurrency,blockDataHandler.getTableName());
+ 		*/
+		
+		/*
+		Block blkByHash= getBlockByHash("0xb76e315ce8a2531e910b2c55d975579d1b05b451eed46947d98278f18f22d25d");
+		List<Block> lblkByHash= new ArrayList<Block>();
+		blkl.add(blkByHash);
+		BlockResultDataHandler blkByHashDataHandler= new BlockResultDataHandler();
+		queryResultSet= new EthResultSet(blkByHashDataHandler.convertToObjArray(blkl), BlockResultDataHandler.getColumnNamesMap(),rSetType,rSetConcurrency,blkByHashDataHandler.getTableName());
+			
+		 
+		 Transaction transByHash= getTransactionByHash("0xe74e6119caa2f92ca50fee714c8ded39385c1ede944aad60dbf3a2cfc69d5b23");
+		 List<Transaction> lTransByHash= new ArrayList<Transaction>();
+		 lTransByHash.add(transByHash);
+		 TransactionResultDataHandler transByHashdataHandler = new TransactionResultDataHandler();
+	     queryResultSet = new EthResultSet(transByHashdataHandler.convertToObjArray(lTransByHash), transByHashdataHandler.getColumnNamesMap(),rSetType,rSetConcurrency,transByHashdataHandler.getTableName());
+		 */
 		
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -316,7 +332,21 @@ public class EthStatement implements Statement {
 				true).send();
 		return block.getBlock();
 	}
+  
+	private Block getBlockByHash(String blockHash) throws IOException {
+		EthBlock block = connection.getWeb3jClient().ethGetBlockByHash(blockHash, true).send();
+		return block.getBlock();
+	}
+	
+	private Transaction getTransactionByHash(String transactionHash) throws IOException {
+		Transaction transaction = connection.getWeb3jClient().ethGetTransactionByHash(transactionHash).send().getResult();
+		return transaction;
+	}
 
+	private Transaction getTransactionByBlockHashAndIndex(String blockHash,BigInteger transactionIndex) throws IOException {
+		Transaction transaction = connection.getWeb3jClient().ethGetTransactionByBlockHashAndIndex(blockHash, transactionIndex).send().getResult();
+		return transaction;
+	}
 
 
 }

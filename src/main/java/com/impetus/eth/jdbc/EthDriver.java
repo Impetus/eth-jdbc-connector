@@ -137,10 +137,4 @@ public class EthDriver implements Driver {
 	        return position;
 	    }
 	 
-	 public static void main(String[] args) {
-		String url = "jdbc:blkchn:ethereum://1223.33.44:12123";
-		StringBuilder token= new StringBuilder();
-		Properties index =getPropMap(url);
-		System.out.println("index : "+index+" token : "+token);
-	}
 	}

@@ -2,6 +2,7 @@ package com.impetus.eth.jdbc;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,12 +27,15 @@ public class EthResultSet extends AbstractResultSet {
 	
 	protected int rSetConcurrency;
 	
+	protected String tableName;
 	
-	public EthResultSet(ArrayList<Object[]> rowData, HashMap<String, Integer> columnNamesMap, int resultSetType, int rSetConcurrency){
+	
+	public EthResultSet(ArrayList<Object[]> rowData, HashMap<String, Integer> columnNamesMap, int resultSetType, int rSetConcurrency,String tableName){
 		this.rowData = rowData;
 		this.columnNamesMap = columnNamesMap;
 		this.resultSetType=resultSetType;
 		this.rSetConcurrency=rSetConcurrency;
+		this.tableName=tableName;
 		currentRowCursor = BEFORE_FIRST_ROW;
 		totalRowCount = rowData.size();
 	}
@@ -109,7 +113,36 @@ public class EthResultSet extends AbstractResultSet {
 		else
 		   return false;
 	}
-
+	
+	@Override
+	public boolean relative(int rows) throws SQLException {
+		checkRSForward();
+		
+		if(rows==0)
+		return true;
+		
+		if(rows==-1)
+			return previous();
+		
+		if(rows==1)
+			return next();
+		
+		if((rows<0 &&(currentRowCursor+rows)>0 )||
+				(rows>0 &&(currentRowCursor+rows)<=totalRowCount))
+		{
+			currentRowCursor=currentRowCursor+rows;
+			currentRow= rowData.get(currentRowCursor-1);
+			return true;
+	    }else 
+			return false;
+			
+	}
+	
+	@Override
+	public int getFetchSize() throws SQLException {
+		return totalRowCount;
+	}
+	
 	
 	@Override
 	public String getString(String columnLabel) throws SQLException {
@@ -201,6 +234,16 @@ public class EthResultSet extends AbstractResultSet {
 	}
 	
 	@Override
+	public short getShort(int columnIndex) throws SQLException {
+		return (short) currentRow[columnIndex];
+	}
+
+	@Override
+	public short getShort(String columnLabel) throws SQLException {
+		return (short) currentRow[columnNamesMap.get(columnLabel)];
+	}
+	
+	@Override
 	public int getRow() throws SQLException {
 		return currentRowCursor;
 	}
@@ -209,6 +252,11 @@ public class EthResultSet extends AbstractResultSet {
 	 public int getType() throws SQLException {
 	           return resultSetType;
 	    }
+	
+	@Override
+	public ResultSetMetaData getMetaData() throws SQLException {
+		return new EthResultSetMetaData(tableName, columnNamesMap);
+	}
 	
 	@Override
 	public int findColumn(String columnLabel) throws SQLException {
@@ -221,4 +269,5 @@ public class EthResultSet extends AbstractResultSet {
 	            throw new SQLException("Result Set is Type Forward only", "1000");
 	        }
 	    }
+	 
 }

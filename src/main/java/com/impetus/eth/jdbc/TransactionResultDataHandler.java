@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.web3j.protocol.core.methods.response.EthBlock.TransactionObject;
+import org.web3j.protocol.core.methods.response.Transaction;
 
 public class TransactionResultDataHandler implements DataHandler {
 
@@ -40,7 +41,7 @@ public class TransactionResultDataHandler implements DataHandler {
 		ArrayList<Object[]> result = new ArrayList<Object[]>();
 		for (Object t : rows) {
 			Object[] arr = new Object[columnNamesMap.size()];
-			TransactionObject tr = (TransactionObject) t;
+			Transaction tr = (Transaction) t;
 			
 			arr[0]=tr.getBlockHash();
 			arr[1]=tr.getBlockNumberRaw();
@@ -62,5 +63,11 @@ public class TransactionResultDataHandler implements DataHandler {
 			result.add(arr);
 		}
 		return result;
+	}
+
+	@Override
+	public String getTableName() {
+		
+		return "transactions";
 	}
 }
