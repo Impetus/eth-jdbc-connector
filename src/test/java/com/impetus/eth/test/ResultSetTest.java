@@ -37,7 +37,7 @@ public class ResultSetTest {
 		
 		TransactionResultDataHandler dataHandler = new TransactionResultDataHandler();
 		
-		ResultSet r = new EthResultSet(dataHandler.convertToObjArray(trans), dataHandler.getColumnNamesMap(),1,1);
+		ResultSet r = new EthResultSet(dataHandler.convertToObjArray(trans), dataHandler.getColumnNamesMap(),1,1,dataHandler.getTableName());
 		
 		try {
 			while(r.next()){
