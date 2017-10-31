@@ -17,6 +17,11 @@
 
 
 	<dependencies>
+	    <dependency>
+			<groupId>com.impetus</groupId>
+			<artifactId>blkchn-sql-interfaces</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 		<dependency>
 			<groupId>org.web3j</groupId>
 			<artifactId>core</artifactId>

@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class EthResultSetMetaData implements ResultSetMetaData {
+import com.impetus.blkch.jdbc.BlkchnResultSetMetaData;
+
+public class EthResultSetMetaData implements BlkchnResultSetMetaData {
 	private String tableName;
 	private HashMap<String, Integer> columnNamesMap = new HashMap<String, Integer>();
 	

@@ -5,7 +5,6 @@ import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Clob;
-import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
@@ -24,7 +23,9 @@ import java.util.concurrent.Executor;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 
-public class EthConnection implements Connection {
+import com.impetus.blkch.jdbc.BlkchnConnection;
+
+public class EthConnection implements BlkchnConnection {
 private String url;
 private Properties props;
 private Web3j web3jClient;

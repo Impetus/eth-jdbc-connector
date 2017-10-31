@@ -6,8 +6,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.web3j.protocol.core.DefaultBlockParameter;
@@ -16,7 +14,9 @@ import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult;
 import org.web3j.protocol.core.methods.response.Transaction;
 
-public class EthStatement implements Statement {
+import com.impetus.blkch.jdbc.BlkchnStatement;
+
+public class EthStatement implements BlkchnStatement {
   
 	protected EthConnection connection;
 	protected int rSetType;
@@ -346,6 +346,22 @@ public class EthStatement implements Statement {
 	private Transaction getTransactionByBlockHashAndIndex(String blockHash,BigInteger transactionIndex) throws IOException {
 		Transaction transaction = connection.getWeb3jClient().ethGetTransactionByBlockHashAndIndex(blockHash, transactionIndex).send().getResult();
 		return transaction;
+	}
+	private Transaction gettest(String blockHash,BigInteger transactionIndex) throws IOException {
+		
+		
+	//Transaction transaction = connection.getWeb3jClient().
+			//ethGetTransactionCount("", null);
+				//ethGetUncleCountByBlockNumber(defaultBlockParameter)
+				//ethGetUncleByBlockNumberAndIndex(defaultBlockParameter, transactionIndex)
+				//ethGetUncleCountByBlockHash(blockHash)
+				//ethGetUncleByBlockHashAndIndex(blockHash, transactionIndex)
+				//ethGetTransactionCount(address, defaultBlockParameter)
+				//ethGetTransactionByBlockNumberAndIndex(defaultBlockParameter, transactionIndex)
+				//ethGetTransactionByBlockHashAndIndex(blockHash, transactionIndex)
+				//ethGetBlockTransactionCountByNumber(defaultBlockParameter)
+				//ethGetBlockTransactionCountByHash(blockHash)
+		return null;
 	}
 
 

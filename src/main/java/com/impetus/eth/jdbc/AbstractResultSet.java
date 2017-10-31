@@ -10,7 +10,6 @@ import java.sql.Clob;
 import java.sql.Date;
 import java.sql.NClob;
 import java.sql.Ref;
-import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.RowId;
 import java.sql.SQLException;
@@ -22,7 +21,9 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Map;
 
-public abstract class AbstractResultSet implements ResultSet {
+import com.impetus.blkch.jdbc.BlkchnResultSet;
+
+public abstract class AbstractResultSet implements BlkchnResultSet {
 
 	@Override
 	public boolean isWrapperFor(Class<?> iface) throws SQLException {

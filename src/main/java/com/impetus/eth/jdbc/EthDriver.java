@@ -1,7 +1,6 @@
 package com.impetus.eth.jdbc;
 
 import java.sql.Connection;
-import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
@@ -9,9 +8,11 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import com.impetus.blkch.jdbc.BlkchnDriver;
 
 
-public class EthDriver implements Driver {
+
+public class EthDriver implements BlkchnDriver {
  
  static {
      try {
