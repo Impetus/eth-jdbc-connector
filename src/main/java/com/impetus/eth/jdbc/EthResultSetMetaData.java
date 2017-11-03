@@ -26,7 +26,7 @@ import com.impetus.blkch.jdbc.BlkchnResultSetMetaData;
 
 /**
  * The Class EthResultSetMetaData.
- * 
+ *
  * @author ashishk.shukla
  * 
  */

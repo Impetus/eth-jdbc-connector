@@ -310,6 +310,7 @@ public class EthConnection implements BlkchnConnection
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException
     {
+
         EthStatement eStatement = new EthStatement(this, resultSetType, resultSetConcurrency);
         addNewStatement(eStatement);
         return eStatement;

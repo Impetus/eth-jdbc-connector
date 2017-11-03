@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.web3j.protocol.core.DefaultBlockParameter;
@@ -275,7 +276,15 @@ public class EthStatement implements BlkchnStatement
         ResultSet queryResultSet = null;
         try
         {
-           
+
+            System.out.println("In execute Query Block ");
+            System.out.println("Preparing to execute Query : " + sql);
+
+            connection.getWeb3jClient().web3ClientVersion().observable().subscribe(x -> {
+                String clientVersion = x.getWeb3ClientVersion();
+                System.out.println("web3j Client Version: " + clientVersion);
+            });
+
             List<TransactionResult> trans = getTransactions("1876545");
             TransactionResultDataHandler dataHandler = new TransactionResultDataHandler();
             queryResultSet = new EthResultSet(dataHandler.convertToObjArray(trans), dataHandler.getColumnNamesMap(),
@@ -290,6 +299,15 @@ public class EthStatement implements BlkchnStatement
              * .getColumnNamesMap(),rSetType,rSetConcurrency
              * ,blockDataHandler.getTableName());
              */
+
+            Block blk = getBlock("1876545");
+            List<Block> blkl = new ArrayList<Block>();
+            blkl.add(blk);
+            BlockResultDataHandler blockDataHandler = new BlockResultDataHandler();
+            queryResultSet = new EthResultSet(blockDataHandler.convertToObjArray(blkl),
+                    BlockResultDataHandler.getColumnNamesMap(), rSetType, rSetConcurrency,
+                    blockDataHandler.getTableName());
+
 
             /*
              * Block blkByHash= getBlockByHash(

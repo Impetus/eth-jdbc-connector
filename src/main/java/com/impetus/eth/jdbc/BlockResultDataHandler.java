@@ -25,7 +25,7 @@ import org.web3j.protocol.core.methods.response.EthBlock.Block;
  * The Class BlockResultDataHandler.
  * 
  * @author ashishk.shukla
- * 
+ *
  */
 public class BlockResultDataHandler implements DataHandler
 {
