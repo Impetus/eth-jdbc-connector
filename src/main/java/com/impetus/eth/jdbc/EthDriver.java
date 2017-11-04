@@ -45,7 +45,6 @@ public class EthDriver implements BlkchnDriver
 
         }
     }
-
     /*
      * (non-Javadoc)
      * 
@@ -54,6 +53,7 @@ public class EthDriver implements BlkchnDriver
     @Override
     public boolean acceptsURL(String url) throws SQLException
     {
+       
         if (url == null)
         {
             return false;
@@ -75,7 +75,14 @@ public class EthDriver implements BlkchnDriver
             return null;
         }
         Properties props = getPropMap(url);
-        return new EthConnection(url, props);
+        try
+        {
+            return new EthConnection(url, props);
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
     }
 
     /*

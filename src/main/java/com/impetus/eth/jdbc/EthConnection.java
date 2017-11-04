@@ -35,6 +35,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 
@@ -48,7 +50,7 @@ import com.impetus.blkch.jdbc.BlkchnConnection;
  */
 public class EthConnection implements BlkchnConnection
 {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(EthConnection.class);
     /** The url. */
     private String url;
 
@@ -115,15 +117,19 @@ public class EthConnection implements BlkchnConnection
      *            the url
      * @param props
      *            the props
+     * @throws Exception 
      */
-    public EthConnection(String url, Properties props)
+    public EthConnection(String url, Properties props) throws SQLException
     {
         super();
         this.url = url;
         this.props = props;
         String httpUrl = DriverConstants.HTTPPREFIX + props.getProperty(DriverConstants.HOSTNAME)
                 + DriverConstants.COLON + props.getProperty(DriverConstants.PORTNUMBER);
+        LOGGER.info("Connecting to ethereum with rpcurl : "+httpUrl);
         web3jClient = Web3j.build(new HttpService(httpUrl));
+        //verifyConnection();
+        LOGGER.info("Connected to ethereum ");
     }
 
     /**
@@ -298,7 +304,7 @@ public class EthConnection implements BlkchnConnection
     @Override
     public Statement createStatement() throws SQLException
     {
-
+        LOGGER.info("Entering into Create Statement Block");
         return createStatement(java.sql.ResultSet.FETCH_FORWARD, java.sql.ResultSet.CONCUR_READ_ONLY);
     }
 
@@ -312,6 +318,7 @@ public class EthConnection implements BlkchnConnection
     {
         EthStatement eStatement = new EthStatement(this, resultSetType, resultSetConcurrency);
         addNewStatement(eStatement);
+        LOGGER.info("Statement Created");
         return eStatement;
     }
 
@@ -773,6 +780,19 @@ public class EthConnection implements BlkchnConnection
     public void setTypeMap(Map<String, Class<?>> map) throws SQLException
     {
         throw new UnsupportedOperationException();
+    }
+    
+    protected void verifyConnection() throws SQLException{
+        try
+        {
+            web3jClient.web3ClientVersion().send().getWeb3ClientVersion();
+        }
+        catch (Exception e)
+        {
+               LOGGER.error("Couldn't connect with ethereum. please check the rpcurl");
+                throw new SQLException("Couldn't connect with ethereum") ;
+           
+        }
     }
 
 }
