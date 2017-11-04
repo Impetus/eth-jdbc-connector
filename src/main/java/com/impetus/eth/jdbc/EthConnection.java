@@ -51,6 +51,7 @@ import com.impetus.blkch.jdbc.BlkchnConnection;
 public class EthConnection implements BlkchnConnection
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(EthConnection.class);
+
     /** The url. */
     private String url;
 
@@ -117,7 +118,7 @@ public class EthConnection implements BlkchnConnection
      *            the url
      * @param props
      *            the props
-     * @throws Exception 
+     * @throws Exception
      */
     public EthConnection(String url, Properties props) throws SQLException
     {
@@ -126,9 +127,9 @@ public class EthConnection implements BlkchnConnection
         this.props = props;
         String httpUrl = DriverConstants.HTTPPREFIX + props.getProperty(DriverConstants.HOSTNAME)
                 + DriverConstants.COLON + props.getProperty(DriverConstants.PORTNUMBER);
-        LOGGER.info("Connecting to ethereum with rpcurl : "+httpUrl);
+        LOGGER.info("Connecting to ethereum with rpcurl : " + httpUrl);
         web3jClient = Web3j.build(new HttpService(httpUrl));
-        //verifyConnection();
+        // verifyConnection();
         LOGGER.info("Connected to ethereum ");
     }
 
@@ -781,17 +782,18 @@ public class EthConnection implements BlkchnConnection
     {
         throw new UnsupportedOperationException();
     }
-    
-    protected void verifyConnection() throws SQLException{
+
+    protected void verifyConnection() throws SQLException
+    {
         try
         {
             web3jClient.web3ClientVersion().send().getWeb3ClientVersion();
         }
         catch (Exception e)
         {
-               LOGGER.error("Couldn't connect with ethereum. please check the rpcurl");
-                throw new SQLException("Couldn't connect with ethereum") ;
-           
+            LOGGER.error("Couldn't connect with ethereum. please check the rpcurl");
+            throw new SQLException("Couldn't connect with ethereum");
+
         }
     }
 

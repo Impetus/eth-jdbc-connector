@@ -275,7 +275,7 @@ public class EthStatement implements BlkchnStatement
         ResultSet queryResultSet = null;
         try
         {
-           
+
             List<TransactionResult> trans = getTransactions("1876545");
             TransactionResultDataHandler dataHandler = new TransactionResultDataHandler();
             queryResultSet = new EthResultSet(dataHandler.convertToObjArray(trans), dataHandler.getColumnNamesMap(),

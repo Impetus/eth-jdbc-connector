@@ -45,6 +45,7 @@ public class EthDriver implements BlkchnDriver
 
         }
     }
+
     /*
      * (non-Javadoc)
      * 
@@ -53,7 +54,7 @@ public class EthDriver implements BlkchnDriver
     @Override
     public boolean acceptsURL(String url) throws SQLException
     {
-       
+
         if (url == null)
         {
             return false;
