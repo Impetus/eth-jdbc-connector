@@ -129,7 +129,7 @@ public class EthConnection implements BlkchnConnection
                 + DriverConstants.COLON + props.getProperty(DriverConstants.PORTNUMBER);
         LOGGER.info("Connecting to ethereum with rpcurl : " + httpUrl);
         web3jClient = Web3j.build(new HttpService(httpUrl));
-        // verifyConnection();
+        verifyConnection();
         LOGGER.info("Connected to ethereum ");
     }
 
@@ -785,6 +785,7 @@ public class EthConnection implements BlkchnConnection
 
     protected void verifyConnection() throws SQLException
     {
+        LOGGER.info("verfying the connection. ");
         try
         {
             web3jClient.web3ClientVersion().send().getWeb3ClientVersion();

@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.web3j.protocol.core.methods.response.Transaction;
 
 /**
@@ -29,6 +31,7 @@ import org.web3j.protocol.core.methods.response.Transaction;
  */
 public class TransactionResultDataHandler implements DataHandler
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionResultDataHandler.class);
 
     /** The column names map. */
     private static HashMap<String, Integer> columnNamesMap = new HashMap<String, Integer>();
@@ -72,7 +75,7 @@ public class TransactionResultDataHandler implements DataHandler
     @Override
     public ArrayList<Object[]> convertToObjArray(List<?> rows)
     {
-
+     LOGGER.info("Conversion of trasaction objects to Result set Objects started");
         ArrayList<Object[]> result = new ArrayList<Object[]>();
         for (Object t : rows)
         {
@@ -98,6 +101,7 @@ public class TransactionResultDataHandler implements DataHandler
             arr[16] = tr.getValueRaw();
             result.add(arr);
         }
+        LOGGER.info("Conversion completed. Returning to ResultSet");
         return result;
     }
 

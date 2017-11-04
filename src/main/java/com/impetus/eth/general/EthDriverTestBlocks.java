@@ -55,7 +55,7 @@ public class EthDriverTestBlocks
 
             Connection conn = DriverManager.getConnection(url, null);
             System.out.println("Connected to Ethereum\n*********\n");
-
+            
             Statement stmt = conn.createStatement();
             System.out.println("Statement Created\n*********\n");
 

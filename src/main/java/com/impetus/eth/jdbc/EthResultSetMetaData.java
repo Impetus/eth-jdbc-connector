@@ -22,6 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.impetus.blkch.jdbc.BlkchnResultSetMetaData;
 
 /**
@@ -32,6 +35,7 @@ import com.impetus.blkch.jdbc.BlkchnResultSetMetaData;
  */
 public class EthResultSetMetaData implements BlkchnResultSetMetaData
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EthResultSetMetaData.class);
 
     /** The table name. */
     private String tableName;
@@ -53,6 +57,7 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData
     public EthResultSetMetaData(String tableName, HashMap<String, Integer> columnNamesMap)
     {
         super();
+        LOGGER.info("Instatiating new EthResultSetMetaData Object ");
         this.tableName = tableName;
         this.columnNamesMap = columnNamesMap;
         indexToColumnMap = columnNamesMap.entrySet().stream()

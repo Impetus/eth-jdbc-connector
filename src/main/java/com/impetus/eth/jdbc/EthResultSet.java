@@ -22,6 +22,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The Class EthResultSet.
  * 
@@ -30,6 +33,7 @@ import java.util.HashMap;
  */
 public class EthResultSet extends AbstractResultSet
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EthResultSet.class);
 
     /** The Constant BEFORE_FIRST_ROW. */
     protected static final int BEFORE_FIRST_ROW = 0;
@@ -78,6 +82,7 @@ public class EthResultSet extends AbstractResultSet
     public EthResultSet(ArrayList<Object[]> rowData, HashMap<String, Integer> columnNamesMap, int resultSetType,
             int rSetConcurrency, String tableName)
     {
+        LOGGER.info("Instantiating new Result Set ");
         this.rowData = rowData;
         this.columnNamesMap = columnNamesMap;
         this.resultSetType = resultSetType;
@@ -95,6 +100,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public boolean first() throws SQLException
     {
+        LOGGER.info("Moving the cursor to the first row of ResultSet Object");
         checkRSForward();
         if (totalRowCount > 0)
         {
@@ -113,6 +119,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public boolean last() throws SQLException
     {
+        LOGGER.info("Moving the cursor to the last row of ResultSet Object");
         checkRSForward();
         if (totalRowCount > 0)
         {
@@ -131,7 +138,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public boolean next() throws SQLException
     {
-
+        LOGGER.info("Moving the cursor to the next row of ResultSet Object");
         if (currentRowCursor != AFTER_LAST_ROW && currentRowCursor < totalRowCount)
         {
             currentRowCursor++;
@@ -153,6 +160,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public boolean previous() throws SQLException
     {
+        LOGGER.info("Moving the cursor to the previous row of ResultSet Object");
         checkRSForward();
         if (currentRowCursor > 1)
         {
@@ -175,6 +183,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public void afterLast() throws SQLException
     {
+        LOGGER.info("Moving the cursor to thee end of ResultSet Object");
         checkRSForward();
         currentRowCursor = AFTER_LAST_ROW;
     }
@@ -187,6 +196,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public void beforeFirst() throws SQLException
     {
+        LOGGER.info("Moving the cursor to the front of ResultSet Object");
         checkRSForward();
         currentRowCursor = BEFORE_FIRST_ROW;
     }
@@ -199,6 +209,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public boolean isFirst() throws SQLException
     {
+        LOGGER.info("Checking if cursor is on the first row of result set object");
         if (currentRowCursor == 1)
             return true;
         else
@@ -213,6 +224,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public boolean isLast() throws SQLException
     {
+        LOGGER.info("Checking if cursor is on the last row of result set object");
         if (currentRowCursor == totalRowCount)
             return true;
         else
@@ -257,6 +269,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public int getFetchSize() throws SQLException
     {
+        LOGGER.info("Calculating Result set fetch size");
         return totalRowCount;
     }
 
@@ -533,10 +546,13 @@ public class EthResultSet extends AbstractResultSet
      */
     protected void checkRSForward() throws SQLException
     {
+        LOGGER.info("checking result set type ");
         if (resultSetType == ResultSet.TYPE_FORWARD_ONLY)
         {
+            LOGGER.error("Result Set is Type Forward only. Exiting...");
             throw new SQLException("Result Set is Type Forward only", "1000");
         }
+        LOGGER.info("Result set type validation Completed ");
     }
 
 }
