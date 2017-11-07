@@ -22,7 +22,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-
 /**
  * The Class EthDriverTest.
  * 
@@ -49,16 +48,9 @@ public class EthDriverTest
         {
             Class.forName(driverClass);
 
-            System.out.println(DriverManager.getDriver(url).getMajorVersion());
-
             Connection conn = DriverManager.getConnection(url, null);
-            System.out.println("Connected to Ethereum\n*********\n");
-
             Statement stmt = conn.createStatement();
-            System.out.println("Statement Created\n*********\n");
-
             ResultSet rs = stmt.executeQuery("SAMPLE_QUERY");
-            System.out.println(rs.getMetaData().getColumnCount());
             while (rs.next())
             {
                 // For Transactions

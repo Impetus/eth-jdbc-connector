@@ -66,7 +66,6 @@ public class ResultSetTest
     @Test
     public void testTransactionResult() throws IOException
     {
-
         List<TransactionResult> trans = getTransactions("1876545");
 
         TransactionResultDataHandler dataHandler = new TransactionResultDataHandler();

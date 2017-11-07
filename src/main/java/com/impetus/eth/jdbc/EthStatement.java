@@ -24,6 +24,8 @@ import java.sql.SQLWarning;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
@@ -40,6 +42,7 @@ import com.impetus.blkch.jdbc.BlkchnStatement;
  */
 public class EthStatement implements BlkchnStatement
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EthStatement.class);
 
     /** The connection. */
     protected EthConnection connection;
@@ -272,42 +275,25 @@ public class EthStatement implements BlkchnStatement
     @Override
     public ResultSet executeQuery(String sql) throws SQLException
     {
-
+        LOGGER.info("Entering into executeQuery Block");
         ResultSet queryResultSet = null;
         try
         {
-
-            System.out.println("In execute Query Block ");
-            System.out.println("Preparing to execute Query : " + sql);
-
-            connection.getWeb3jClient().web3ClientVersion().observable().subscribe(x -> {
-                String clientVersion = x.getWeb3ClientVersion();
-                System.out.println("web3j Client Version: " + clientVersion);
-            });
 
             List<TransactionResult> trans = getTransactions("1876545");
             TransactionResultDataHandler dataHandler = new TransactionResultDataHandler();
             queryResultSet = new EthResultSet(dataHandler.convertToObjArray(trans), dataHandler.getColumnNamesMap(),
                     rSetType, rSetConcurrency, dataHandler.getTableName());
-
-            /*
-             * Block blk= getBlock("1876545"); List<Block> blkl= new
-             * ArrayList<Block>(); blkl.add(blk); BlockResultDataHandler
-             * blockDataHandler= new BlockResultDataHandler(); queryResultSet=
-             * new EthResultSet(blockDataHandler.convertToObjArray(blkl),
-             * BlockResultDataHandler
-             * .getColumnNamesMap(),rSetType,rSetConcurrency
-             * ,blockDataHandler.getTableName());
+               
+            
+              /*Block blk= getBlock("1876545"); List<Block> blkl= new
+              ArrayList<Block>(); blkl.add(blk); BlockResultDataHandler
+              blockDataHandler= new BlockResultDataHandler(); queryResultSet=
+              new EthResultSet(blockDataHandler.convertToObjArray(blkl),
+              BlockResultDataHandler
+              .getColumnNamesMap(),rSetType,rSetConcurrency
+              ,blockDataHandler.getTableName());
              */
-
-            Block blk = getBlock("1876545");
-            List<Block> blkl = new ArrayList<Block>();
-            blkl.add(blk);
-            BlockResultDataHandler blockDataHandler = new BlockResultDataHandler();
-            queryResultSet = new EthResultSet(blockDataHandler.convertToObjArray(blkl),
-                    BlockResultDataHandler.getColumnNamesMap(), rSetType, rSetConcurrency,
-                    blockDataHandler.getTableName());
-
 
             /*
              * Block blkByHash= getBlockByHash(
@@ -338,7 +324,7 @@ public class EthStatement implements BlkchnStatement
         {
             e.printStackTrace();
         }
-
+      LOGGER.info("Exiting from executeQuery Block");
         return queryResultSet;
     }
 
@@ -686,6 +672,7 @@ public class EthStatement implements BlkchnStatement
      */
     private List<TransactionResult> getTransactions(String blockNumber) throws IOException
     {
+        LOGGER.info("Getting details of transactions stored in block - "+blockNumber);
         EthBlock block = connection.getWeb3jClient()
                 .ethGetBlockByNumber(DefaultBlockParameter.valueOf(new BigInteger(blockNumber)), true).send();
 
@@ -703,6 +690,7 @@ public class EthStatement implements BlkchnStatement
      */
     private Block getBlock(String blockNumber) throws IOException
     {
+        LOGGER.info("Getting block - "+blockNumber+ " Information ");
         EthBlock block = connection.getWeb3jClient()
                 .ethGetBlockByNumber(DefaultBlockParameter.valueOf(new BigInteger(blockNumber)), true).send();
         return block.getBlock();
@@ -719,6 +707,7 @@ public class EthStatement implements BlkchnStatement
      */
     private Block getBlockByHash(String blockHash) throws IOException
     {
+        LOGGER.info("Getting  information of block with hash - "+blockHash);
         EthBlock block = connection.getWeb3jClient().ethGetBlockByHash(blockHash, true).send();
         return block.getBlock();
     }
@@ -734,6 +723,8 @@ public class EthStatement implements BlkchnStatement
      */
     private Transaction getTransactionByHash(String transactionHash) throws IOException
     {
+        LOGGER.info("Getting information of Transaction by hash - "+transactionHash);
+
         Transaction transaction = connection.getWeb3jClient().ethGetTransactionByHash(transactionHash).send()
                 .getResult();
         return transaction;
@@ -753,6 +744,8 @@ public class EthStatement implements BlkchnStatement
     private Transaction getTransactionByBlockHashAndIndex(String blockHash, BigInteger transactionIndex)
             throws IOException
     {
+        LOGGER.info("Getting information of Transaction by blockhash - "+blockHash+" and transactionIndex"+transactionIndex);
+
         Transaction transaction = connection.getWeb3jClient()
                 .ethGetTransactionByBlockHashAndIndex(blockHash, transactionIndex).send().getResult();
         return transaction;

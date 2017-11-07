@@ -19,16 +19,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
 
 /**
  * The Class BlockResultDataHandler.
  * 
  * @author ashishk.shukla
- *
+ * 
  */
 public class BlockResultDataHandler implements DataHandler
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlockResultDataHandler.class);
 
     /** The column names map. */
     private static HashMap<String, Integer> columnNamesMap = new HashMap<String, Integer>();
@@ -76,6 +79,7 @@ public class BlockResultDataHandler implements DataHandler
     @Override
     public ArrayList<Object[]> convertToObjArray(List rows)
     {
+        LOGGER.info("Conversion of Block objects to Result set Objects started");
         ArrayList<Object[]> result = new ArrayList<Object[]>();
         for (Object bl : rows)
         {
@@ -83,28 +87,29 @@ public class BlockResultDataHandler implements DataHandler
             Object[] arr = new Object[columnNamesMap.size()];
             Block blockInfo = (Block) bl;
             arr[0] = blockInfo.getNumberRaw();
-            arr[1] = blockInfo.getNumberRaw();
-            arr[2] = blockInfo.getHash();
-            arr[3] = blockInfo.getParentHash();
-            arr[4] = blockInfo.getNonceRaw();
-            arr[5] = blockInfo.getSha3Uncles();
-            arr[6] = blockInfo.getLogsBloom();
-            arr[7] = blockInfo.getTransactionsRoot();
-            arr[8] = blockInfo.getStateRoot();
-            arr[9] = blockInfo.getReceiptsRoot();
-            arr[10] = blockInfo.getAuthor();
-            arr[11] = blockInfo.getMiner();
-            arr[12] = blockInfo.getMixHash();
-            arr[13] = blockInfo.getTotalDifficultyRaw();
-            arr[14] = blockInfo.getExtraData();
-            arr[15] = blockInfo.getSize();
-            arr[16] = blockInfo.getGasLimitRaw();
+            arr[1] = blockInfo.getHash();
+            arr[2] = blockInfo.getParentHash();
+            arr[3] = blockInfo.getNonceRaw();
+            arr[4] = blockInfo.getSha3Uncles();
+            arr[5] = blockInfo.getLogsBloom();
+            arr[6] = blockInfo.getTransactionsRoot();
+            arr[7] = blockInfo.getStateRoot();
+            arr[8] = blockInfo.getReceiptsRoot();
+            arr[9] = blockInfo.getAuthor();
+            arr[10] = blockInfo.getMiner();
+            arr[11] = blockInfo.getMixHash();
+            arr[12] = blockInfo.getTotalDifficultyRaw();
+            arr[13] = blockInfo.getExtraData();
+            arr[14] = blockInfo.getSize();
+            arr[15] = blockInfo.getGasLimitRaw();
+            arr[16] = blockInfo.getGasUsed();
             arr[17] = blockInfo.getTimestampRaw();
             arr[18] = blockInfo.getTransactions();
             arr[19] = blockInfo.getUncles();
             arr[20] = blockInfo.getSealFields();
             result.add(arr);
         }
+        LOGGER.info("Conversion completed. Returning to ResultSet");
         return result;
     }
 
