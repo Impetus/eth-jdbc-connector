@@ -22,6 +22,13 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.protocol.core.methods.response.Transaction;
+import org.web3j.protocol.core.methods.response.EthBlock.Block;
+
+import com.impetus.blkch.sql.query.Column;
+import com.impetus.blkch.sql.query.FunctionNode;
+import com.impetus.blkch.sql.query.IdentifierNode;
+import com.impetus.blkch.sql.query.SelectItem;
+import com.impetus.blkch.sql.query.StarNode;
 
 /**
  * The Class TransactionResultDataHandler.
@@ -57,14 +64,11 @@ public class TransactionResultDataHandler implements DataHandler
         columnNamesMap.put("value", 16);
     }
 
-    /**
-     * Gets the column names map.
-     *
-     * @return the column names map
-     */
-    public static HashMap<String, Integer> getColumnNamesMap()
+    public static HashMap<String, Integer> returnColumnNamesMap = new HashMap<>();
+
+    public HashMap<String, Integer> getColumnNamesMap()
     {
-        return columnNamesMap;
+        return returnColumnNamesMap;
     }
 
     /*
@@ -73,35 +77,71 @@ public class TransactionResultDataHandler implements DataHandler
      * @see com.impetus.eth.jdbc.DataHandler#convertToObjArray(java.util.List)
      */
     @Override
-    public ArrayList<Object[]> convertToObjArray(List<?> rows)
+    public ArrayList<List<Object>> convertToObjArray(List rows, List<SelectItem> selItems)
     {
-     LOGGER.info("Conversion of trasaction objects to Result set Objects started");
-        ArrayList<Object[]> result = new ArrayList<Object[]>();
-        for (Object t : rows)
-        {
-            Object[] arr = new Object[columnNamesMap.size()];
-            Transaction tr = (Transaction) t;
 
-            arr[0] = tr.getBlockHash();
-            arr[1] = tr.getBlockNumberRaw();
-            arr[2] = tr.getCreates();
-            arr[3] = tr.getFrom();
-            arr[4] = tr.getGasRaw();
-            arr[5] = tr.getGasPriceRaw();
-            arr[6] = tr.getHash();
-            arr[7] = tr.getInput();
-            arr[8] = tr.getNonceRaw();
-            arr[9] = tr.getPublicKey();
-            arr[10] = tr.getR();
-            arr[11] = tr.getRaw();
-            arr[12] = tr.getS();
-            arr[13] = tr.getTo();
-            arr[14] = tr.getTransactionIndexRaw();
-            arr[15] = tr.getV();
-            arr[16] = tr.getValueRaw();
-            result.add(arr);
+        LOGGER.info("Conversion of transaction objects to Result set Objects started");
+        ArrayList<List<Object>> result = new ArrayList<>();
+        boolean columnsInitialized = false;
+        for (Object record : rows)
+        {
+            Transaction transInfo = (Transaction) record;
+            List<Object> returnRec = new ArrayList<>();
+            for (SelectItem col : selItems)
+            {
+                if (col.hasChildType(StarNode.class))
+                {
+                   
+                    returnRec.add(transInfo.getBlockHash());
+                    returnRec.add(transInfo.getBlockNumberRaw());
+                    returnRec.add(transInfo.getCreates());
+                    returnRec.add(transInfo.getFrom());
+                    returnRec.add(transInfo.getGasRaw());
+                    returnRec.add(transInfo.getGasPriceRaw());
+                    returnRec.add(transInfo.getHash());
+                    returnRec.add(transInfo.getInput());
+                    returnRec.add(transInfo.getNonceRaw());
+                    returnRec.add(transInfo.getPublicKey());
+                    returnRec.add(transInfo.getR());
+                    returnRec.add(transInfo.getRaw());
+                    returnRec.add(transInfo.getS());
+                    returnRec.add(transInfo.getTo());
+                    returnRec.add(transInfo.getTransactionIndexRaw());
+                    returnRec.add(transInfo.getV());
+                    returnRec.add(transInfo.getValueRaw());
+                    if (!columnsInitialized)
+                    {
+                        returnColumnNamesMap = columnNamesMap;
+                    }
+                }
+                else if (col.hasChildType(Column.class))
+                {
+                    String colName = col.getChildType(Column.class, 0).getChildType(IdentifierNode.class, 0)
+                            .getValue();
+                    if (!columnsInitialized)
+                    {
+                        if (columnNamesMap.containsKey(colName.toLowerCase()))
+                        {
+                           returnColumnNamesMap.put(colName, returnColumnNamesMap.size());
+                        }else {
+                            throw new RuntimeException("Column " + colName + " doesn't exist in table");
+                        }
+
+                    }
+               
+                    returnRec.add(getTransactionColumnValue(transInfo, colName)); 
+                }
+                else if (col.hasChildType(FunctionNode.class))
+                {
+                    // TODO implement
+                }
+            }
+            result.add(returnRec);
+            columnsInitialized = true;
+
         }
-        LOGGER.info("Conversion completed. Returning to ResultSet");
+
+        LOGGER.info("Conversion completed. Returning ..");
         return result;
     }
 
@@ -116,4 +156,10 @@ public class TransactionResultDataHandler implements DataHandler
 
         return "transactions";
     }
+    
+    private Object getTransactionColumnValue(Transaction transInfo,String colName){
+        return null;
+    }
+
+   
 }

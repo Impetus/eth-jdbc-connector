@@ -23,6 +23,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
 
+import com.impetus.blkch.sql.query.Column;
+import com.impetus.blkch.sql.query.FunctionNode;
+import com.impetus.blkch.sql.query.IdentifierNode;
+import com.impetus.blkch.sql.query.SelectItem;
+import com.impetus.blkch.sql.query.StarNode;
+import com.impetus.eth.parser.AggregationFunctions;
+import com.impetus.eth.parser.DataFrame;
+
 /**
  * The Class BlockResultDataHandler.
  * 
@@ -40,75 +48,102 @@ public class BlockResultDataHandler implements DataHandler
     {
         columnNamesMap.put("number", 0);
         columnNamesMap.put("hash", 1);
-        columnNamesMap.put("parentHash", 2);
+        columnNamesMap.put("parenthash", 2);
         columnNamesMap.put("nonce", 3);
-        columnNamesMap.put("sha3Uncles", 4);
-        columnNamesMap.put("logsBloom", 5);
-        columnNamesMap.put("transactionsRoot", 6);
-        columnNamesMap.put("stateRoot", 7);
-        columnNamesMap.put("receiptsRoot", 8);
+        columnNamesMap.put("sha3uncles", 4);
+        columnNamesMap.put("logsbloom", 5);
+        columnNamesMap.put("transactionsroot", 6);
+        columnNamesMap.put("stateroot", 7);
+        columnNamesMap.put("receiptsroot", 8);
         columnNamesMap.put("author", 9);
         columnNamesMap.put("miner", 10);
-        columnNamesMap.put("mixHash", 11);
-        columnNamesMap.put("totalDifficulty", 12);
-        columnNamesMap.put("extraData", 13);
+        columnNamesMap.put("mixhash", 11);
+        columnNamesMap.put("totaldifficulty", 12);
+        columnNamesMap.put("extradata", 13);
         columnNamesMap.put("size", 14);
-        columnNamesMap.put("gasLimit", 15);
-        columnNamesMap.put("gasUsed", 16);
+        columnNamesMap.put("gaslimit", 15);
+        columnNamesMap.put("gasused", 16);
         columnNamesMap.put("timestamp", 17);
         columnNamesMap.put("transactions", 18);
         columnNamesMap.put("uncles", 19);
-        columnNamesMap.put("sealFields", 20);
+        columnNamesMap.put("sealfields", 20);
     }
 
-    /**
-     * Gets the column names map.
-     *
-     * @return the column names map
-     */
-    public static HashMap<String, Integer> getColumnNamesMap()
+    public static HashMap<String, Integer> returnColumnNamesMap = new HashMap<>();
+
+    public HashMap<String, Integer> getColumnNamesMap()
     {
-        return columnNamesMap;
+        return returnColumnNamesMap;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.eth.jdbc.DataHandler#convertToObjArray(java.util.List)
-     */
     @Override
-    public ArrayList<Object[]> convertToObjArray(List rows)
+    public ArrayList<List<Object>> convertToObjArray(List rows, List<SelectItem> selItems)
     {
         LOGGER.info("Conversion of Block objects to Result set Objects started");
-        ArrayList<Object[]> result = new ArrayList<Object[]>();
-        for (Object bl : rows)
+        ArrayList<List<Object>> result = new ArrayList<>();
+        boolean columnsInitialized = false;
+        for (Object record : rows)
         {
+            Block blockInfo = (Block) record;
+            List<Object> returnRec = new ArrayList<>();
+            for (SelectItem col : selItems)
+            {
+                if (col.hasChildType(StarNode.class))
+                {
+                   
+                    returnRec.add(blockInfo.getNumberRaw());
+                    returnRec.add(blockInfo.getHash());
+                    returnRec.add(blockInfo.getParentHash());
+                    returnRec.add(blockInfo.getNonceRaw());
+                    returnRec.add(blockInfo.getSha3Uncles());
+                    returnRec.add(blockInfo.getLogsBloom());
+                    returnRec.add(blockInfo.getTransactionsRoot());
+                    returnRec.add(blockInfo.getStateRoot());
+                    returnRec.add(blockInfo.getReceiptsRoot());
+                    returnRec.add(blockInfo.getAuthor());
+                    returnRec.add(blockInfo.getMiner());
+                    returnRec.add(blockInfo.getMixHash());
+                    returnRec.add(blockInfo.getTotalDifficultyRaw());
+                    returnRec.add(blockInfo.getExtraData());
+                    returnRec.add(blockInfo.getSizeRaw());
+                    returnRec.add(blockInfo.getGasLimitRaw());
+                    returnRec.add(blockInfo.getGasUsedRaw());
+                    returnRec.add(blockInfo.getTimestampRaw());
+                    returnRec.add(blockInfo.getTransactions());
+                    returnRec.add(blockInfo.getUncles());
+                    returnRec.add(blockInfo.getSealFields());
+                    if (!columnsInitialized)
+                    {
+                        returnColumnNamesMap = columnNamesMap;
+                    }
+                }
+                else if (col.hasChildType(Column.class))
+                {
+                    String colName = col.getChildType(Column.class, 0).getChildType(IdentifierNode.class, 0)
+                            .getValue();
+                    if (!columnsInitialized)
+                    {
+                        if (columnNamesMap.containsKey(colName.toLowerCase()))
+                        {
+                           returnColumnNamesMap.put(colName, returnColumnNamesMap.size());
+                        }else {
+                            throw new RuntimeException("Column " + colName + " doesn't exist in table");
+                        }
 
-            Object[] arr = new Object[columnNamesMap.size()];
-            Block blockInfo = (Block) bl;
-            arr[0] = blockInfo.getNumberRaw();
-            arr[1] = blockInfo.getHash();
-            arr[2] = blockInfo.getParentHash();
-            arr[3] = blockInfo.getNonceRaw();
-            arr[4] = blockInfo.getSha3Uncles();
-            arr[5] = blockInfo.getLogsBloom();
-            arr[6] = blockInfo.getTransactionsRoot();
-            arr[7] = blockInfo.getStateRoot();
-            arr[8] = blockInfo.getReceiptsRoot();
-            arr[9] = blockInfo.getAuthor();
-            arr[10] = blockInfo.getMiner();
-            arr[11] = blockInfo.getMixHash();
-            arr[12] = blockInfo.getTotalDifficultyRaw();
-            arr[13] = blockInfo.getExtraData();
-            arr[14] = blockInfo.getSize();
-            arr[15] = blockInfo.getGasLimitRaw();
-            arr[16] = blockInfo.getGasUsed();
-            arr[17] = blockInfo.getTimestampRaw();
-            arr[18] = blockInfo.getTransactions();
-            arr[19] = blockInfo.getUncles();
-            arr[20] = blockInfo.getSealFields();
-            result.add(arr);
+                    }
+               
+                    returnRec.add(getBlockColumnValue(blockInfo, colName)); 
+                }
+                else if (col.hasChildType(FunctionNode.class))
+                {
+                    // todo implement
+                }
+            }
+            result.add(returnRec);
+            columnsInitialized = true;
+
         }
+
         LOGGER.info("Conversion completed. Returning to ResultSet");
         return result;
     }
@@ -124,5 +159,53 @@ public class BlockResultDataHandler implements DataHandler
 
         return "blocks";
     }
-
+    
+    private Object getBlockColumnValue(Block blockInfo, String colName){
+        if("number".equalsIgnoreCase(colName)){
+            return blockInfo.getNumberRaw();       
+        }else if("hash".equalsIgnoreCase(colName)){
+            return blockInfo.getHash();
+        }else if("parenthash".equalsIgnoreCase(colName)){
+            return blockInfo.getParentHash();
+        }else if("nonce".equalsIgnoreCase(colName)){
+            return blockInfo.getNonceRaw();
+        }else if("sha3uncles".equalsIgnoreCase(colName)){
+            return blockInfo.getSha3Uncles();
+        }else if("logsbloom".equalsIgnoreCase(colName)){
+            return blockInfo.getLogsBloom();
+        }else if("transactionsroot".equalsIgnoreCase(colName)){
+            return blockInfo.getTransactionsRoot();
+        }else if("stateroot".equalsIgnoreCase(colName)){
+            return blockInfo.getStateRoot();
+        }else if("receiptsroot".equalsIgnoreCase(colName)){
+            return blockInfo.getReceiptsRoot();
+        }else if("author".equalsIgnoreCase(colName)){
+            return blockInfo.getAuthor();
+        }else if("miner".equalsIgnoreCase(colName)){
+            return blockInfo.getMiner();
+        }else if("mixhash".equalsIgnoreCase(colName)){
+            return blockInfo.getMixHash();
+        }else if("totaldifficulty".equalsIgnoreCase(colName)){
+            return blockInfo.getTotalDifficultyRaw();
+        }else if("extradata".equalsIgnoreCase(colName)){
+            return blockInfo.getExtraData();
+        }else if("size".equalsIgnoreCase(colName)){
+            return blockInfo.getSizeRaw();
+        }else if("gaslimit".equalsIgnoreCase(colName)){
+            return blockInfo.getGasLimitRaw();
+        }else if("gasused".equalsIgnoreCase(colName)){
+            return blockInfo.getGasUsedRaw();
+        }else if("timestamp".equalsIgnoreCase(colName)){
+            return blockInfo.getTimestampRaw();
+        }else if("transactions".equalsIgnoreCase(colName)){
+            return blockInfo.getTransactions();
+        }else if("uncles".equalsIgnoreCase(colName)){
+            return blockInfo.getUncles();
+        }else if("sealfields".equalsIgnoreCase(colName)){
+            return blockInfo.getSealFields();
+        }
+        else{
+            throw new RuntimeException("column "+colName+" does not exist in the table");
+        }
+    }
 }

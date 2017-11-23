@@ -21,9 +21,12 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.impetus.eth.parser.DataFrame;
 
 /**
  * The Class EthResultSet.
@@ -48,7 +51,7 @@ public class EthResultSet extends AbstractResultSet
     protected int totalRowCount;
 
     /** The row data. */
-    protected ArrayList<Object[]> rowData;
+    protected List<List<Object>> rowData;
 
     /** The current row. */
     protected Object[] currentRow;
@@ -79,15 +82,15 @@ public class EthResultSet extends AbstractResultSet
      * @param tableName
      *            the table name
      */
-    public EthResultSet(ArrayList<Object[]> rowData, HashMap<String, Integer> columnNamesMap, int resultSetType,
-            int rSetConcurrency, String tableName)
+    public EthResultSet(DataFrame dataframe, int resultSetType,
+            int rSetConcurrency)
     {
         LOGGER.info("Instantiating new Result Set ");
-        this.rowData = rowData;
-        this.columnNamesMap = columnNamesMap;
+        this.rowData = dataframe.getData();
+        this.columnNamesMap = dataframe.getColumnNamesMap();
         this.resultSetType = resultSetType;
         this.rSetConcurrency = rSetConcurrency;
-        this.tableName = tableName;
+        this.tableName = dataframe.getTable();
         currentRowCursor = BEFORE_FIRST_ROW;
         totalRowCount = rowData.size();
     }
@@ -105,7 +108,7 @@ public class EthResultSet extends AbstractResultSet
         if (totalRowCount > 0)
         {
             currentRowCursor = 1;
-            currentRow = rowData.get(currentRowCursor - 1);
+            currentRow = rowData.get(currentRowCursor - 1).toArray();
             return true;
         }
         return false;
@@ -124,7 +127,7 @@ public class EthResultSet extends AbstractResultSet
         if (totalRowCount > 0)
         {
             currentRowCursor = totalRowCount;
-            currentRow = rowData.get(currentRowCursor - 1);
+            currentRow = rowData.get(currentRowCursor - 1).toArray();
             return true;
         }
         return false;
@@ -142,7 +145,7 @@ public class EthResultSet extends AbstractResultSet
         if (currentRowCursor != AFTER_LAST_ROW && currentRowCursor < totalRowCount)
         {
             currentRowCursor++;
-            currentRow = rowData.get(currentRowCursor - 1);
+            currentRow = rowData.get(currentRowCursor - 1).toArray();
             return true;
         }
         else
@@ -165,7 +168,7 @@ public class EthResultSet extends AbstractResultSet
         if (currentRowCursor > 1)
         {
             currentRowCursor--;
-            currentRow = rowData.get(currentRowCursor - 1);
+            currentRow = rowData.get(currentRowCursor - 1).toArray();
             return true;
         }
         else
@@ -253,7 +256,7 @@ public class EthResultSet extends AbstractResultSet
         if ((rows < 0 && (currentRowCursor + rows) > 0) || (rows > 0 && (currentRowCursor + rows) <= totalRowCount))
         {
             currentRowCursor = currentRowCursor + rows;
-            currentRow = rowData.get(currentRowCursor - 1);
+            currentRow = rowData.get(currentRowCursor - 1).toArray();
             return true;
         }
         else

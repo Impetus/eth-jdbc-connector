@@ -24,6 +24,7 @@ import java.sql.SQLWarning;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.protocol.core.DefaultBlockParameter;
@@ -33,6 +34,16 @@ import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult;
 import org.web3j.protocol.core.methods.response.Transaction;
 
 import com.impetus.blkch.jdbc.BlkchnStatement;
+import com.impetus.blkch.sql.generated.SqlBaseLexer;
+import com.impetus.blkch.sql.generated.SqlBaseParser;
+import com.impetus.blkch.sql.parser.AbstractSyntaxTreeVisitor;
+import com.impetus.blkch.sql.parser.BlockchainVisitor;
+import com.impetus.blkch.sql.parser.CaseInsensitiveCharStream;
+import com.impetus.blkch.sql.parser.LogicalPlan;
+import com.impetus.blkch.sql.query.SelectClause;
+import com.impetus.eth.parser.APIConverter;
+import com.impetus.eth.parser.DataFrame;
+
 
 /**
  * The Class EthStatement.
@@ -277,10 +288,13 @@ public class EthStatement implements BlkchnStatement
     {
         LOGGER.info("Entering into executeQuery Block");
         ResultSet queryResultSet = null;
-        try
+        LogicalPlan logicalPlan = getLogicalPlan(sql);
+        DataFrame dataframe= new APIConverter(logicalPlan, connection.getWeb3jClient()).executeQuery();
+        queryResultSet = new EthResultSet(dataframe,rSetType, rSetConcurrency);
+       /* try
         {
 
-            List<TransactionResult> trans = getTransactions("1876545");
+           /* List<TransactionResult> trans = getTransactions("1876545");
             TransactionResultDataHandler dataHandler = new TransactionResultDataHandler();
             queryResultSet = new EthResultSet(dataHandler.convertToObjArray(trans), dataHandler.getColumnNamesMap(),
                     rSetType, rSetConcurrency, dataHandler.getTableName());
@@ -317,13 +331,13 @@ public class EthStatement implements BlkchnStatement
              * (lTransByHash),
              * transByHashdataHandler.getColumnNamesMap(),rSetType
              * ,rSetConcurrency,transByHashdataHandler.getTableName());
-             */
+             *
 
         }
         catch (IOException e)
         {
             e.printStackTrace();
-        }
+        }*/
       LOGGER.info("Exiting from executeQuery Block");
         return queryResultSet;
     }
@@ -781,4 +795,11 @@ public class EthStatement implements BlkchnStatement
         return null;
     }
 
+    private LogicalPlan getLogicalPlan(String query) {
+        SqlBaseLexer lexer = new SqlBaseLexer(new CaseInsensitiveCharStream(query));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        SqlBaseParser parser = new SqlBaseParser(tokens);
+        AbstractSyntaxTreeVisitor visitor = new BlockchainVisitor();
+        return visitor.visitSingleStatement(parser.singleStatement());
+        }
 }
