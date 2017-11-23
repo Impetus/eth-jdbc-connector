@@ -46,9 +46,7 @@ public class APIConverter
     private Web3j web3jClient;
 
     private List<SelectItem> selectItems = new ArrayList<>();
-
-    private static final String[] filterableCols = { "blockNo", "blockHash", "transactionId" };
-
+    
     private Map<String, String> aliasMapping = new HashMap<>();
 
     private ArrayList<List<Object>> data;
@@ -79,7 +77,6 @@ public class APIConverter
                 }
             }
         }
-        System.out.println(aliasMapping);
     }
 
     public DataFrame executeQuery()
@@ -164,8 +161,10 @@ public class APIConverter
             {
                 Block block = new Block();
 
-                if ("blockNo".equalsIgnoreCase(filterColumn))
+                if ("blocknumber".equalsIgnoreCase(filterColumn))
                 {
+                    block=getBlock(value);
+                    dataList.add(block);
                 }
                 else if ("blockHash".equalsIgnoreCase(filterColumn))
                 {
@@ -176,6 +175,8 @@ public class APIConverter
                 }
                 else
                 {
+                    LOGGER.error("Column "+filterColumn+" is not filterable");
+                    throw new RuntimeException("Column "+filterColumn+" is not filterable/ Doesn't exist in the table");
                 }
 
             }
@@ -186,6 +187,14 @@ public class APIConverter
                 {
                     List<TransactionResult> transactionResult = getTransactions(value.replace("'", ""));
                     dataList = transactionResult;
+                }else if("hash".equalsIgnoreCase(filterColumn)){
+                   Transaction transInfo= getTransactionByHash(value.replace("'", ""));
+                   dataList.add(transInfo);
+                    
+                }else
+                {
+                    LOGGER.error("Column "+filterColumn+" is not filterable/ Doesn't exist in the table");
+                    throw new RuntimeException("Column "+filterColumn+" is not filterable");
                 }
 
             }

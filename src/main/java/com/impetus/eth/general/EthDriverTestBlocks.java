@@ -52,7 +52,7 @@ public class EthDriverTestBlocks
             Class.forName(driverClass);
             Connection conn = DriverManager.getConnection(url, null);
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("select transactions as ts from blocks where blockhash='0xbd8c4b656c2d2c002743a96297dc5fea155293c123f8c55f8fc127f250f3312f' ");
+            ResultSet rs = stmt.executeQuery("select transactions as ts from blocks where blocknumbr=1652339 ");
             while (rs.next())
             {
                 // For Blocks

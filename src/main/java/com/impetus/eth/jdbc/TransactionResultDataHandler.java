@@ -38,6 +38,8 @@ import com.impetus.blkch.sql.query.StarNode;
  */
 public class TransactionResultDataHandler implements DataHandler
 {
+    
+    /** The Constant LOGGER. */
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionResultDataHandler.class);
 
     /** The column names map. */
@@ -45,8 +47,8 @@ public class TransactionResultDataHandler implements DataHandler
 
     static
     {
-        columnNamesMap.put("blockHash", 0);
-        columnNamesMap.put("blockNumber", 1);
+        columnNamesMap.put("blockhash", 0);
+        columnNamesMap.put("blocknumber", 1);
         columnNamesMap.put("creates", 2);
         columnNamesMap.put("from", 3);
         columnNamesMap.put("gas", 4);
@@ -54,18 +56,22 @@ public class TransactionResultDataHandler implements DataHandler
         columnNamesMap.put("hash", 6);
         columnNamesMap.put("input", 7);
         columnNamesMap.put("nonce", 8);
-        columnNamesMap.put("publicKey", 9);
+        columnNamesMap.put("publickey", 9);
         columnNamesMap.put("r", 10);
         columnNamesMap.put("raw", 11);
         columnNamesMap.put("s", 12);
         columnNamesMap.put("to", 13);
-        columnNamesMap.put("tranactionIndex", 14);
+        columnNamesMap.put("tranactionindex", 14);
         columnNamesMap.put("v", 15);
         columnNamesMap.put("value", 16);
     }
 
+    /** The return column names map. */
     public static HashMap<String, Integer> returnColumnNamesMap = new HashMap<>();
 
+    /* (non-Javadoc)
+     * @see com.impetus.eth.jdbc.DataHandler#getColumnNamesMap()
+     */
     public HashMap<String, Integer> getColumnNamesMap()
     {
         return returnColumnNamesMap;
@@ -124,6 +130,7 @@ public class TransactionResultDataHandler implements DataHandler
                         {
                            returnColumnNamesMap.put(colName, returnColumnNamesMap.size());
                         }else {
+                            LOGGER.error("Column " + colName + " doesn't exist in table");
                             throw new RuntimeException("Column " + colName + " doesn't exist in table");
                         }
 
@@ -157,8 +164,51 @@ public class TransactionResultDataHandler implements DataHandler
         return "transactions";
     }
     
+    /**
+     * Gets the transaction column value.
+     *
+     * @param transInfo the trans info
+     * @param colName the col name
+     * @return the transaction column value
+     */
     private Object getTransactionColumnValue(Transaction transInfo,String colName){
-        return null;
+        if("blockhash".equalsIgnoreCase(colName)){
+            return transInfo.getBlockHash();
+        }else if("blocknumber".equalsIgnoreCase(colName)){
+            return transInfo.getBlockNumberRaw();
+        }else if("creates".equalsIgnoreCase(colName)){
+            return transInfo.getCreates();
+        }else if("from".equalsIgnoreCase(colName)){
+            return transInfo.getFrom();
+        }else if("gas".equalsIgnoreCase(colName)){
+            return transInfo.getGasRaw();
+        }else if("gasprice".equalsIgnoreCase(colName)){
+            return transInfo.getGasPriceRaw();
+        }else if("hash".equalsIgnoreCase(colName)){
+            return transInfo.getHash();
+        }else if("input".equalsIgnoreCase(colName)){
+            return transInfo.getInput();
+        }else if("nonce".equalsIgnoreCase(colName)){
+            return transInfo.getNonceRaw();
+        }else if("publickey".equalsIgnoreCase(colName)){
+            return transInfo.getPublicKey();
+        }else if("r".equalsIgnoreCase(colName)){
+            return transInfo.getR();
+        }else if("raw".equalsIgnoreCase(colName)){
+            return transInfo.getRaw();
+        }else if("s".equalsIgnoreCase(colName)){
+            return transInfo.getS();
+        }else if("to".equalsIgnoreCase(colName)){
+            return transInfo.getTo();
+        }else if("tranactionindex".equalsIgnoreCase(colName)){
+            return transInfo.getTransactionIndex();
+        }else if("v".equalsIgnoreCase(colName)){
+            return transInfo.getV();
+        }else if("value".equalsIgnoreCase(colName)){
+            return transInfo.getValueRaw();
+        }else {
+            throw new RuntimeException("column "+colName+" does not exist in the table");
+        }
     }
 
    

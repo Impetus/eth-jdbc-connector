@@ -49,23 +49,23 @@ public class EthDriverTest
             Class.forName(driverClass);
 
             Connection conn = DriverManager.getConnection(url, null);
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("select * from transactions where blocknumber=1652339 ");
+            Statement stmt = conn.createStatement(); 
+            ResultSet rs = stmt.executeQuery("select value from transactions where blocknumber=1652339 ");
             while (rs.next())
             {
                 // For Transactions
 
-                System.out.println("" + rs.getString(3));
-                System.out.println("" + rs.getString("from"));
+                System.out.println("" + rs.getString(0));
+                System.out.println("" + rs.getString("value"));
                 System.out.println();
             }
             System.out.println("Result set MetaData");
 
             ResultSetMetaData rsMetaData = rs.getMetaData();
             System.out.println("Total Columns : " + rsMetaData.getColumnCount());
-            System.out.println("column label name : " + rsMetaData.getColumnLabel(3));
-            System.out.println("column Name : " + rsMetaData.getColumnName(3));
-            System.out.println("tableName : " + rsMetaData.getTableName(3));
+            System.out.println("column label name : " + rsMetaData.getColumnLabel(0));
+            System.out.println("column Name : " + rsMetaData.getColumnName(0));
+            System.out.println("tableName : " + rsMetaData.getTableName(0));
         }
         catch (SQLException e1)
         {
