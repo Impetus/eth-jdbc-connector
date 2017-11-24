@@ -52,7 +52,7 @@ public class DataFrame
      * @param table
      *            the table
      */
-    DataFrame(List<List<Object>> data, HashMap<String, Integer> columnNamesMap, Map<String, String> aliasMapping,
+    public DataFrame(List<List<Object>> data, HashMap<String, Integer> columnNamesMap, Map<String, String> aliasMapping,
             String table)
     {
         this.aliasMapping = aliasMapping;

@@ -37,6 +37,7 @@ import com.impetus.blkch.sql.query.Column;
 import com.impetus.blkch.sql.query.FilterItem;
 import com.impetus.blkch.sql.query.FromItem;
 import com.impetus.blkch.sql.query.IdentifierNode;
+import com.impetus.blkch.sql.query.LogicalOperation;
 import com.impetus.blkch.sql.query.SelectClause;
 import com.impetus.blkch.sql.query.SelectItem;
 import com.impetus.blkch.sql.query.Table;
@@ -186,8 +187,8 @@ public class APIConverter
         }
         else
         {
-            throw new RuntimeException("Multiple where notsupported");
-            // return executeMultipleWhereClause(tableName, whereClause);
+            // throw new RuntimeException("Multiple where notsupported");
+            return executeMultipleWhereClause(tableName, whereClause);
 
         }
     }
@@ -266,6 +267,103 @@ public class APIConverter
             throw new RuntimeException(e.getMessage());
         }
         return dataList;
+    }
+
+    /**
+     * Execute multiple where clause.
+     *
+     * @param tableName the table name
+     * @param whereClause the where clause
+     * @return the list
+     */
+    public List<?> executeMultipleWhereClause(String tableName, WhereClause whereClause)
+    {
+        LogicalOperation operation = whereClause.getChildType(LogicalOperation.class, 0);
+        return executeLogicalOperation(tableName, operation);
+    }
+
+    /**
+     * Execute logical operation.
+     *
+     * @param <T> the generic type
+     * @param tableName the table name
+     * @param operation the operation
+     * @return the list
+     */
+    public <T> List<?> executeLogicalOperation(String tableName, LogicalOperation operation)
+    {
+        if (operation.getChildNodes().size() != 2)
+        {
+            throw new RuntimeException("Logical operation should have two boolean expressions");
+        }
+        List<?> firstBlock, secondBlock;
+        if (operation.getChildNode(0) instanceof LogicalOperation)
+        {
+            firstBlock = executeLogicalOperation(tableName, (LogicalOperation) operation.getChildNode(0));
+        }
+        else
+        {
+            FilterItem filterItem = (FilterItem) operation.getChildNode(0);
+            firstBlock = executeSingleWhereClause(tableName, filterItem);
+        }
+        if (operation.getChildNode(1) instanceof LogicalOperation)
+        {
+            secondBlock = executeLogicalOperation(tableName, (LogicalOperation) operation.getChildNode(1));
+        }
+        else
+        {
+            FilterItem filterItem = (FilterItem) operation.getChildNode(1);
+            secondBlock = executeSingleWhereClause(tableName, filterItem);
+        }
+        List<T> recordList = new ArrayList<>();
+        Map<String, Object> firstBlockMap = new HashMap<>(), secondBlockMap = new HashMap<>();
+
+        if ("transactions".equalsIgnoreCase(tableName))
+        {
+            for (Object transInfo : firstBlock)
+            {
+
+                firstBlockMap.put(((Transaction) transInfo).getHash(), transInfo);
+            }
+            for (Object transInfo : secondBlock)
+            {
+                secondBlockMap.put(((Transaction) transInfo).getHash(), transInfo);
+            }
+        }
+        else if ("blocks".equalsIgnoreCase(tableName))
+        {
+            for (Object blockInfo : firstBlock)
+            {
+                firstBlockMap.put(((Block) blockInfo).getHash(), blockInfo);
+            }
+            for (Object blockInfo : secondBlock)
+            {
+                secondBlockMap.put(((Block) blockInfo).getHash(), blockInfo);
+            }
+        }
+
+        if (operation.isAnd())
+        {
+            for (String recordHash : firstBlockMap.keySet())
+            {
+                if (secondBlockMap.containsKey(recordHash))
+                {
+                    recordList.add((T) secondBlockMap.get(recordHash));
+                }
+            }
+        }
+        else
+        {
+            recordList.addAll((Collection<? extends T>) firstBlock);
+            for (String recordHash : secondBlockMap.keySet())
+            {
+                if (!firstBlockMap.containsKey(recordHash))
+                {
+                    recordList.add((T) secondBlockMap.get(recordHash));
+                }
+            }
+        }
+        return recordList;
     }
 
     /**

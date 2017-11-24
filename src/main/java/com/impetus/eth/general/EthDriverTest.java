@@ -50,7 +50,7 @@ public class EthDriverTest
 
             Connection conn = DriverManager.getConnection(url, null);
             Statement stmt = conn.createStatement(); 
-            ResultSet rs = stmt.executeQuery("select count(from), value from transactions where blocknumber=1652339 ");
+            ResultSet rs = stmt.executeQuery("select count(from), value from transactions where blocknumber=1652339 or blocknumber=1652340");
             while (rs.next())
             {
                 // For Transactions
