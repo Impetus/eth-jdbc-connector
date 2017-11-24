@@ -28,8 +28,8 @@ import com.impetus.blkch.sql.query.FunctionNode;
 import com.impetus.blkch.sql.query.IdentifierNode;
 import com.impetus.blkch.sql.query.SelectItem;
 import com.impetus.blkch.sql.query.StarNode;
-import com.impetus.eth.parser.AggregationFunctions;
-import com.impetus.eth.parser.DataFrame;
+import com.impetus.eth.parser.Function;
+import com.impetus.eth.parser.Utils;
 
 /**
  * The Class BlockResultDataHandler.
@@ -90,7 +90,7 @@ public class BlockResultDataHandler implements DataHandler
             {
                 if (col.hasChildType(StarNode.class))
                 {
-                   
+
                     returnRec.add(blockInfo.getNumberRaw());
                     returnRec.add(blockInfo.getHash());
                     returnRec.add(blockInfo.getParentHash());
@@ -119,24 +119,41 @@ public class BlockResultDataHandler implements DataHandler
                 }
                 else if (col.hasChildType(Column.class))
                 {
-                    String colName = col.getChildType(Column.class, 0).getChildType(IdentifierNode.class, 0)
-                            .getValue();
+                    String colName = col.getChildType(Column.class, 0).getChildType(IdentifierNode.class, 0).getValue();
                     if (!columnsInitialized)
                     {
                         if (columnNamesMap.containsKey(colName.toLowerCase()))
                         {
-                           returnColumnNamesMap.put(colName, returnColumnNamesMap.size());
-                        }else {
+                            returnColumnNamesMap.put(colName, returnColumnNamesMap.size());
+                        }
+                        else
+                        {
                             throw new RuntimeException("Column " + colName + " doesn't exist in table");
                         }
 
                     }
-               
-                    returnRec.add(getBlockColumnValue(blockInfo, colName)); 
+
+                    returnRec.add(Utils.getBlockColumnValue(blockInfo, colName));
                 }
                 else if (col.hasChildType(FunctionNode.class))
                 {
-                    // todo implement
+                    Function computFunc = new Function(rows, columnNamesMap, getTableName());
+                    Object computeResult = computFunc.computeFunction(col.getChildType(FunctionNode.class, 0));
+                    returnRec.add(computeResult);
+                    if (col.hasChildType(IdentifierNode.class))
+                    {
+                        if (!columnsInitialized)
+                        {
+                            returnColumnNamesMap.put(col.getChildType(IdentifierNode.class, 0).getValue(),
+                                    returnColumnNamesMap.size());
+                        }
+                    }
+                    else if (!columnsInitialized)
+                    {
+                        returnColumnNamesMap.put(
+                                computFunc.createFunctionColName(col.getChildType(FunctionNode.class, 0)),
+                                returnColumnNamesMap.size());
+                    }
                 }
             }
             result.add(returnRec);
@@ -159,53 +176,5 @@ public class BlockResultDataHandler implements DataHandler
 
         return "blocks";
     }
-    
-    private Object getBlockColumnValue(Block blockInfo, String colName){
-        if("number".equalsIgnoreCase(colName)){
-            return blockInfo.getNumberRaw();       
-        }else if("hash".equalsIgnoreCase(colName)){
-            return blockInfo.getHash();
-        }else if("parenthash".equalsIgnoreCase(colName)){
-            return blockInfo.getParentHash();
-        }else if("nonce".equalsIgnoreCase(colName)){
-            return blockInfo.getNonceRaw();
-        }else if("sha3uncles".equalsIgnoreCase(colName)){
-            return blockInfo.getSha3Uncles();
-        }else if("logsbloom".equalsIgnoreCase(colName)){
-            return blockInfo.getLogsBloom();
-        }else if("transactionsroot".equalsIgnoreCase(colName)){
-            return blockInfo.getTransactionsRoot();
-        }else if("stateroot".equalsIgnoreCase(colName)){
-            return blockInfo.getStateRoot();
-        }else if("receiptsroot".equalsIgnoreCase(colName)){
-            return blockInfo.getReceiptsRoot();
-        }else if("author".equalsIgnoreCase(colName)){
-            return blockInfo.getAuthor();
-        }else if("miner".equalsIgnoreCase(colName)){
-            return blockInfo.getMiner();
-        }else if("mixhash".equalsIgnoreCase(colName)){
-            return blockInfo.getMixHash();
-        }else if("totaldifficulty".equalsIgnoreCase(colName)){
-            return blockInfo.getTotalDifficultyRaw();
-        }else if("extradata".equalsIgnoreCase(colName)){
-            return blockInfo.getExtraData();
-        }else if("size".equalsIgnoreCase(colName)){
-            return blockInfo.getSizeRaw();
-        }else if("gaslimit".equalsIgnoreCase(colName)){
-            return blockInfo.getGasLimitRaw();
-        }else if("gasused".equalsIgnoreCase(colName)){
-            return blockInfo.getGasUsedRaw();
-        }else if("timestamp".equalsIgnoreCase(colName)){
-            return blockInfo.getTimestampRaw();
-        }else if("transactions".equalsIgnoreCase(colName)){
-            return blockInfo.getTransactions();
-        }else if("uncles".equalsIgnoreCase(colName)){
-            return blockInfo.getUncles();
-        }else if("sealfields".equalsIgnoreCase(colName)){
-            return blockInfo.getSealFields();
-        }
-        else{
-            throw new RuntimeException("column "+colName+" does not exist in the table");
-        }
-    }
+
 }

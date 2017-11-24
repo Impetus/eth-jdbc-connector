@@ -1,17 +1,28 @@
+/******************************************************************************* 
+ * * Copyright 2017 Impetus Infotech.
+ * *
+ * * Licensed under the Apache License, Version 2.0 (the "License");
+ * * you may not use this file except in compliance with the License.
+ * * You may obtain a copy of the License at
+ * *
+ * * http://www.apache.org/licenses/LICENSE-2.0
+ * *
+ * * Unless required by applicable law or agreed to in writing, software
+ * * distributed under the License is distributed on an "AS IS" BASIS,
+ * * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * * See the License for the specific language governing permissions and
+ * * limitations under the License.
+ ******************************************************************************/
 package com.impetus.eth.parser;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.antlr.v4.parse.ANTLRParser.throwsSpec_return;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.protocol.Web3j;
@@ -19,7 +30,6 @@ import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
-import org.web3j.protocol.core.methods.response.EthBlock.TransactionObject;
 import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult;
 
 import com.impetus.blkch.sql.parser.LogicalPlan;
@@ -27,32 +37,49 @@ import com.impetus.blkch.sql.query.Column;
 import com.impetus.blkch.sql.query.FilterItem;
 import com.impetus.blkch.sql.query.FromItem;
 import com.impetus.blkch.sql.query.IdentifierNode;
-import com.impetus.blkch.sql.query.LogicalOperation;
 import com.impetus.blkch.sql.query.SelectClause;
 import com.impetus.blkch.sql.query.SelectItem;
 import com.impetus.blkch.sql.query.Table;
 import com.impetus.blkch.sql.query.WhereClause;
 import com.impetus.eth.jdbc.BlockResultDataHandler;
 import com.impetus.eth.jdbc.DataHandler;
-import com.impetus.eth.jdbc.EthStatement;
 import com.impetus.eth.jdbc.TransactionResultDataHandler;
 
+/**
+ * The Class APIConverter.
+ */
 public class APIConverter
 {
+
+    /** The Constant LOGGER. */
     private static final Logger LOGGER = LoggerFactory.getLogger(APIConverter.class);
 
+    /** The logical plan. */
     private LogicalPlan logicalPlan;
 
+    /** The web 3 j client. */
     private Web3j web3jClient;
 
+    /** The select items. */
     private List<SelectItem> selectItems = new ArrayList<>();
-    
+
+    /** The alias mapping. */
     private Map<String, String> aliasMapping = new HashMap<>();
 
+    /** The data. */
     private ArrayList<List<Object>> data;
 
+    /** The column names map. */
     private HashMap<String, Integer> columnNamesMap;
 
+    /**
+     * Instantiates a new API converter.
+     *
+     * @param logicalPlan
+     *            the logical plan
+     * @param web3jClient
+     *            the web 3 j client
+     */
     public APIConverter(LogicalPlan logicalPlan, Web3j web3jClient)
     {
         this.logicalPlan = logicalPlan;
@@ -79,6 +106,11 @@ public class APIConverter
         }
     }
 
+    /**
+     * Execute query.
+     *
+     * @return the data frame
+     */
     public DataFrame executeQuery()
     {
         FromItem fromItem = logicalPlan.getQuery().getChildType(FromItem.class, 0);
@@ -99,13 +131,22 @@ public class APIConverter
             throw new RuntimeException("Table : " + tableName + " does not exist. ");
         }
         List<?> recordList = getFromTable(tableName);
-         
+
         data = dataHandler.convertToObjArray(recordList, selectItems);
         columnNamesMap = dataHandler.getColumnNamesMap();
         DataFrame dataframe = new DataFrame(data, columnNamesMap, aliasMapping, tableName);
         return dataframe;
     }
 
+    /**
+     * Gets the from table.
+     *
+     * @param <T>
+     *            the generic type
+     * @param tableName
+     *            the table name
+     * @return the from table
+     */
     public <T> List<?> getFromTable(String tableName)
     {
         List<T> recordList = new ArrayList<>();
@@ -128,6 +169,13 @@ public class APIConverter
         return recordList;
     }
 
+    /**
+     * Execute with where clause.
+     *
+     * @param tableName
+     *            the table name
+     * @return the list
+     */
     public List<?> executeWithWhereClause(String tableName)
     {
         WhereClause whereClause = logicalPlan.getQuery().getChildType(WhereClause.class, 0);
@@ -144,6 +192,15 @@ public class APIConverter
         }
     }
 
+    /**
+     * Execute single where clause.
+     *
+     * @param tableName
+     *            the table name
+     * @param filterItem
+     *            the filter item
+     * @return the list
+     */
     public List<?> executeSingleWhereClause(String tableName, FilterItem filterItem)
     {
         String filterColumn = null;
@@ -163,20 +220,21 @@ public class APIConverter
 
                 if ("blocknumber".equalsIgnoreCase(filterColumn))
                 {
-                    block=getBlock(value);
+                    block = getBlock(value);
                     dataList.add(block);
                 }
                 else if ("blockHash".equalsIgnoreCase(filterColumn))
                 {
 
-                    block=getBlockByHash(value.replace("'", ""));
+                    block = getBlockByHash(value.replace("'", ""));
                     dataList.add(block);
 
                 }
                 else
                 {
-                    LOGGER.error("Column "+filterColumn+" is not filterable");
-                    throw new RuntimeException("Column "+filterColumn+" is not filterable/ Doesn't exist in the table");
+                    LOGGER.error("Column " + filterColumn + " is not filterable");
+                    throw new RuntimeException("Column " + filterColumn
+                            + " is not filterable/ Doesn't exist in the table");
                 }
 
             }
@@ -187,26 +245,38 @@ public class APIConverter
                 {
                     List<TransactionResult> transactionResult = getTransactions(value.replace("'", ""));
                     dataList = transactionResult;
-                }else if("hash".equalsIgnoreCase(filterColumn)){
-                   Transaction transInfo= getTransactionByHash(value.replace("'", ""));
-                   dataList.add(transInfo);
-                    
-                }else
+                }
+                else if ("hash".equalsIgnoreCase(filterColumn))
                 {
-                    LOGGER.error("Column "+filterColumn+" is not filterable/ Doesn't exist in the table");
-                    throw new RuntimeException("Column "+filterColumn+" is not filterable");
+                    Transaction transInfo = getTransactionByHash(value.replace("'", ""));
+                    dataList.add(transInfo);
+
+                }
+                else
+                {
+                    LOGGER.error("Column " + filterColumn + " is not filterable/ Doesn't exist in the table");
+                    throw new RuntimeException("Column " + filterColumn + " is not filterable");
                 }
 
             }
         }
         catch (Exception e)
         {
-           
+
             throw new RuntimeException(e.getMessage());
         }
         return dataList;
     }
 
+    /**
+     * Gets the transactions.
+     *
+     * @param blockNumber
+     *            the block number
+     * @return the transactions
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     */
     private List<TransactionResult> getTransactions(String blockNumber) throws IOException
     {
         LOGGER.info("Getting details of transactions stored in block - " + blockNumber);
@@ -287,5 +357,5 @@ public class APIConverter
                 .getResult();
         return transaction;
     }
-   
+
 }

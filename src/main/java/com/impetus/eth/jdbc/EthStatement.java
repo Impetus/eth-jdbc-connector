@@ -44,7 +44,6 @@ import com.impetus.blkch.sql.query.SelectClause;
 import com.impetus.eth.parser.APIConverter;
 import com.impetus.eth.parser.DataFrame;
 
-
 /**
  * The Class EthStatement.
  * 
@@ -289,56 +288,9 @@ public class EthStatement implements BlkchnStatement
         LOGGER.info("Entering into executeQuery Block");
         ResultSet queryResultSet = null;
         LogicalPlan logicalPlan = getLogicalPlan(sql);
-        DataFrame dataframe= new APIConverter(logicalPlan, connection.getWeb3jClient()).executeQuery();
-        queryResultSet = new EthResultSet(dataframe,rSetType, rSetConcurrency);
-       /* try
-        {
-
-           /* List<TransactionResult> trans = getTransactions("1876545");
-            TransactionResultDataHandler dataHandler = new TransactionResultDataHandler();
-            queryResultSet = new EthResultSet(dataHandler.convertToObjArray(trans), dataHandler.getColumnNamesMap(),
-                    rSetType, rSetConcurrency, dataHandler.getTableName());
-               
-            
-              /*Block blk= getBlock("1876545"); List<Block> blkl= new
-              ArrayList<Block>(); blkl.add(blk); BlockResultDataHandler
-              blockDataHandler= new BlockResultDataHandler(); queryResultSet=
-              new EthResultSet(blockDataHandler.convertToObjArray(blkl),
-              BlockResultDataHandler
-              .getColumnNamesMap(),rSetType,rSetConcurrency
-              ,blockDataHandler.getTableName());
-             */
-
-            /*
-             * Block blkByHash= getBlockByHash(
-             * "0xb76e315ce8a2531e910b2c55d975579d1b05b451eed46947d98278f18f22d25d"
-             * ); List<Block> lblkByHash= new ArrayList<Block>();
-             * blkl.add(blkByHash); BlockResultDataHandler blkByHashDataHandler=
-             * new BlockResultDataHandler(); queryResultSet= new
-             * EthResultSet(blkByHashDataHandler.convertToObjArray(blkl),
-             * BlockResultDataHandler
-             * .getColumnNamesMap(),rSetType,rSetConcurrency
-             * ,blkByHashDataHandler.getTableName());
-             * 
-             * 
-             * Transaction transByHash= getTransactionByHash(
-             * "0xe74e6119caa2f92ca50fee714c8ded39385c1ede944aad60dbf3a2cfc69d5b23"
-             * ); List<Transaction> lTransByHash= new ArrayList<Transaction>();
-             * lTransByHash.add(transByHash); TransactionResultDataHandler
-             * transByHashdataHandler = new TransactionResultDataHandler();
-             * queryResultSet = new
-             * EthResultSet(transByHashdataHandler.convertToObjArray
-             * (lTransByHash),
-             * transByHashdataHandler.getColumnNamesMap(),rSetType
-             * ,rSetConcurrency,transByHashdataHandler.getTableName());
-             *
-
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }*/
-      LOGGER.info("Exiting from executeQuery Block");
+        DataFrame dataframe = new APIConverter(logicalPlan, connection.getWeb3jClient()).executeQuery();
+        queryResultSet = new EthResultSet(dataframe, rSetType, rSetConcurrency);
+        LOGGER.info("Exiting from executeQuery Block");
         return queryResultSet;
     }
 
@@ -686,7 +638,7 @@ public class EthStatement implements BlkchnStatement
      */
     private List<TransactionResult> getTransactions(String blockNumber) throws IOException
     {
-        LOGGER.info("Getting details of transactions stored in block - "+blockNumber);
+        LOGGER.info("Getting details of transactions stored in block - " + blockNumber);
         EthBlock block = connection.getWeb3jClient()
                 .ethGetBlockByNumber(DefaultBlockParameter.valueOf(new BigInteger(blockNumber)), true).send();
 
@@ -704,7 +656,7 @@ public class EthStatement implements BlkchnStatement
      */
     private Block getBlock(String blockNumber) throws IOException
     {
-        LOGGER.info("Getting block - "+blockNumber+ " Information ");
+        LOGGER.info("Getting block - " + blockNumber + " Information ");
         EthBlock block = connection.getWeb3jClient()
                 .ethGetBlockByNumber(DefaultBlockParameter.valueOf(new BigInteger(blockNumber)), true).send();
         return block.getBlock();
@@ -721,7 +673,7 @@ public class EthStatement implements BlkchnStatement
      */
     private Block getBlockByHash(String blockHash) throws IOException
     {
-        LOGGER.info("Getting  information of block with hash - "+blockHash);
+        LOGGER.info("Getting  information of block with hash - " + blockHash);
         EthBlock block = connection.getWeb3jClient().ethGetBlockByHash(blockHash, true).send();
         return block.getBlock();
     }
@@ -737,7 +689,7 @@ public class EthStatement implements BlkchnStatement
      */
     private Transaction getTransactionByHash(String transactionHash) throws IOException
     {
-        LOGGER.info("Getting information of Transaction by hash - "+transactionHash);
+        LOGGER.info("Getting information of Transaction by hash - " + transactionHash);
 
         Transaction transaction = connection.getWeb3jClient().ethGetTransactionByHash(transactionHash).send()
                 .getResult();
@@ -758,7 +710,8 @@ public class EthStatement implements BlkchnStatement
     private Transaction getTransactionByBlockHashAndIndex(String blockHash, BigInteger transactionIndex)
             throws IOException
     {
-        LOGGER.info("Getting information of Transaction by blockhash - "+blockHash+" and transactionIndex"+transactionIndex);
+        LOGGER.info("Getting information of Transaction by blockhash - " + blockHash + " and transactionIndex"
+                + transactionIndex);
 
         Transaction transaction = connection.getWeb3jClient()
                 .ethGetTransactionByBlockHashAndIndex(blockHash, transactionIndex).send().getResult();
@@ -795,11 +748,12 @@ public class EthStatement implements BlkchnStatement
         return null;
     }
 
-    private LogicalPlan getLogicalPlan(String query) {
+    private LogicalPlan getLogicalPlan(String query)
+    {
         SqlBaseLexer lexer = new SqlBaseLexer(new CaseInsensitiveCharStream(query));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         SqlBaseParser parser = new SqlBaseParser(tokens);
         AbstractSyntaxTreeVisitor visitor = new BlockchainVisitor();
         return visitor.visitSingleStatement(parser.singleStatement());
-        }
+    }
 }

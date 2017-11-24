@@ -22,13 +22,14 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.protocol.core.methods.response.Transaction;
-import org.web3j.protocol.core.methods.response.EthBlock.Block;
 
 import com.impetus.blkch.sql.query.Column;
 import com.impetus.blkch.sql.query.FunctionNode;
 import com.impetus.blkch.sql.query.IdentifierNode;
 import com.impetus.blkch.sql.query.SelectItem;
 import com.impetus.blkch.sql.query.StarNode;
+import com.impetus.eth.parser.Function;
+import com.impetus.eth.parser.Utils;
 
 /**
  * The Class TransactionResultDataHandler.
@@ -38,7 +39,7 @@ import com.impetus.blkch.sql.query.StarNode;
  */
 public class TransactionResultDataHandler implements DataHandler
 {
-    
+
     /** The Constant LOGGER. */
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionResultDataHandler.class);
 
@@ -69,7 +70,9 @@ public class TransactionResultDataHandler implements DataHandler
     /** The return column names map. */
     public static HashMap<String, Integer> returnColumnNamesMap = new HashMap<>();
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.eth.jdbc.DataHandler#getColumnNamesMap()
      */
     public HashMap<String, Integer> getColumnNamesMap()
@@ -97,7 +100,7 @@ public class TransactionResultDataHandler implements DataHandler
             {
                 if (col.hasChildType(StarNode.class))
                 {
-                   
+
                     returnRec.add(transInfo.getBlockHash());
                     returnRec.add(transInfo.getBlockNumberRaw());
                     returnRec.add(transInfo.getCreates());
@@ -122,25 +125,42 @@ public class TransactionResultDataHandler implements DataHandler
                 }
                 else if (col.hasChildType(Column.class))
                 {
-                    String colName = col.getChildType(Column.class, 0).getChildType(IdentifierNode.class, 0)
-                            .getValue();
+                    String colName = col.getChildType(Column.class, 0).getChildType(IdentifierNode.class, 0).getValue();
                     if (!columnsInitialized)
                     {
                         if (columnNamesMap.containsKey(colName.toLowerCase()))
                         {
-                           returnColumnNamesMap.put(colName, returnColumnNamesMap.size());
-                        }else {
+                            returnColumnNamesMap.put(colName, returnColumnNamesMap.size());
+                        }
+                        else
+                        {
                             LOGGER.error("Column " + colName + " doesn't exist in table");
                             throw new RuntimeException("Column " + colName + " doesn't exist in table");
                         }
 
                     }
-               
-                    returnRec.add(getTransactionColumnValue(transInfo, colName)); 
+
+                    returnRec.add(Utils.getTransactionColumnValue(transInfo, colName));
                 }
                 else if (col.hasChildType(FunctionNode.class))
                 {
-                    // TODO implement
+                    Function computFunc = new Function(rows, columnNamesMap, getTableName());
+                    Object computeResult = computFunc.computeFunction(col.getChildType(FunctionNode.class, 0));
+                    returnRec.add(computeResult);
+                    if (col.hasChildType(IdentifierNode.class))
+                    {
+                        if (!columnsInitialized)
+                        {
+                            returnColumnNamesMap.put(col.getChildType(IdentifierNode.class, 0).getValue(),
+                                    returnColumnNamesMap.size());
+                        }
+                    }
+                    else if (!columnsInitialized)
+                    {
+                        returnColumnNamesMap.put(
+                                computFunc.createFunctionColName(col.getChildType(FunctionNode.class, 0)),
+                                returnColumnNamesMap.size());
+                    }
                 }
             }
             result.add(returnRec);
@@ -163,53 +183,5 @@ public class TransactionResultDataHandler implements DataHandler
 
         return "transactions";
     }
-    
-    /**
-     * Gets the transaction column value.
-     *
-     * @param transInfo the trans info
-     * @param colName the col name
-     * @return the transaction column value
-     */
-    private Object getTransactionColumnValue(Transaction transInfo,String colName){
-        if("blockhash".equalsIgnoreCase(colName)){
-            return transInfo.getBlockHash();
-        }else if("blocknumber".equalsIgnoreCase(colName)){
-            return transInfo.getBlockNumberRaw();
-        }else if("creates".equalsIgnoreCase(colName)){
-            return transInfo.getCreates();
-        }else if("from".equalsIgnoreCase(colName)){
-            return transInfo.getFrom();
-        }else if("gas".equalsIgnoreCase(colName)){
-            return transInfo.getGasRaw();
-        }else if("gasprice".equalsIgnoreCase(colName)){
-            return transInfo.getGasPriceRaw();
-        }else if("hash".equalsIgnoreCase(colName)){
-            return transInfo.getHash();
-        }else if("input".equalsIgnoreCase(colName)){
-            return transInfo.getInput();
-        }else if("nonce".equalsIgnoreCase(colName)){
-            return transInfo.getNonceRaw();
-        }else if("publickey".equalsIgnoreCase(colName)){
-            return transInfo.getPublicKey();
-        }else if("r".equalsIgnoreCase(colName)){
-            return transInfo.getR();
-        }else if("raw".equalsIgnoreCase(colName)){
-            return transInfo.getRaw();
-        }else if("s".equalsIgnoreCase(colName)){
-            return transInfo.getS();
-        }else if("to".equalsIgnoreCase(colName)){
-            return transInfo.getTo();
-        }else if("tranactionindex".equalsIgnoreCase(colName)){
-            return transInfo.getTransactionIndex();
-        }else if("v".equalsIgnoreCase(colName)){
-            return transInfo.getV();
-        }else if("value".equalsIgnoreCase(colName)){
-            return transInfo.getValueRaw();
-        }else {
-            throw new RuntimeException("column "+colName+" does not exist in the table");
-        }
-    }
 
-   
 }

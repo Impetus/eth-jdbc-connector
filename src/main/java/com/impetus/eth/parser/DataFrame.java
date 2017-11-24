@@ -1,181 +1,111 @@
+/******************************************************************************* 
+ * * Copyright 2017 Impetus Infotech.
+ * *
+ * * Licensed under the Apache License, Version 2.0 (the "License");
+ * * you may not use this file except in compliance with the License.
+ * * You may obtain a copy of the License at
+ * *
+ * * http://www.apache.org/licenses/LICENSE-2.0
+ * *
+ * * Unless required by applicable law or agreed to in writing, software
+ * * distributed under the License is distributed on an "AS IS" BASIS,
+ * * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * * See the License for the specific language governing permissions and
+ * * limitations under the License.
+ ******************************************************************************/
 package com.impetus.eth.parser;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.impetus.blkch.sql.query.Column;
-import com.impetus.blkch.sql.query.FunctionNode;
-import com.impetus.blkch.sql.query.IdentifierNode;
-
+/**
+ * The Class DataFrame.
+ */
 public class DataFrame
 {
+
+    /** The table. */
     private String table;
+
+    /** The columns. */
     private List<String> columns;
 
+    /** The alias mapping. */
     private Map<String, String> aliasMapping;
-    
-    private  HashMap<String, Integer> columnNamesMap;
-    
+
+    /** The column names map. */
+    private HashMap<String, Integer> columnNamesMap;
+
+    /** The data. */
     private List<List<Object>> data;
 
-    DataFrame(List<List<Object>> data, HashMap<String, Integer> columnNamesMap, Map<String, String> aliasMapping,String table)
+    /**
+     * Instantiates a new data frame.
+     *
+     * @param data
+     *            the data
+     * @param columnNamesMap
+     *            the column names map
+     * @param aliasMapping
+     *            the alias mapping
+     * @param table
+     *            the table
+     */
+    DataFrame(List<List<Object>> data, HashMap<String, Integer> columnNamesMap, Map<String, String> aliasMapping,
+            String table)
     {
         this.aliasMapping = aliasMapping;
         this.data = data;
-        this.columnNamesMap=columnNamesMap;
-        this.table=table;
+        this.columnNamesMap = columnNamesMap;
+        this.table = table;
     }
 
+    /**
+     * Gets the columns.
+     *
+     * @return the columns
+     */
     public List<String> getColumns()
     {
         return columns;
     }
 
+    /**
+     * Gets the alias mapping.
+     *
+     * @return the alias mapping
+     */
     public Map<String, String> getAliasMapping()
     {
         return aliasMapping;
     }
 
+    /**
+     * Gets the data.
+     *
+     * @return the data
+     */
     public List<List<Object>> getData()
     {
         return data;
     }
 
-  /*  public DataFrame select(List<SelectItem> cols)
-    {
-        List<List<Object>> returnData = new ArrayList<>();
-        List<String> returnCols = new ArrayList<>();
-        boolean columnsInitialized = false;
-        for (List<Object> record : data)
-        {
-            List<Object> returnRec = new ArrayList<>();
-            for (SelectItem col : cols)
-            {
-                if (col.hasChildType(StarNode.class))
-                {
-                    for (String colName : columns)
-                    {
-                        int colIndex = columns.indexOf(colName);
-                        returnRec.add(record.get(colIndex));
-                        if (!columnsInitialized)
-                        {
-                            returnCols.add(colName);
-                        }
-                    }
-                }
-                else if (col.hasChildType(Column.class))
-                {
-                    int colIndex;
-                    String colName = col.getChildType(Column.class, 0).getChildType(IdentifierNode.class, 0).getValue();
-                    if (columns.contains(colName))
-                    {
-                        colIndex = columns.indexOf(colName);
-                        if (!columnsInitialized)
-                        {
-                            returnCols.add(colName);
-                        }
-                    }
-                    else if (aliasMapping.containsKey(colName))
-                    {
-                        String actualCol = aliasMapping.get(colName);
-                        colIndex = columns.indexOf(actualCol);
-                        if (!columnsInitialized)
-                        {
-                            returnCols.add(actualCol);
-                        }
-                    }
-                    else
-                    {
-                        throw new RuntimeException("Column " + colName + " doesn't exist in table");
-                    }
-                    returnRec.add(record.get(colIndex));
-                }
-                else if (col.hasChildType(FunctionNode.class))
-                {
-                    Object computeResult = computeFunction(col.getChildType(FunctionNode.class, 0));
-                    returnRec.add(computeResult);
-                    if (col.hasChildType(IdentifierNode.class))
-                    {
-                        if (!columnsInitialized)
-                        {
-                            returnCols.add(col.getChildType(IdentifierNode.class, 0).getValue());
-                        }
-                    }
-                    else if (!columnsInitialized)
-                    {
-                        returnCols.add(createFunctionColName(col.getChildType(FunctionNode.class, 0)));
-                    }
-                }
-            }
-            returnData.add(returnRec);
-            columnsInitialized = true;
-        }
-        System.out.println(returnCols);
-        return new DataFrame(returnData, returnCols, aliasMapping);
-    }
-*/
-    private Object computeFunction(FunctionNode function)
-    {
-        String func = function.getChildType(IdentifierNode.class, 0).getValue();
-        List<Object> columnData = new ArrayList<>();
-        if (function.hasChildType(FunctionNode.class))
-        {
-            columnData.add(computeFunction(function.getChildType(FunctionNode.class, 0)));
-        }
-        else
-        {
-            int colIndex;
-            String colName = function.getChildType(Column.class, 0).getChildType(IdentifierNode.class, 0).getValue();
-            if (columns.contains(colName))
-            {
-                colIndex = columns.indexOf(colName);
-            }
-            else if (aliasMapping.containsKey(colName))
-            {
-                String actualCol = aliasMapping.get(colName);
-                colIndex = columns.indexOf(actualCol);
-            }
-            else
-            {
-                throw new RuntimeException("Column " + colName + " doesn't exist in table");
-            }
-            for (List<Object> record : data)
-            {
-                columnData.add(record.get(colIndex));
-            }
-        }
-        switch (func)
-        {
-        case "count":
-            return AggregationFunctions.count(columnData);
-        case "sum":
-            return AggregationFunctions.sum(columnData);
-        default:
-            throw new RuntimeException("Unidentified function: " + func);
-        }
-    }
-
-    private String createFunctionColName(FunctionNode function)
-    {
-        String func = function.getChildType(IdentifierNode.class, 0).getValue();
-        if (function.hasChildType(FunctionNode.class))
-        {
-            return func + "(" + createFunctionColName(function.getChildType(FunctionNode.class, 0)) + ")";
-        }
-        else
-        {
-            String colName = function.getChildType(Column.class, 0).getChildType(IdentifierNode.class, 0).getValue();
-            return func + "(" + colName + ")";
-        }
-    }
-
+    /**
+     * Gets the table.
+     *
+     * @return the table
+     */
     public String getTable()
     {
         return table;
     }
 
+    /**
+     * Gets the column names map.
+     *
+     * @return the column names map
+     */
     public HashMap<String, Integer> getColumnNamesMap()
     {
         return columnNamesMap;

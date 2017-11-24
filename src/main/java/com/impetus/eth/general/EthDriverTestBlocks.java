@@ -52,7 +52,7 @@ public class EthDriverTestBlocks
             Class.forName(driverClass);
             Connection conn = DriverManager.getConnection(url, null);
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("select transactions as ts from blocks where blocknumbr=1652339 ");
+            ResultSet rs = stmt.executeQuery("select transactions as ts, count(transactions) from blocks where blocknumber=1652339 ");
             while (rs.next())
             {
                 // For Blocks
@@ -66,7 +66,7 @@ public class EthDriverTestBlocks
                 List<TransactionObject> lt = (List<TransactionObject>) rs.getObject("transactions");
                 System.out.println("transation "+lt);
                 System.out.println("blockNumber : " + lt.get(0).getBlockNumber());
-
+                System.out.println(rs.getInt(1));
             }
 
         }
