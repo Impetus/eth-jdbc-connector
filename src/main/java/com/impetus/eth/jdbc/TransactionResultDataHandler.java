@@ -18,6 +18,9 @@ package com.impetus.eth.jdbc;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +36,6 @@ import com.impetus.eth.parser.Utils;
 
 /**
  * The Class TransactionResultDataHandler.
- * 
- * @author karthikp.manchala
- * 
  */
 public class TransactionResultDataHandler implements DataHandler
 {
@@ -79,6 +79,31 @@ public class TransactionResultDataHandler implements DataHandler
     {
         return returnColumnNamesMap;
     }
+    
+    /** The result. */
+    private   ArrayList<List<Object>> result = new ArrayList<>();
+    
+    /** The columns initialized. */
+    private boolean columnsInitialized = false;
+    
+    /** The is groupby select. */
+    private boolean isGroupbySelect=false;
+    
+    /* (non-Javadoc)
+     * @see com.impetus.eth.jdbc.DataHandler#convertGroupedDataToObjArray(java.util.List, java.util.List, java.util.List)
+     */
+    @Override
+    public ArrayList<List<Object>> convertGroupedDataToObjArray(List rows, List<SelectItem> selItems,
+            List<String> groupByCols)
+    {
+        isGroupbySelect=true;
+        Map<Object, List<Object>> groupedData=((List<Object>)rows).stream().collect(Collectors.groupingBy(transInfo->groupByCols.stream().map(column->Utils.getTransactionColumnValue((Transaction)transInfo, column)).collect(Collectors.toList()),Collectors.toList()));       
+        for(Entry<Object, List<Object>> entry : groupedData.entrySet()){
+            convertToObjArray((List<Object>) entry.getValue(), selItems);
+       }  
+        return result;
+    }
+
 
     /*
      * (non-Javadoc)
@@ -90,8 +115,7 @@ public class TransactionResultDataHandler implements DataHandler
     {
 
         LOGGER.info("Conversion of transaction objects to Result set Objects started");
-        ArrayList<List<Object>> result = new ArrayList<>();
-        boolean columnsInitialized = false;
+       
         for (Object record : rows)
         {
             Transaction transInfo = (Transaction) record;
@@ -165,7 +189,9 @@ public class TransactionResultDataHandler implements DataHandler
             }
             result.add(returnRec);
             columnsInitialized = true;
-
+          
+            if(isGroupbySelect)
+               break;
         }
 
         LOGGER.info("Conversion completed. Returning ..");
@@ -184,4 +210,5 @@ public class TransactionResultDataHandler implements DataHandler
         return "transactions";
     }
 
+   
 }

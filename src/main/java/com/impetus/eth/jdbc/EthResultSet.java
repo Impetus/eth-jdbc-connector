@@ -36,6 +36,8 @@ import com.impetus.eth.parser.DataFrame;
  */
 public class EthResultSet extends AbstractResultSet
 {
+    
+    /** The Constant LOGGER. */
     private static final Logger LOGGER = LoggerFactory.getLogger(EthResultSet.class);
 
     /** The Constant BEFORE_FIRST_ROW. */
@@ -71,16 +73,9 @@ public class EthResultSet extends AbstractResultSet
     /**
      * Instantiates a new eth result set.
      *
-     * @param rowData
-     *            the row data
-     * @param columnNamesMap
-     *            the column names map
-     * @param resultSetType
-     *            the result set type
-     * @param rSetConcurrency
-     *            the r set concurrency
-     * @param tableName
-     *            the table name
+     * @param dataframe the dataframe
+     * @param resultSetType            the result set type
+     * @param rSetConcurrency            the r set concurrency
      */
     public EthResultSet(DataFrame dataframe, int resultSetType,
             int rSetConcurrency)

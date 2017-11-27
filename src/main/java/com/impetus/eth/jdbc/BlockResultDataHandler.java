@@ -18,9 +18,13 @@ package com.impetus.eth.jdbc;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
 
 import com.impetus.blkch.sql.query.Column;
@@ -39,6 +43,8 @@ import com.impetus.eth.parser.Utils;
  */
 public class BlockResultDataHandler implements DataHandler
 {
+    
+    /** The Constant LOGGER. */
     private static final Logger LOGGER = LoggerFactory.getLogger(BlockResultDataHandler.class);
 
     /** The column names map. */
@@ -46,7 +52,7 @@ public class BlockResultDataHandler implements DataHandler
 
     static
     {
-        columnNamesMap.put("number", 0);
+        columnNamesMap.put("blocknumber", 0);
         columnNamesMap.put("hash", 1);
         columnNamesMap.put("parenthash", 2);
         columnNamesMap.put("nonce", 3);
@@ -69,19 +75,48 @@ public class BlockResultDataHandler implements DataHandler
         columnNamesMap.put("sealfields", 20);
     }
 
+    /** The return column names map. */
     public static HashMap<String, Integer> returnColumnNamesMap = new HashMap<>();
 
+    /* (non-Javadoc)
+     * @see com.impetus.eth.jdbc.DataHandler#getColumnNamesMap()
+     */
     public HashMap<String, Integer> getColumnNamesMap()
     {
         return returnColumnNamesMap;
     }
 
+    /** The result. */
+    private   ArrayList<List<Object>> result = new ArrayList<>();
+    
+    /** The columns initialized. */
+    private boolean columnsInitialized = false;
+    
+    /** The is groupby select. */
+    private boolean isGroupbySelect=false;
+    
+    /* (non-Javadoc)
+     * @see com.impetus.eth.jdbc.DataHandler#convertGroupedDataToObjArray(java.util.List, java.util.List, java.util.List)
+     */
+    @Override
+    public ArrayList<List<Object>> convertGroupedDataToObjArray(List rows, List<SelectItem> selItems,
+            List<String> groupByCols)
+    {
+        isGroupbySelect=true;
+        Map<Object, List<Object>> groupedData=((List<Object>)rows).stream().collect(Collectors.groupingBy(blockInfo->groupByCols.stream().map(column->Utils.getBlockColumnValue((Block)blockInfo, column)).collect(Collectors.toList()),Collectors.toList()));       
+        for(Entry<Object, List<Object>> entry : groupedData.entrySet()){
+            convertToObjArray((List<Object>) entry.getValue(), selItems);
+       }  
+        return result;
+    }
+    
+    /* (non-Javadoc)
+     * @see com.impetus.eth.jdbc.DataHandler#convertToObjArray(java.util.List, java.util.List)
+     */
     @Override
     public ArrayList<List<Object>> convertToObjArray(List rows, List<SelectItem> selItems)
     {
         LOGGER.info("Conversion of Block objects to Result set Objects started");
-        ArrayList<List<Object>> result = new ArrayList<>();
-        boolean columnsInitialized = false;
         for (Object record : rows)
         {
             Block blockInfo = (Block) record;
@@ -158,7 +193,8 @@ public class BlockResultDataHandler implements DataHandler
             }
             result.add(returnRec);
             columnsInitialized = true;
-
+            if(isGroupbySelect)
+                break;
         }
 
         LOGGER.info("Conversion completed. Returning to ResultSet");
@@ -176,5 +212,7 @@ public class BlockResultDataHandler implements DataHandler
 
         return "blocks";
     }
+
+   
 
 }

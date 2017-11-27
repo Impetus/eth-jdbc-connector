@@ -35,6 +35,8 @@ import com.impetus.blkch.jdbc.BlkchnResultSetMetaData;
  */
 public class EthResultSetMetaData implements BlkchnResultSetMetaData
 {
+    
+    /** The Constant LOGGER. */
     private static final Logger LOGGER = LoggerFactory.getLogger(EthResultSetMetaData.class);
 
     /** The table name. */

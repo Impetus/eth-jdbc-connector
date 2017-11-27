@@ -52,6 +52,8 @@ import com.impetus.eth.parser.DataFrame;
  */
 public class EthStatement implements BlkchnStatement
 {
+    
+    /** The Constant LOGGER. */
     private static final Logger LOGGER = LoggerFactory.getLogger(EthStatement.class);
 
     /** The connection. */
@@ -748,6 +750,12 @@ public class EthStatement implements BlkchnStatement
         return null;
     }
 
+    /**
+     * Gets the logical plan.
+     *
+     * @param query the query
+     * @return the logical plan
+     */
     private LogicalPlan getLogicalPlan(String query)
     {
         SqlBaseLexer lexer = new SqlBaseLexer(new CaseInsensitiveCharStream(query));

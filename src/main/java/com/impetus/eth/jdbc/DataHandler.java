@@ -52,5 +52,15 @@ public interface DataHandler
      * @return the column names map
      */
     public  HashMap<String, Integer> getColumnNamesMap();
+    
+    /**
+     * Convert grouped data to obj array.
+     *
+     * @param rows the rows
+     * @param selItems the sel items
+     * @param groupByCols the group by cols
+     * @return the array list
+     */
+    public ArrayList<List<Object>> convertGroupedDataToObjArray(List rows, List<SelectItem> selItems, List<String> groupByCols);
 
 }

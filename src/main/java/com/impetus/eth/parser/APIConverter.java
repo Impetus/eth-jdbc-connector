@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,7 @@ import com.impetus.blkch.sql.parser.LogicalPlan;
 import com.impetus.blkch.sql.query.Column;
 import com.impetus.blkch.sql.query.FilterItem;
 import com.impetus.blkch.sql.query.FromItem;
+import com.impetus.blkch.sql.query.GroupByClause;
 import com.impetus.blkch.sql.query.IdentifierNode;
 import com.impetus.blkch.sql.query.LogicalOperation;
 import com.impetus.blkch.sql.query.SelectClause;
@@ -64,6 +66,8 @@ public class APIConverter
     /** The select items. */
     private List<SelectItem> selectItems = new ArrayList<>();
 
+    private List<String> selectColumns = new ArrayList<String>();
+
     /** The alias mapping. */
     private Map<String, String> aliasMapping = new HashMap<>();
 
@@ -90,18 +94,23 @@ public class APIConverter
         for (SelectItem selItem : selItems)
         {
             selectItems.add(selItem);
-            if (selItem.hasChildType(IdentifierNode.class))
+            if (selItem.hasChildType(Column.class))
             {
-
-                String alias = selItem.getChildType(IdentifierNode.class, 0).getValue();
                 String colName = selItem.getChildType(Column.class, 0).getChildType(IdentifierNode.class, 0).getValue();
-                if (aliasMapping.containsKey(alias))
+                selectColumns.add(colName);
+
+                if (selItem.hasChildType(IdentifierNode.class))
                 {
-                    throw new RuntimeException("Alias " + alias + " is ambiguous");
-                }
-                else
-                {
-                    aliasMapping.put(alias, colName);
+                    String alias = selItem.getChildType(IdentifierNode.class, 0).getValue();
+
+                    if (aliasMapping.containsKey(alias))
+                    {
+                        throw new RuntimeException("Alias " + alias + " is ambiguous");
+                    }
+                    else
+                    {
+                        aliasMapping.put(alias, colName);
+                    }
                 }
             }
         }
@@ -132,10 +141,22 @@ public class APIConverter
             throw new RuntimeException("Table : " + tableName + " does not exist. ");
         }
         List<?> recordList = getFromTable(tableName);
-
+        DataFrame dataframe;
+        if (logicalPlan.getQuery().hasChildType(GroupByClause.class))
+        {
+            GroupByClause groupByClause = logicalPlan.getQuery().getChildType(GroupByClause.class, 0);
+            List<Column> groupColumns = groupByClause.getChildType(Column.class);
+            List<String> groupByCols = groupColumns.stream()
+                    .map(col -> col.getChildType(IdentifierNode.class, 0).getValue()).collect(Collectors.toList());
+            Utils.verifyGroupedColumns(selectColumns, groupByCols);
+            data = dataHandler.convertGroupedDataToObjArray(recordList, selectItems, groupByCols);
+            columnNamesMap = dataHandler.getColumnNamesMap();
+            dataframe = new DataFrame(data, columnNamesMap, aliasMapping, tableName);
+            return dataframe;
+        }
         data = dataHandler.convertToObjArray(recordList, selectItems);
         columnNamesMap = dataHandler.getColumnNamesMap();
-        DataFrame dataframe = new DataFrame(data, columnNamesMap, aliasMapping, tableName);
+        dataframe = new DataFrame(data, columnNamesMap, aliasMapping, tableName);
         return dataframe;
     }
 
@@ -272,8 +293,10 @@ public class APIConverter
     /**
      * Execute multiple where clause.
      *
-     * @param tableName the table name
-     * @param whereClause the where clause
+     * @param tableName
+     *            the table name
+     * @param whereClause
+     *            the where clause
      * @return the list
      */
     public List<?> executeMultipleWhereClause(String tableName, WhereClause whereClause)
@@ -285,9 +308,12 @@ public class APIConverter
     /**
      * Execute logical operation.
      *
-     * @param <T> the generic type
-     * @param tableName the table name
-     * @param operation the operation
+     * @param <T>
+     *            the generic type
+     * @param tableName
+     *            the table name
+     * @param operation
+     *            the operation
      * @return the list
      */
     public <T> List<?> executeLogicalOperation(String tableName, LogicalOperation operation)

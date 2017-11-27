@@ -50,6 +50,8 @@ import com.impetus.blkch.jdbc.BlkchnConnection;
  */
 public class EthConnection implements BlkchnConnection
 {
+    
+    /** The Constant LOGGER. */
     private static final Logger LOGGER = LoggerFactory.getLogger(EthConnection.class);
 
     /** The url. */
@@ -114,11 +116,9 @@ public class EthConnection implements BlkchnConnection
     /**
      * Instantiates a new eth connection.
      *
-     * @param url
-     *            the url
-     * @param props
-     *            the props
-     * @throws Exception
+     * @param url            the url
+     * @param props            the props
+     * @throws SQLException the SQL exception
      */
     public EthConnection(String url, Properties props) throws SQLException
     {
@@ -783,6 +783,11 @@ public class EthConnection implements BlkchnConnection
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Verify connection.
+     *
+     * @throws SQLException the SQL exception
+     */
     protected void verifyConnection() throws SQLException
     {
         LOGGER.info("verfying the connection. ");

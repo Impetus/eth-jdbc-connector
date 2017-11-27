@@ -55,20 +55,22 @@ public class EthDriverTestBlocks
             ResultSet rs = stmt.executeQuery("select transactions as ts, count(transactions) from blocks where blocknumber=1652339 or blocknumber=1652340 ");
             while (rs.next())
             {
-                // For Blocks
-
-                /*System.out.println("\n************");
-                System.out.println("2nd column value : " + rs.getString(1));
-                System.out.println("block number in hex : " + rs.getString("number"));
-                System.out.println("block number decoded : " + Numeric.decodeQuantity(rs.getString("number")));
-                */
+               
                 System.out.println(rs.getObject(0));
                 List<TransactionObject> lt = (List<TransactionObject>) rs.getObject("transactions");
                 System.out.println("transation "+lt);
                 System.out.println("blockNumber : " + lt.get(0).getBlockNumber());
                 System.out.println(rs.getInt(1));
             }
-
+            
+            
+            rs = stmt.executeQuery("select count(blocknumber), blocknumber from blocks where blocknumber=1652339 or blocknumber=1652340 or blocknumber=2120613 group by blocknumber ");
+            while (rs.next())
+            {
+               System.out.println("count : "+rs.getInt(0));
+               System.out.println("block number "+rs.getString(1));
+                
+            }
         }
         catch (SQLException e1)
         {

@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.impetus.eth.parser;
 
+import java.util.List;
+
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
 
@@ -120,7 +122,7 @@ public class Utils
      */
     public static Object getBlockColumnValue(Block blockInfo, String colName)
     {
-        if ("number".equalsIgnoreCase(colName))
+        if ("blocknumber".equalsIgnoreCase(colName))
         {
             return blockInfo.getNumberRaw();
         }
@@ -209,5 +211,16 @@ public class Utils
             throw new RuntimeException("column " + colName + " does not exist in the table");
         }
     }
+    
+    
+ public static void verifyGroupedColumns(List<String> columns, List<String> groupedColumns){
 
+     for(String selectColumn: columns){
+         
+         if (groupedColumns.contains(selectColumn))
+             continue;
+         else 
+             throw new RuntimeException("Select column " + selectColumn + " should exist in group by clause");
+     }
+ }
 }

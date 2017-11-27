@@ -50,13 +50,13 @@ public class EthDriverTest
 
             Connection conn = DriverManager.getConnection(url, null);
             Statement stmt = conn.createStatement(); 
-            ResultSet rs = stmt.executeQuery("select count(from), value from transactions where blocknumber=1652339 or blocknumber=1652340");
+            ResultSet rs = stmt.executeQuery("select count(to), to from transactions where blocknumber=1652339 or blocknumber=1652340 group by to");
             while (rs.next())
             {
                 // For Transactions
-
+                System.out.println("column count"+ rs.getMetaData().getColumnCount());
                 System.out.println("" + rs.getInt(0));
-                System.out.println("" + rs.getString("value"));
+                System.out.println("" + rs.getString("to"));
                 System.out.println();
             }
             System.out.println("Result set MetaData");
