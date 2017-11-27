@@ -68,7 +68,7 @@ public class TransactionResultDataHandler implements DataHandler
     }
 
     /** The return column names map. */
-    public static HashMap<String, Integer> returnColumnNamesMap = new HashMap<>();
+    public  HashMap<String, Integer> returnColumnNamesMap = new HashMap<>();
 
     /*
      * (non-Javadoc)

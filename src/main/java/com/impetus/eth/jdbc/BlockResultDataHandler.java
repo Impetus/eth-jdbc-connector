@@ -76,7 +76,7 @@ public class BlockResultDataHandler implements DataHandler
     }
 
     /** The return column names map. */
-    public static HashMap<String, Integer> returnColumnNamesMap = new HashMap<>();
+    public  HashMap<String, Integer> returnColumnNamesMap = new HashMap<>();
 
     /* (non-Javadoc)
      * @see com.impetus.eth.jdbc.DataHandler#getColumnNamesMap()
