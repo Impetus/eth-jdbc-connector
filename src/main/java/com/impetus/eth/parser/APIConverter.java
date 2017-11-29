@@ -39,6 +39,7 @@ import com.impetus.blkch.sql.query.FilterItem;
 import com.impetus.blkch.sql.query.FromItem;
 import com.impetus.blkch.sql.query.GroupByClause;
 import com.impetus.blkch.sql.query.IdentifierNode;
+import com.impetus.blkch.sql.query.LimitClause;
 import com.impetus.blkch.sql.query.LogicalOperation;
 import com.impetus.blkch.sql.query.SelectClause;
 import com.impetus.blkch.sql.query.SelectItem;
@@ -142,6 +143,11 @@ public class APIConverter
         }
         List<?> recordList = getFromTable(tableName);
         DataFrame dataframe;
+        LimitClause limitClause = null;
+        if (logicalPlan.getQuery().hasChildType(LimitClause.class))
+        {
+            limitClause = logicalPlan.getQuery().getChildType(LimitClause.class, 0);
+        }
         if (logicalPlan.getQuery().hasChildType(GroupByClause.class))
         {
             GroupByClause groupByClause = logicalPlan.getQuery().getChildType(GroupByClause.class, 0);
@@ -152,12 +158,26 @@ public class APIConverter
             data = dataHandler.convertGroupedDataToObjArray(recordList, selectItems, groupByCols);
             columnNamesMap = dataHandler.getColumnNamesMap();
             dataframe = new DataFrame(data, columnNamesMap, aliasMapping, tableName);
-            return dataframe;
+            if (limitClause == null)
+            {
+                return dataframe;
+            }
+            else
+            {
+                return dataframe.limit(limitClause);
+            }
         }
         data = dataHandler.convertToObjArray(recordList, selectItems);
         columnNamesMap = dataHandler.getColumnNamesMap();
         dataframe = new DataFrame(data, columnNamesMap, aliasMapping, tableName);
-        return dataframe;
+        if (limitClause == null)
+        {
+            return dataframe;
+        }
+        else
+        {
+            return dataframe.limit(limitClause);
+        }
     }
 
     /**

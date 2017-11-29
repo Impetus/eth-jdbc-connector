@@ -18,6 +18,10 @@ package com.impetus.eth.parser;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.impetus.blkch.sql.query.IdentifierNode;
+import com.impetus.blkch.sql.query.LimitClause;
 
 /**
  * The Class DataFrame.
@@ -110,5 +114,20 @@ public class DataFrame
     {
         return columnNamesMap;
     }
+    
+    public DataFrame limit(LimitClause limitClause) {
+        String limitValue = limitClause.getChildType(IdentifierNode.class, 0).getValue();
+        int limit;
+        try {
+        limit = Integer.parseInt(limitValue);
+        } catch (NumberFormatException e) {
+        throw new RuntimeException(e);
+        }
+        if(limit < 0) {
+        throw new RuntimeException("limit value should not be less than zero");
+        }
+        List<List<Object>> limitedData = data.stream().limit(limit).collect(Collectors.toList());
+        return new DataFrame(limitedData,columnNamesMap,aliasMapping,table);
+        }
 
 }
