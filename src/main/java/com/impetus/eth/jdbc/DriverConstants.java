@@ -26,6 +26,9 @@ public class DriverConstants
 
     /** The Constant HOSTNAME. */
     public static final String HOSTNAME = "HOSTNAME";
+    
+    /** The Constant IPC. */
+    public static final String IPC = "IPC";
 
     /** The Constant PORTNUMBER. */
     public static final String PORTNUMBER = "PORTNUMBER";
@@ -44,5 +47,8 @@ public class DriverConstants
 
     /** The Constant MINOR_VERSION. */
     public static final int MINOR_VERSION = 0;
+
+    /** The Constant IPC_OS. */
+    static final String IPC_OS = "IPC_OS";
 
 }
