@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
 
 import com.impetus.blkch.sql.query.Column;
@@ -43,7 +42,7 @@ import com.impetus.eth.parser.Utils;
  */
 public class BlockResultDataHandler implements DataHandler
 {
-    
+
     /** The Constant LOGGER. */
     private static final Logger LOGGER = LoggerFactory.getLogger(BlockResultDataHandler.class);
 
@@ -76,9 +75,11 @@ public class BlockResultDataHandler implements DataHandler
     }
 
     /** The return column names map. */
-    public  HashMap<String, Integer> returnColumnNamesMap = new HashMap<>();
+    public HashMap<String, Integer> returnColumnNamesMap = new HashMap<>();
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.impetus.eth.jdbc.DataHandler#getColumnNamesMap()
      */
     public HashMap<String, Integer> getColumnNamesMap()
@@ -87,34 +88,46 @@ public class BlockResultDataHandler implements DataHandler
     }
 
     /** The result. */
-    private   ArrayList<List<Object>> result = new ArrayList<>();
-    
+    private ArrayList<List<Object>> result = new ArrayList<>();
+
     /** The columns initialized. */
     private boolean columnsInitialized = false;
-    
+
     /** The is groupby select. */
-    private boolean isGroupbySelect=false;
-    
-    /* (non-Javadoc)
-     * @see com.impetus.eth.jdbc.DataHandler#convertGroupedDataToObjArray(java.util.List, java.util.List, java.util.List)
+    private boolean isGroupbySelect = false;
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.eth.jdbc.DataHandler#convertGroupedDataToObjArray(java.util
+     * .List, java.util.List, java.util.List)
      */
     @Override
     public ArrayList<List<Object>> convertGroupedDataToObjArray(List rows, List<SelectItem> selItems,
             List<String> groupByCols)
     {
-        isGroupbySelect=true;
-        Map<Object, List<Object>> groupedData=((List<Object>)rows).stream().collect(Collectors.groupingBy(blockInfo->groupByCols.stream().map(column->Utils.getBlockColumnValue((Block)blockInfo, column)).collect(Collectors.toList()),Collectors.toList()));       
-        for(Entry<Object, List<Object>> entry : groupedData.entrySet()){
-            convertToObjArray((List<Object>) entry.getValue(), selItems);
-       }  
+        isGroupbySelect = true;
+        Map<Object, List<Object>> groupedData = ((List<Object>) rows).stream().collect(
+                Collectors.groupingBy(
+                        blockInfo -> groupByCols.stream()
+                                .map(column -> Utils.getBlockColumnValue((Block) blockInfo, column))
+                                .collect(Collectors.toList()), Collectors.toList()));
+        for (Entry<Object, List<Object>> entry : groupedData.entrySet())
+        {
+            convertToObjArray((List<Object>) entry.getValue(), selItems, null);
+        }
         return result;
     }
-    
-    /* (non-Javadoc)
-     * @see com.impetus.eth.jdbc.DataHandler#convertToObjArray(java.util.List, java.util.List)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.impetus.eth.jdbc.DataHandler#convertToObjArray(java.util.List,
+     * java.util.List)
      */
     @Override
-    public ArrayList<List<Object>> convertToObjArray(List rows, List<SelectItem> selItems)
+    public ArrayList<List<Object>> convertToObjArray(List rows, List<SelectItem> selItems, List<String> extraSelectCols)
     {
         LOGGER.info("Conversion of Block objects to Result set Objects started");
         for (Object record : rows)
@@ -191,9 +204,29 @@ public class BlockResultDataHandler implements DataHandler
                     }
                 }
             }
+            if (!(null == extraSelectCols))
+            {
+
+                for (String extraSelectColumn : extraSelectCols)
+                {
+                    if (!columnsInitialized)
+                    {
+                        if (columnNamesMap.containsKey(extraSelectColumn.toLowerCase()))
+                        {
+                            returnColumnNamesMap.put(extraSelectColumn, returnColumnNamesMap.size());
+                        }
+                        else
+                        {
+                            LOGGER.error("Column " + extraSelectColumn + " doesn't exist in table");
+                            throw new RuntimeException("Column " + extraSelectColumn + " doesn't exist in table");
+                        }
+                    }
+                    returnRec.add(Utils.getBlockColumnValue(blockInfo, extraSelectColumn));
+                }
+            }
             result.add(returnRec);
             columnsInitialized = true;
-            if(isGroupbySelect)
+            if (isGroupbySelect)
                 break;
         }
 
@@ -212,7 +245,5 @@ public class BlockResultDataHandler implements DataHandler
 
         return "blocks";
     }
-
-   
 
 }

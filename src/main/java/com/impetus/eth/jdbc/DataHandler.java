@@ -37,7 +37,7 @@ public interface DataHandler
      * @param selItems the sel items
      * @return the array list
      */
-    public ArrayList<List<Object>> convertToObjArray(List rows, List<SelectItem> selItems);
+    public ArrayList<List<Object>> convertToObjArray(List rows, List<SelectItem> selItems,List<String> extraSelectCols);
 
     /**
      * Gets the table name.

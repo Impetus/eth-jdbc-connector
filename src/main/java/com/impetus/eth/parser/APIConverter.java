@@ -41,6 +41,9 @@ import com.impetus.blkch.sql.query.GroupByClause;
 import com.impetus.blkch.sql.query.IdentifierNode;
 import com.impetus.blkch.sql.query.LimitClause;
 import com.impetus.blkch.sql.query.LogicalOperation;
+import com.impetus.blkch.sql.query.OrderByClause;
+import com.impetus.blkch.sql.query.OrderItem;
+import com.impetus.blkch.sql.query.OrderingDirection;
 import com.impetus.blkch.sql.query.SelectClause;
 import com.impetus.blkch.sql.query.SelectItem;
 import com.impetus.blkch.sql.query.Table;
@@ -68,6 +71,10 @@ public class APIConverter
     private List<SelectItem> selectItems = new ArrayList<>();
 
     private List<String> selectColumns = new ArrayList<String>();
+
+    private List<String> extraSelectCols = new ArrayList<String>();
+
+    private Map<String, OrderingDirection> orderList = new HashMap<>();
 
     /** The alias mapping. */
     private Map<String, String> aliasMapping = new HashMap<>();
@@ -143,11 +150,19 @@ public class APIConverter
         }
         List<?> recordList = getFromTable(tableName);
         DataFrame dataframe;
+        List<OrderItem> orderItems = null;
+        if (logicalPlan.getQuery().hasChildType(OrderByClause.class))
+        {
+            OrderByClause orderByClause = logicalPlan.getQuery().getChildType(OrderByClause.class, 0);
+            orderItems = orderByClause.getChildType(OrderItem.class);
+            getorderList(orderItems,selectColumns);
+        }
         LimitClause limitClause = null;
         if (logicalPlan.getQuery().hasChildType(LimitClause.class))
         {
             limitClause = logicalPlan.getQuery().getChildType(LimitClause.class, 0);
         }
+
         if (logicalPlan.getQuery().hasChildType(GroupByClause.class))
         {
             GroupByClause groupByClause = logicalPlan.getQuery().getChildType(GroupByClause.class, 0);
@@ -158,6 +173,12 @@ public class APIConverter
             data = dataHandler.convertGroupedDataToObjArray(recordList, selectItems, groupByCols);
             columnNamesMap = dataHandler.getColumnNamesMap();
             dataframe = new DataFrame(data, columnNamesMap, aliasMapping, tableName);
+            if (!(orderItems == null))
+            {
+                Utils.verifyGroupedOrderByColumns(groupByCols, extraSelectCols);
+                dataframe= dataframe.order(orderList, null);
+            }
+
             if (limitClause == null)
             {
                 return dataframe;
@@ -167,9 +188,14 @@ public class APIConverter
                 return dataframe.limit(limitClause);
             }
         }
-        data = dataHandler.convertToObjArray(recordList, selectItems);
+        data = dataHandler.convertToObjArray(recordList, selectItems, extraSelectCols);
         columnNamesMap = dataHandler.getColumnNamesMap();
         dataframe = new DataFrame(data, columnNamesMap, aliasMapping, tableName);
+        if (!(orderItems == null))
+        {
+           
+            dataframe= dataframe.order(orderList, extraSelectCols);
+        }
         if (limitClause == null)
         {
             return dataframe;
@@ -502,4 +528,17 @@ public class APIConverter
         return transaction;
     }
 
+    public void getorderList(List<OrderItem> orderItems,List<String> selectColumns)
+    {
+
+        for (OrderItem orderItem : orderItems)
+        {
+            OrderingDirection direction = orderItem.getChildType(OrderingDirection.class, 0);
+            String col = orderItem.getChildType(Column.class, 0).getChildType(IdentifierNode.class, 0).getValue();
+            orderList.put(col, direction);
+            if(!selectColumns.contains(orderItem))
+                extraSelectCols.add(col);
+
+        }
+    }
 }

@@ -15,10 +15,14 @@
  ******************************************************************************/
 package com.impetus.eth.parser;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
+
+import com.impetus.blkch.sql.query.OrderingDirection;
 
 /**
  * The Class Utils.
@@ -93,7 +97,7 @@ public class Utils
         {
             return transInfo.getTo();
         }
-        else if ("tranactionindex".equalsIgnoreCase(colName))
+        else if ("transactionindex".equalsIgnoreCase(colName))
         {
             return transInfo.getTransactionIndex();
         }
@@ -221,6 +225,18 @@ public class Utils
              continue;
          else 
              throw new RuntimeException("Select column " + selectColumn + " should exist in group by clause");
+     }
+ }
+ 
+ public static void  verifyGroupedOrderByColumns(List<String> groupByCols,List<String> orderByCols){
+     
+
+     for(String orderByCol: orderByCols){
+         
+         if (groupByCols.contains(orderByCol))
+             continue;
+         else 
+             throw new RuntimeException("OrderBy column " + orderByCol + " should exist in group by clause");
      }
  }
 }

@@ -62,13 +62,13 @@ public class TransactionResultDataHandler implements DataHandler
         columnNamesMap.put("raw", 11);
         columnNamesMap.put("s", 12);
         columnNamesMap.put("to", 13);
-        columnNamesMap.put("tranactionindex", 14);
+        columnNamesMap.put("transactionindex", 14);
         columnNamesMap.put("v", 15);
         columnNamesMap.put("value", 16);
     }
 
     /** The return column names map. */
-    public  HashMap<String, Integer> returnColumnNamesMap = new HashMap<>();
+    public HashMap<String, Integer> returnColumnNamesMap = new HashMap<>();
 
     /*
      * (non-Javadoc)
@@ -79,31 +79,39 @@ public class TransactionResultDataHandler implements DataHandler
     {
         return returnColumnNamesMap;
     }
-    
+
     /** The result. */
-    private   ArrayList<List<Object>> result = new ArrayList<>();
-    
+    private ArrayList<List<Object>> result = new ArrayList<>();
+
     /** The columns initialized. */
     private boolean columnsInitialized = false;
-    
+
     /** The is groupby select. */
-    private boolean isGroupbySelect=false;
-    
-    /* (non-Javadoc)
-     * @see com.impetus.eth.jdbc.DataHandler#convertGroupedDataToObjArray(java.util.List, java.util.List, java.util.List)
+    private boolean isGroupbySelect = false;
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.impetus.eth.jdbc.DataHandler#convertGroupedDataToObjArray(java.util
+     * .List, java.util.List, java.util.List)
      */
     @Override
     public ArrayList<List<Object>> convertGroupedDataToObjArray(List rows, List<SelectItem> selItems,
             List<String> groupByCols)
     {
-        isGroupbySelect=true;
-        Map<Object, List<Object>> groupedData=((List<Object>)rows).stream().collect(Collectors.groupingBy(transInfo->groupByCols.stream().map(column->Utils.getTransactionColumnValue((Transaction)transInfo, column)).collect(Collectors.toList()),Collectors.toList()));       
-        for(Entry<Object, List<Object>> entry : groupedData.entrySet()){
-            convertToObjArray((List<Object>) entry.getValue(), selItems);
-       }  
+        isGroupbySelect = true;
+        Map<Object, List<Object>> groupedData = ((List<Object>) rows).stream().collect(
+                Collectors.groupingBy(
+                        transInfo -> groupByCols.stream()
+                                .map(column -> Utils.getTransactionColumnValue((Transaction) transInfo, column))
+                                .collect(Collectors.toList()), Collectors.toList()));
+        for (Entry<Object, List<Object>> entry : groupedData.entrySet())
+        {
+            convertToObjArray((List<Object>) entry.getValue(), selItems, null);
+        }
         return result;
     }
-
 
     /*
      * (non-Javadoc)
@@ -111,11 +119,11 @@ public class TransactionResultDataHandler implements DataHandler
      * @see com.impetus.eth.jdbc.DataHandler#convertToObjArray(java.util.List)
      */
     @Override
-    public ArrayList<List<Object>> convertToObjArray(List rows, List<SelectItem> selItems)
+    public ArrayList<List<Object>> convertToObjArray(List rows, List<SelectItem> selItems, List<String> extraSelectCols)
     {
 
         LOGGER.info("Conversion of transaction objects to Result set Objects started");
-       
+
         for (Object record : rows)
         {
             Transaction transInfo = (Transaction) record;
@@ -187,11 +195,31 @@ public class TransactionResultDataHandler implements DataHandler
                     }
                 }
             }
+            if (!(null == extraSelectCols))
+            {
+
+                for (String extraSelectColumn : extraSelectCols)
+                {
+                    if (!columnsInitialized)
+                    {
+                        if (columnNamesMap.containsKey(extraSelectColumn.toLowerCase()))
+                        {
+                            returnColumnNamesMap.put(extraSelectColumn, returnColumnNamesMap.size());
+                        }
+                        else
+                        {
+                            LOGGER.error("Column " + extraSelectColumn + " doesn't exist in table");
+                            throw new RuntimeException("Column " + extraSelectColumn + " doesn't exist in table");
+                        }
+                    }
+                    returnRec.add(Utils.getTransactionColumnValue(transInfo, extraSelectColumn));
+                }
+            }
             result.add(returnRec);
             columnsInitialized = true;
-          
-            if(isGroupbySelect)
-               break;
+
+            if (isGroupbySelect)
+                break;
         }
 
         LOGGER.info("Conversion completed. Returning ..");
@@ -210,5 +238,4 @@ public class TransactionResultDataHandler implements DataHandler
         return "transactions";
     }
 
-   
 }

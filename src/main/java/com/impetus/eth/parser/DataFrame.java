@@ -15,13 +15,19 @@
  ******************************************************************************/
 package com.impetus.eth.parser;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.impetus.blkch.sql.query.Column;
 import com.impetus.blkch.sql.query.IdentifierNode;
 import com.impetus.blkch.sql.query.LimitClause;
+import com.impetus.blkch.sql.query.OrderItem;
+import com.impetus.blkch.sql.query.OrderingDirection;
 
 /**
  * The Class DataFrame.
@@ -56,8 +62,8 @@ public class DataFrame
      * @param table
      *            the table
      */
-    public DataFrame(List<List<Object>> data, HashMap<String, Integer> columnNamesMap, Map<String, String> aliasMapping,
-            String table)
+    public DataFrame(List<List<Object>> data, HashMap<String, Integer> columnNamesMap,
+            Map<String, String> aliasMapping, String table)
     {
         this.aliasMapping = aliasMapping;
         this.data = data;
@@ -114,20 +120,84 @@ public class DataFrame
     {
         return columnNamesMap;
     }
-    
-    public DataFrame limit(LimitClause limitClause) {
+
+    public DataFrame limit(LimitClause limitClause)
+    {
         String limitValue = limitClause.getChildType(IdentifierNode.class, 0).getValue();
         int limit;
-        try {
-        limit = Integer.parseInt(limitValue);
-        } catch (NumberFormatException e) {
-        throw new RuntimeException(e);
+        try
+        {
+            limit = Integer.parseInt(limitValue);
         }
-        if(limit < 0) {
-        throw new RuntimeException("limit value should not be less than zero");
+        catch (NumberFormatException e)
+        {
+            throw new RuntimeException(e);
+        }
+        if (limit < 0)
+        {
+            throw new RuntimeException("limit value should not be less than zero");
         }
         List<List<Object>> limitedData = data.stream().limit(limit).collect(Collectors.toList());
-        return new DataFrame(limitedData,columnNamesMap,aliasMapping,table);
-        }
+        return new DataFrame(limitedData, columnNamesMap, aliasMapping, table);
+    }
 
+    public DataFrame order(Map<String, OrderingDirection> orderList, List<String> extraSelectCols)
+    {
+       
+       // List<List<Object>> sortData = data.stream()
+        //        .map(list -> list.stream().map(obj -> obj).collect(Collectors.toList())).collect(Collectors.toList());
+        Collections.sort(data, new Comparator<List<Object>>()
+        {
+
+            @Override
+            public int compare(List<Object> first, List<Object> second)
+            {
+                for (Map.Entry<String, OrderingDirection> entry : orderList.entrySet())
+                {
+                    int colIndex = columnNamesMap.get(entry.getKey());
+                    Object firstObject = first.get(colIndex);
+                    Object secondObject = second.get(colIndex);
+                    if (firstObject.equals(secondObject))
+                    {
+                        continue;
+                    }
+                    OrderingDirection direction = entry.getValue();
+                    int diff;
+                    if (firstObject instanceof Integer)
+                    {
+                        diff = (((Integer) firstObject) - ((Integer) secondObject)) < 0 ? -1 : +1;
+                    }
+                    else if (firstObject instanceof Long)
+                    {
+                        diff = (((Long) firstObject) - ((Long) secondObject)) < 0 ? -1 : +1;
+                    }
+                    else if (firstObject instanceof Double)
+                    {
+                        diff = (((Double) firstObject) - ((Double) secondObject)) < 0.0 ? -1 : +1;
+                    }
+                    else if (firstObject instanceof Date)
+                    {
+                        diff = (((Date) firstObject).getTime() - ((Date) secondObject).getTime()) < 0.0 ? -1 : +1;
+                    }
+                    else
+                    {
+                        diff = firstObject.toString().compareTo(secondObject.toString());
+                    }
+                    return direction.isAsc() ? diff : diff * -1;
+                }
+                return 0;
+            }
+
+        });
+        if(!(null==extraSelectCols)) 
+        for(int i=0;i<data.size();i++)
+        {
+            for(int j=0;j<extraSelectCols.size();j++){
+                data.get(i).remove(data.get(i).size()-1);
+            if(columnNamesMap.containsKey(extraSelectCols.get(j)))
+                columnNamesMap.remove(extraSelectCols.get(j));
+            }
+        }
+        return new DataFrame(data, columnNamesMap, aliasMapping, table);
+    }
 }
