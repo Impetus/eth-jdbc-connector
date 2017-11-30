@@ -536,7 +536,7 @@ public class APIConverter
             OrderingDirection direction = orderItem.getChildType(OrderingDirection.class, 0);
             String col = orderItem.getChildType(Column.class, 0).getChildType(IdentifierNode.class, 0).getValue();
             orderList.put(col, direction);
-            if(!selectColumns.contains(orderItem))
+            if(!selectColumns.contains(col))
                 extraSelectCols.add(col);
 
         }

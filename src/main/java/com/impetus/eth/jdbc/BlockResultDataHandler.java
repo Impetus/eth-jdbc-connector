@@ -139,7 +139,7 @@ public class BlockResultDataHandler implements DataHandler
                 if (col.hasChildType(StarNode.class))
                 {
 
-                    returnRec.add(blockInfo.getNumberRaw());
+                    returnRec.add(blockInfo.getNumber().longValueExact());
                     returnRec.add(blockInfo.getHash());
                     returnRec.add(blockInfo.getParentHash());
                     returnRec.add(blockInfo.getNonceRaw());
@@ -151,12 +151,12 @@ public class BlockResultDataHandler implements DataHandler
                     returnRec.add(blockInfo.getAuthor());
                     returnRec.add(blockInfo.getMiner());
                     returnRec.add(blockInfo.getMixHash());
-                    returnRec.add(blockInfo.getTotalDifficultyRaw());
+                    returnRec.add(blockInfo.getTotalDifficulty().longValueExact());
                     returnRec.add(blockInfo.getExtraData());
-                    returnRec.add(blockInfo.getSizeRaw());
-                    returnRec.add(blockInfo.getGasLimitRaw());
-                    returnRec.add(blockInfo.getGasUsedRaw());
-                    returnRec.add(blockInfo.getTimestampRaw());
+                    returnRec.add(blockInfo.getSize().longValueExact());
+                    returnRec.add(blockInfo.getGasLimit().longValueExact());
+                    returnRec.add(blockInfo.getGasUsed().longValueExact());
+                    returnRec.add(blockInfo.getTimestamp().longValueExact());
                     returnRec.add(blockInfo.getTransactions());
                     returnRec.add(blockInfo.getUncles());
                     returnRec.add(blockInfo.getSealFields());

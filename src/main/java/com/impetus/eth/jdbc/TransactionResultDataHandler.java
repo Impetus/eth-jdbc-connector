@@ -134,22 +134,22 @@ public class TransactionResultDataHandler implements DataHandler
                 {
 
                     returnRec.add(transInfo.getBlockHash());
-                    returnRec.add(transInfo.getBlockNumberRaw());
+                    returnRec.add(transInfo.getBlockNumber().longValueExact());
                     returnRec.add(transInfo.getCreates());
                     returnRec.add(transInfo.getFrom());
                     returnRec.add(transInfo.getGasRaw());
-                    returnRec.add(transInfo.getGasPriceRaw());
+                    returnRec.add(transInfo.getGasPrice().longValueExact());
                     returnRec.add(transInfo.getHash());
                     returnRec.add(transInfo.getInput());
-                    returnRec.add(transInfo.getNonceRaw());
+                    returnRec.add(transInfo.getNonce().longValueExact());
                     returnRec.add(transInfo.getPublicKey());
                     returnRec.add(transInfo.getR());
                     returnRec.add(transInfo.getRaw());
                     returnRec.add(transInfo.getS());
                     returnRec.add(transInfo.getTo());
-                    returnRec.add(transInfo.getTransactionIndexRaw());
+                    returnRec.add(transInfo.getTransactionIndex().longValueExact());
                     returnRec.add(transInfo.getV());
-                    returnRec.add(transInfo.getValueRaw());
+                    returnRec.add(transInfo.getValue().toString());
                     if (!columnsInitialized)
                     {
                         returnColumnNamesMap = columnNamesMap;

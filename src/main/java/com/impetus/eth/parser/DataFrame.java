@@ -143,9 +143,6 @@ public class DataFrame
 
     public DataFrame order(Map<String, OrderingDirection> orderList, List<String> extraSelectCols)
     {
-       
-       // List<List<Object>> sortData = data.stream()
-        //        .map(list -> list.stream().map(obj -> obj).collect(Collectors.toList())).collect(Collectors.toList());
         Collections.sort(data, new Comparator<List<Object>>()
         {
 

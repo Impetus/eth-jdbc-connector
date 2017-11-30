@@ -15,14 +15,11 @@
  ******************************************************************************/
 package com.impetus.eth.parser;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
 
-import com.impetus.blkch.sql.query.OrderingDirection;
 
 /**
  * The Class Utils.
@@ -47,7 +44,7 @@ public class Utils
         }
         else if ("blocknumber".equalsIgnoreCase(colName))
         {
-            return transInfo.getBlockNumberRaw();
+            return transInfo.getBlockNumber().longValueExact();
         }
         else if ("creates".equalsIgnoreCase(colName))
         {
@@ -59,11 +56,11 @@ public class Utils
         }
         else if ("gas".equalsIgnoreCase(colName))
         {
-            return transInfo.getGasRaw();
+            return transInfo.getGas().longValueExact();
         }
         else if ("gasprice".equalsIgnoreCase(colName))
         {
-            return transInfo.getGasPriceRaw();
+            return transInfo.getGasPrice().longValueExact();
         }
         else if ("hash".equalsIgnoreCase(colName))
         {
@@ -75,7 +72,7 @@ public class Utils
         }
         else if ("nonce".equalsIgnoreCase(colName))
         {
-            return transInfo.getNonceRaw();
+            return transInfo.getNonce().longValueExact();
         }
         else if ("publickey".equalsIgnoreCase(colName))
         {
@@ -99,7 +96,7 @@ public class Utils
         }
         else if ("transactionindex".equalsIgnoreCase(colName))
         {
-            return transInfo.getTransactionIndex();
+            return transInfo.getTransactionIndex().longValueExact();
         }
         else if ("v".equalsIgnoreCase(colName))
         {
@@ -107,7 +104,7 @@ public class Utils
         }
         else if ("value".equalsIgnoreCase(colName))
         {
-            return transInfo.getValueRaw();
+            return transInfo.getValue().toString();
         }
         else
         {
@@ -128,7 +125,7 @@ public class Utils
     {
         if ("blocknumber".equalsIgnoreCase(colName))
         {
-            return blockInfo.getNumberRaw();
+            return blockInfo.getNumber().longValueExact();
         }
         else if ("hash".equalsIgnoreCase(colName))
         {
@@ -140,7 +137,7 @@ public class Utils
         }
         else if ("nonce".equalsIgnoreCase(colName))
         {
-            return blockInfo.getNonceRaw();
+            return blockInfo.getNonce().longValueExact();
         }
         else if ("sha3uncles".equalsIgnoreCase(colName))
         {
@@ -176,7 +173,7 @@ public class Utils
         }
         else if ("totaldifficulty".equalsIgnoreCase(colName))
         {
-            return blockInfo.getTotalDifficultyRaw();
+            return blockInfo.getTotalDifficulty().longValueExact();
         }
         else if ("extradata".equalsIgnoreCase(colName))
         {
@@ -184,19 +181,19 @@ public class Utils
         }
         else if ("size".equalsIgnoreCase(colName))
         {
-            return blockInfo.getSizeRaw();
+            return blockInfo.getSize().longValueExact();
         }
         else if ("gaslimit".equalsIgnoreCase(colName))
         {
-            return blockInfo.getGasLimitRaw();
+            return blockInfo.getGasLimit().longValueExact();
         }
         else if ("gasused".equalsIgnoreCase(colName))
         {
-            return blockInfo.getGasUsedRaw();
+            return blockInfo.getGasUsed().longValueExact();
         }
         else if ("timestamp".equalsIgnoreCase(colName))
         {
-            return blockInfo.getTimestampRaw();
+            return blockInfo.getTimestamp().longValueExact();
         }
         else if ("transactions".equalsIgnoreCase(colName))
         {
