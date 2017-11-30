@@ -39,6 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.protocol.ipc.UnixIpcService;
+import org.web3j.protocol.ipc.WindowsIpcService;
 
 import com.impetus.blkch.jdbc.BlkchnConnection;
 
@@ -50,7 +52,7 @@ import com.impetus.blkch.jdbc.BlkchnConnection;
  */
 public class EthConnection implements BlkchnConnection
 {
-    
+
     /** The Constant LOGGER. */
     private static final Logger LOGGER = LoggerFactory.getLogger(EthConnection.class);
 
@@ -116,19 +118,40 @@ public class EthConnection implements BlkchnConnection
     /**
      * Instantiates a new eth connection.
      *
-     * @param url            the url
-     * @param props            the props
-     * @throws SQLException the SQL exception
+     * @param url
+     *            the url
+     * @param props
+     *            the props
+     * @throws SQLException
+     *             the SQL exception
      */
     public EthConnection(String url, Properties props) throws SQLException
     {
         super();
         this.url = url;
         this.props = props;
-        String httpUrl = DriverConstants.HTTPPREFIX + props.getProperty(DriverConstants.HOSTNAME)
-                + DriverConstants.COLON + props.getProperty(DriverConstants.PORTNUMBER);
-        LOGGER.info("Connecting to ethereum with rpcurl : " + httpUrl);
-        web3jClient = Web3j.build(new HttpService(httpUrl));
+        
+        if (props.getProperty(DriverConstants.IPC) != null)
+        {
+            String path  = props.getProperty(DriverConstants.IPC);
+            if (props.getProperty(DriverConstants.IPC_OS) != null)
+            {
+                LOGGER.info("Connecting to ethereum with ipc file on windows location : " + path);
+                web3jClient = Web3j.build(new WindowsIpcService(path));
+            }
+            else
+            {
+                LOGGER.info("Connecting to ethereum with ipc file on unix location : " + path);
+                web3jClient = Web3j.build(new UnixIpcService(path));
+            }
+        }
+        else
+        {
+            String httpUrl = DriverConstants.HTTPPREFIX + props.getProperty(DriverConstants.HOSTNAME)
+                    + DriverConstants.COLON + props.getProperty(DriverConstants.PORTNUMBER);
+            LOGGER.info("Connecting to ethereum with rpcurl : " + httpUrl);
+            web3jClient = Web3j.build(new HttpService(httpUrl));
+        }
         verifyConnection();
         LOGGER.info("Connected to ethereum ");
     }
@@ -786,7 +809,8 @@ public class EthConnection implements BlkchnConnection
     /**
      * Verify connection.
      *
-     * @throws SQLException the SQL exception
+     * @throws SQLException
+     *             the SQL exception
      */
     protected void verifyConnection() throws SQLException
     {

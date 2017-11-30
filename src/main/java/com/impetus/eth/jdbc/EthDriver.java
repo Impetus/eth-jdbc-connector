@@ -176,6 +176,18 @@ public class EthDriver implements BlkchnDriver
         {
             return null;
         }
+        // connecting with ipc file
+        if (url.contains(".ipc"))
+        {
+            String path = url.substring(23);
+            props.setProperty(DriverConstants.IPC, path);
+            if (path.indexOf(DriverConstants.COLON) > 0)
+            {
+                props.setProperty(DriverConstants.IPC_OS, "windows");
+            }
+            
+            return props;
+        }
 
         index = nextColonIndex(url, index, token);
         index = nextColonIndex(url, index, token);
