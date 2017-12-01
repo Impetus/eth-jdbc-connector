@@ -151,7 +151,14 @@ public class DataFrame
             {
                 for (Map.Entry<String, OrderingDirection> entry : orderList.entrySet())
                 {
-                    int colIndex = columnNamesMap.get(entry.getKey());
+                    int colIndex;
+                    if (!columnNamesMap.containsKey(entry.getKey()))
+                    {
+                      colIndex=columnNamesMap.get(aliasMapping.get(entry.getKey()));
+                    }
+                    else
+                        colIndex = columnNamesMap.get(entry.getKey());
+
                     Object firstObject = first.get(colIndex);
                     Object secondObject = second.get(colIndex);
                     if (firstObject.equals(secondObject))
@@ -186,15 +193,16 @@ public class DataFrame
             }
 
         });
-        if(!(null==extraSelectCols)) 
-        for(int i=0;i<data.size();i++)
-        {
-            for(int j=0;j<extraSelectCols.size();j++){
-                data.get(i).remove(data.get(i).size()-1);
-            if(columnNamesMap.containsKey(extraSelectCols.get(j)))
-                columnNamesMap.remove(extraSelectCols.get(j));
+        if (!(null == extraSelectCols))
+            for (int i = 0; i < data.size(); i++)
+            {
+                for (int j = 0; j < extraSelectCols.size(); j++)
+                {
+                    data.get(i).remove(data.get(i).size() - 1);
+                    if (columnNamesMap.containsKey(extraSelectCols.get(j)))
+                        columnNamesMap.remove(extraSelectCols.get(j));
+                }
             }
-        }
         return new DataFrame(data, columnNamesMap, aliasMapping, table);
     }
 }

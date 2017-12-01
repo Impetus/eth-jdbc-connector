@@ -37,6 +37,7 @@ import com.impetus.blkch.sql.parser.LogicalPlan;
 import com.impetus.blkch.sql.query.Column;
 import com.impetus.blkch.sql.query.FilterItem;
 import com.impetus.blkch.sql.query.FromItem;
+import com.impetus.blkch.sql.query.FunctionNode;
 import com.impetus.blkch.sql.query.GroupByClause;
 import com.impetus.blkch.sql.query.IdentifierNode;
 import com.impetus.blkch.sql.query.LimitClause;
@@ -120,6 +121,28 @@ public class APIConverter
                         aliasMapping.put(alias, colName);
                     }
                 }
+
+            }
+            else if (selItem.hasChildType(FunctionNode.class))
+            {
+                String colName;
+                Function func = new Function();
+                colName = func.createFunctionColName(selItem.getChildType(FunctionNode.class, 0));
+                if (selItem.hasChildType(IdentifierNode.class))
+                {
+
+                    String alias = selItem.getChildType(IdentifierNode.class, 0).getValue();
+
+                    if (aliasMapping.containsKey(alias))
+                    {
+                        throw new RuntimeException("Alias " + alias + " is ambiguous");
+                    }
+                    else
+                    {
+                        aliasMapping.put(alias, colName);
+                    }
+
+                }
             }
         }
     }
@@ -155,7 +178,7 @@ public class APIConverter
         {
             OrderByClause orderByClause = logicalPlan.getQuery().getChildType(OrderByClause.class, 0);
             orderItems = orderByClause.getChildType(OrderItem.class);
-            getorderList(orderItems,selectColumns);
+            getorderList(orderItems);
         }
         LimitClause limitClause = null;
         if (logicalPlan.getQuery().hasChildType(LimitClause.class))
@@ -176,7 +199,7 @@ public class APIConverter
             if (!(orderItems == null))
             {
                 Utils.verifyGroupedOrderByColumns(groupByCols, extraSelectCols);
-                dataframe= dataframe.order(orderList, null);
+                dataframe = dataframe.order(orderList, null);
             }
 
             if (limitClause == null)
@@ -193,8 +216,8 @@ public class APIConverter
         dataframe = new DataFrame(data, columnNamesMap, aliasMapping, tableName);
         if (!(orderItems == null))
         {
-           
-            dataframe= dataframe.order(orderList, extraSelectCols);
+
+            dataframe = dataframe.order(orderList, extraSelectCols);
         }
         if (limitClause == null)
         {
@@ -528,7 +551,7 @@ public class APIConverter
         return transaction;
     }
 
-    public void getorderList(List<OrderItem> orderItems,List<String> selectColumns)
+    public void getorderList(List<OrderItem> orderItems)
     {
 
         for (OrderItem orderItem : orderItems)
@@ -536,7 +559,8 @@ public class APIConverter
             OrderingDirection direction = orderItem.getChildType(OrderingDirection.class, 0);
             String col = orderItem.getChildType(Column.class, 0).getChildType(IdentifierNode.class, 0).getValue();
             orderList.put(col, direction);
-            if(!selectColumns.contains(col))
+
+            if (!selectColumns.contains(col) && !aliasMapping.containsKey(col))
                 extraSelectCols.add(col);
 
         }

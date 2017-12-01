@@ -179,19 +179,12 @@ public class TransactionResultDataHandler implements DataHandler
                     Function computFunc = new Function(rows, columnNamesMap, getTableName());
                     Object computeResult = computFunc.computeFunction(col.getChildType(FunctionNode.class, 0));
                     returnRec.add(computeResult);
-                    if (col.hasChildType(IdentifierNode.class))
+                    if (!columnsInitialized)
                     {
-                        if (!columnsInitialized)
-                        {
-                            returnColumnNamesMap.put(col.getChildType(IdentifierNode.class, 0).getValue(),
+                        returnColumnNamesMap.put(computFunc.createFunctionColName(col.getChildType(FunctionNode.class, 0)),
                                     returnColumnNamesMap.size());
-                        }
-                    }
-                    else if (!columnsInitialized)
-                    {
-                        returnColumnNamesMap.put(
-                                computFunc.createFunctionColName(col.getChildType(FunctionNode.class, 0)),
-                                returnColumnNamesMap.size());
+                       
+                       
                     }
                 }
             }
