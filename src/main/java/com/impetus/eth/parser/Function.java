@@ -41,6 +41,9 @@ public class Function
     /** The table. */
     private String table;
 
+    /**
+     * Instantiates a new function.
+     */
     public Function(){
         
     }

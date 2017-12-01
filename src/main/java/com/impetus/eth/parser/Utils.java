@@ -16,6 +16,7 @@
 package com.impetus.eth.parser;
 
 import java.util.List;
+import java.util.Map;
 
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
@@ -214,26 +215,40 @@ public class Utils
     }
     
     
- public static void verifyGroupedColumns(List<String> columns, List<String> groupedColumns){
+ /**
+  * Verify grouped columns.
+  *
+  * @param selectColumns the select columns
+  * @param groupedColumns the grouped columns
+  * @param aliasMapping the alias mapping
+  */
+ public static void verifyGroupedColumns(List<String> selectColumns, List<String> groupedColumns,Map<String,String> aliasMapping){
 
-     for(String selectColumn: columns){
+     for(String groupByColumn: groupedColumns){
          
-         if (groupedColumns.contains(selectColumn))
+         if (selectColumns.contains(groupByColumn)||aliasMapping.containsKey(groupByColumn))
              continue;
          else 
-             throw new RuntimeException("Select column " + selectColumn + " should exist in group by clause");
+             throw new RuntimeException("Group by Column " + groupByColumn + " should exist in Select clause");
      }
  }
  
- public static void  verifyGroupedOrderByColumns(List<String> groupByCols,List<String> orderByCols){
-     
-
-     for(String orderByCol: orderByCols){
-         
-         if (groupByCols.contains(orderByCol))
-             continue;
-         else 
-             throw new RuntimeException("OrderBy column " + orderByCol + " should exist in group by clause");
-     }
- }
+/**
+ * Gets the actual group by cols.
+ *
+ * @param groupByCols the group by cols
+ * @param aliasMapping the alias mapping
+ * @return the actual group by cols
+ */
+public static List<String> getActualGroupByCols(List<String> groupByCols, Map<String, String> aliasMapping){
+   for(int i=0;i<groupByCols.size();i++){
+       
+       if(aliasMapping.containsKey(groupByCols.get(i)))
+               groupByCols.set(i, aliasMapping.get(groupByCols.get(i)));
+       else 
+           continue;
+       
+       }
+   return groupByCols;
+}
 }

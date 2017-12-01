@@ -35,6 +35,7 @@ public interface DataHandler
      *
      * @param rows            the rows
      * @param selItems the sel items
+     * @param extraSelectCols the extra select cols
      * @return the array list
      */
     public ArrayList<List<Object>> convertToObjArray(List rows, List<SelectItem> selItems,List<String> extraSelectCols);

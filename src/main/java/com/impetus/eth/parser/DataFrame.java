@@ -121,6 +121,12 @@ public class DataFrame
         return columnNamesMap;
     }
 
+    /**
+     * Limit.
+     *
+     * @param limitClause the limit clause
+     * @return the data frame
+     */
     public DataFrame limit(LimitClause limitClause)
     {
         String limitValue = limitClause.getChildType(IdentifierNode.class, 0).getValue();
@@ -141,6 +147,13 @@ public class DataFrame
         return new DataFrame(limitedData, columnNamesMap, aliasMapping, table);
     }
 
+    /**
+     * Order.
+     *
+     * @param orderList the order list
+     * @param extraSelectCols the extra select cols
+     * @return the data frame
+     */
     public DataFrame order(Map<String, OrderingDirection> orderList, List<String> extraSelectCols)
     {
         Collections.sort(data, new Comparator<List<Object>>()

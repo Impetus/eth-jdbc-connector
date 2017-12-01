@@ -71,10 +71,13 @@ public class APIConverter
     /** The select items. */
     private List<SelectItem> selectItems = new ArrayList<>();
 
+    /** The select columns. */
     private List<String> selectColumns = new ArrayList<String>();
 
+    /** The extra select cols. */
     private List<String> extraSelectCols = new ArrayList<String>();
 
+    /** The order list. */
     private Map<String, OrderingDirection> orderList = new HashMap<>();
 
     /** The alias mapping. */
@@ -192,14 +195,26 @@ public class APIConverter
             List<Column> groupColumns = groupByClause.getChildType(Column.class);
             List<String> groupByCols = groupColumns.stream()
                     .map(col -> col.getChildType(IdentifierNode.class, 0).getValue()).collect(Collectors.toList());
-            Utils.verifyGroupedColumns(selectColumns, groupByCols);
+            if (!aliasMapping.isEmpty())
+            {
+                groupByCols = Utils.getActualGroupByCols(groupByCols, aliasMapping);
+            }
+            Utils.verifyGroupedColumns(selectColumns, groupByCols, aliasMapping);
+
             data = dataHandler.convertGroupedDataToObjArray(recordList, selectItems, groupByCols);
             columnNamesMap = dataHandler.getColumnNamesMap();
             dataframe = new DataFrame(data, columnNamesMap, aliasMapping, tableName);
             if (!(orderItems == null))
             {
-                Utils.verifyGroupedOrderByColumns(groupByCols, extraSelectCols);
-                dataframe = dataframe.order(orderList, null);
+                if (extraSelectCols.isEmpty())
+                {
+                    dataframe = dataframe.order(orderList, null);
+                }
+                else
+                {
+                    throw new RuntimeException("order by column(s) "
+                            + extraSelectCols.toString().replace("[", "").replace("]", "") + " are not valid to use ");
+                }
             }
 
             if (limitClause == null)
@@ -233,7 +248,7 @@ public class APIConverter
      * Gets the from table.
      *
      * @param <T>
-     *            the generic type
+     *            the generic type.r
      * @param tableName
      *            the table name
      * @return the from table
@@ -551,6 +566,12 @@ public class APIConverter
         return transaction;
     }
 
+    /**
+     * Gets the order list.
+     *
+     * @param orderItems the order items
+     * @return the order list
+     */
     public void getorderList(List<OrderItem> orderItems)
     {
 
