@@ -23,10 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.impetus.blkch.sql.query.Column;
 import com.impetus.blkch.sql.query.IdentifierNode;
 import com.impetus.blkch.sql.query.LimitClause;
-import com.impetus.blkch.sql.query.OrderItem;
 import com.impetus.blkch.sql.query.OrderingDirection;
 
 /**
@@ -37,9 +35,6 @@ public class DataFrame
 
     /** The table. */
     private String table;
-
-    /** The columns. */
-    private List<String> columns;
 
     /** The alias mapping. */
     private Map<String, String> aliasMapping;
@@ -69,16 +64,6 @@ public class DataFrame
         this.data = data;
         this.columnNamesMap = columnNamesMap;
         this.table = table;
-    }
-
-    /**
-     * Gets the columns.
-     *
-     * @return the columns
-     */
-    public List<String> getColumns()
-    {
-        return columns;
     }
 
     /**
@@ -124,7 +109,8 @@ public class DataFrame
     /**
      * Limit.
      *
-     * @param limitClause the limit clause
+     * @param limitClause
+     *            the limit clause
      * @return the data frame
      */
     public DataFrame limit(LimitClause limitClause)
@@ -150,8 +136,10 @@ public class DataFrame
     /**
      * Order.
      *
-     * @param orderList the order list
-     * @param extraSelectCols the extra select cols
+     * @param orderList
+     *            the order list
+     * @param extraSelectCols
+     *            the extra select cols
      * @return the data frame
      */
     public DataFrame order(Map<String, OrderingDirection> orderList, List<String> extraSelectCols)
@@ -167,7 +155,7 @@ public class DataFrame
                     int colIndex;
                     if (!columnNamesMap.containsKey(entry.getKey()))
                     {
-                      colIndex=columnNamesMap.get(aliasMapping.get(entry.getKey()));
+                        colIndex = columnNamesMap.get(aliasMapping.get(entry.getKey()));
                     }
                     else
                         colIndex = columnNamesMap.get(entry.getKey());
