@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -35,10 +36,12 @@ import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult;
 
 import com.impetus.blkch.sql.parser.LogicalPlan;
 import com.impetus.blkch.sql.query.Column;
+import com.impetus.blkch.sql.query.Comparator;
 import com.impetus.blkch.sql.query.FilterItem;
 import com.impetus.blkch.sql.query.FromItem;
 import com.impetus.blkch.sql.query.FunctionNode;
 import com.impetus.blkch.sql.query.GroupByClause;
+import com.impetus.blkch.sql.query.HavingClause;
 import com.impetus.blkch.sql.query.IdentifierNode;
 import com.impetus.blkch.sql.query.LimitClause;
 import com.impetus.blkch.sql.query.LogicalOperation;
@@ -53,6 +56,7 @@ import com.impetus.eth.jdbc.BlockResultDataHandler;
 import com.impetus.eth.jdbc.DataHandler;
 import com.impetus.eth.jdbc.TransactionResultDataHandler;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class APIConverter.
  */
@@ -204,6 +208,10 @@ public class APIConverter
             data = dataHandler.convertGroupedDataToObjArray(recordList, selectItems, groupByCols);
             columnNamesMap = dataHandler.getColumnNamesMap();
             dataframe = new DataFrame(data, columnNamesMap, aliasMapping, tableName);
+
+            // apply having on grouped data
+            dataframe = performHaving(dataframe, groupByCols);
+
             if (!(orderItems == null))
             {
                 if (extraSelectCols.isEmpty())
@@ -567,9 +575,220 @@ public class APIConverter
     }
 
     /**
+     * Perform having.
+     *
+     * @param dataframe
+     *            the dataframe
+     * @param groupByCols
+     *            the group by cols
+     * @return the data frame
+     */
+    private DataFrame performHaving(DataFrame dataframe, List<String> groupByCols)
+    {
+        if (logicalPlan.getQuery().hasChildType(HavingClause.class))
+        {
+            HavingClause havingClause = logicalPlan.getQuery().getChildType(HavingClause.class, 0);
+            if (havingClause.hasChildType(FilterItem.class))
+            {
+                dataframe = executeSingleHavingClause(havingClause.getChildType(FilterItem.class, 0), dataframe,
+                        groupByCols);
+            }
+            else
+            {
+                dataframe = executeMultipleHavingClause(havingClause.getChildType(LogicalOperation.class, 0),
+                        dataframe, groupByCols);
+            }
+        }
+        return dataframe;
+    }
+
+    /**
+     * Execute single having clause.
+     *
+     * @param filterItem
+     *            the filter item
+     * @param dataframe
+     *            the dataframe
+     * @param groupByCols
+     *            the group by cols
+     * @return the data frame
+     */
+    private DataFrame executeSingleHavingClause(FilterItem filterItem, DataFrame dataframe, List<String> groupByCols)
+    {
+        String column = filterItem.getChildType(Column.class, 0).getChildType(IdentifierNode.class, 0).getValue();
+        Comparator comparator = filterItem.getChildType(Comparator.class, 0);
+        String value = filterItem.getChildType(IdentifierNode.class, 0).getValue().replace("'", "");
+        int groupIdx = -1;
+        boolean invalidFilterCol = false;
+        Set<String> columns = dataframe.getColumnNamesMap().keySet();
+        if (columns.contains(column))
+        {
+            if (!groupByCols.contains(column))
+            {
+                invalidFilterCol = true;
+            }
+            else
+            {
+                groupIdx = columnNamesMap.get(column);
+            }
+        }
+        else if (aliasMapping.containsKey(column))
+        {
+            if (!groupByCols.contains(columns.contains(aliasMapping.get(column))))
+            {
+                invalidFilterCol = true;
+            }
+            else
+            {
+                groupIdx = columnNamesMap.get(aliasMapping.get(column));
+            }
+        }
+        else
+        {
+            invalidFilterCol = true;
+        }
+        if (invalidFilterCol || (groupIdx == -1))
+        {
+            throw new RuntimeException("Column " + column + " must appear in GROUP BY clause");
+        }
+        final int groupIndex = groupIdx;
+        List<List<Object>> filterData = dataframe.getData().stream().filter(entry -> {
+            Object cellValue = entry.get(groupIndex);
+            if (cellValue == null)
+            {
+                return false;
+            }
+            if (cellValue instanceof Number)
+            {
+                Double cell = Double.parseDouble(cellValue.toString());
+                Double doubleValue = Double.parseDouble(value);
+                if (comparator.isEQ())
+                {
+                    return cell.equals(doubleValue);
+                }
+                else if (comparator.isGT())
+                {
+                    return cell > doubleValue;
+                }
+                else if (comparator.isGTE())
+                {
+                    return cell >= doubleValue;
+                }
+                else if (comparator.isLT())
+                {
+                    return cell < doubleValue;
+                }
+                else if (comparator.isLTE())
+                {
+                    return cell <= doubleValue;
+                }
+                else
+                {
+                    return !cell.equals(doubleValue);
+                }
+            }
+            else
+            {
+                int comparisionValue = cellValue.toString().compareTo(value);
+                if (comparator.isEQ())
+                {
+                    return comparisionValue == 0;
+                }
+                else if (comparator.isGT())
+                {
+                    return comparisionValue > 0;
+                }
+                else if (comparator.isGTE())
+                {
+                    return comparisionValue >= 0;
+                }
+                else if (comparator.isLT())
+                {
+                    return comparisionValue < 0;
+                }
+                else if (comparator.isLTE())
+                {
+                    return comparisionValue <= 0;
+                }
+                else
+                {
+                    return comparisionValue != 0;
+                }
+            }
+        }).collect(Collectors.toList());
+
+        return new DataFrame(filterData, columnNamesMap, aliasMapping, dataframe.getTable());
+    }
+
+    /**
+     * Execute multiple having clause.
+     *
+     * @param operation
+     *            the operation
+     * @param dataframe
+     *            the dataframe
+     * @param groupByCols
+     *            the group by cols
+     * @return the data frame
+     */
+    private DataFrame executeMultipleHavingClause(LogicalOperation operation, DataFrame dataframe,
+            List<String> groupByCols)
+    {
+        if (operation.getChildNodes().size() != 2)
+        {
+            throw new RuntimeException("Logical operation should have two boolean expressions");
+        }
+        DataFrame firstOut, secondOut = new DataFrame(new ArrayList<List<Object>>(), columnNamesMap, aliasMapping,
+                dataframe.getTable());
+        List<List<Object>> returnData = new ArrayList<List<Object>>();
+        if (operation.getChildNode(0) instanceof LogicalOperation)
+        {
+            firstOut = executeMultipleHavingClause((LogicalOperation) operation.getChildNode(0), dataframe, groupByCols);
+        }
+        else
+        {
+            FilterItem filterItem = (FilterItem) operation.getChildNode(0);
+            firstOut = executeSingleHavingClause(filterItem, dataframe, groupByCols);
+        }
+        if (operation.getChildNode(1) instanceof LogicalOperation)
+        {
+            secondOut = executeMultipleHavingClause((LogicalOperation) operation.getChildNode(1), dataframe,
+                    groupByCols);
+        }
+        else
+        {
+            FilterItem filterItem = (FilterItem) operation.getChildNode(1);
+            secondOut = executeSingleHavingClause(filterItem, dataframe, groupByCols);
+        }
+        if (operation.isAnd())
+        {
+            for (List<Object> key : firstOut.getData())
+            {
+                if (secondOut.getData().contains(key))
+                {
+                    returnData.add(key);
+                }
+            }
+        }
+        else
+        {
+            returnData.addAll(firstOut.getData());
+            for (List<Object> key : secondOut.getData())
+            {
+                if (!returnData.contains(key))
+                {
+                    returnData.add(key);
+                }
+            }
+        }
+        return new DataFrame(returnData, columnNamesMap, aliasMapping, dataframe.getTable());
+    }
+
+    /**
      * Gets the order list.
      *
-     * @param orderItems the order items
+     * @param orderItems
+     *            the order items
      * @return the order list
      */
     public void getorderList(List<OrderItem> orderItems)
