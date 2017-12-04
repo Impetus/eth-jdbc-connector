@@ -623,7 +623,7 @@ public class APIConverter
         Set<String> columns = dataframe.getColumnNamesMap().keySet();
         if (columns.contains(column))
         {
-            if (!groupByCols.contains(column))
+            if (!columnNamesMap.containsKey(column))
             {
                 invalidFilterCol = true;
             }
@@ -634,7 +634,7 @@ public class APIConverter
         }
         else if (aliasMapping.containsKey(column))
         {
-            if (!groupByCols.contains(columns.contains(aliasMapping.get(column))))
+            if (!columnNamesMap.containsKey(aliasMapping.get(column)))
             {
                 invalidFilterCol = true;
             }
@@ -649,7 +649,7 @@ public class APIConverter
         }
         if (invalidFilterCol || (groupIdx == -1))
         {
-            throw new RuntimeException("Column " + column + " must appear in GROUP BY clause");
+            throw new RuntimeException("Column " + column + " must appear in Select clause");
         }
         final int groupIndex = groupIdx;
         List<List<Object>> filterData = dataframe.getData().stream().filter(entry -> {
