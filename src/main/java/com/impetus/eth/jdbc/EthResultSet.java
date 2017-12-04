@@ -37,7 +37,7 @@ import com.impetus.eth.parser.DataFrame;
  */
 public class EthResultSet extends AbstractResultSet
 {
-    
+
     /** The Constant LOGGER. */
     private static final Logger LOGGER = LoggerFactory.getLogger(EthResultSet.class);
 
@@ -70,18 +70,21 @@ public class EthResultSet extends AbstractResultSet
 
     /** The table name. */
     protected String tableName;
-    
-    protected Map<String,String> aliasMapping;
+
+    /** The alias mapping. */
+    protected Map<String, String> aliasMapping;
 
     /**
      * Instantiates a new eth result set.
      *
-     * @param dataframe the dataframe
-     * @param resultSetType            the result set type
-     * @param rSetConcurrency            the r set concurrency
+     * @param dataframe
+     *            the dataframe
+     * @param resultSetType
+     *            the result set type
+     * @param rSetConcurrency
+     *            the r set concurrency
      */
-    public EthResultSet(DataFrame dataframe, int resultSetType,
-            int rSetConcurrency)
+    public EthResultSet(DataFrame dataframe, int resultSetType, int rSetConcurrency)
     {
         LOGGER.info("Instantiating new Result Set ");
         this.rowData = dataframe.getData();
@@ -89,7 +92,7 @@ public class EthResultSet extends AbstractResultSet
         this.resultSetType = resultSetType;
         this.rSetConcurrency = rSetConcurrency;
         this.tableName = dataframe.getTable();
-        this.aliasMapping=dataframe.getAliasMapping();
+        this.aliasMapping = dataframe.getAliasMapping();
         currentRowCursor = BEFORE_FIRST_ROW;
         totalRowCount = rowData.size();
     }
@@ -526,7 +529,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public ResultSetMetaData getMetaData() throws SQLException
     {
-        return new EthResultSetMetaData(tableName, columnNamesMap,aliasMapping);
+        return new EthResultSetMetaData(tableName, columnNamesMap, aliasMapping);
     }
 
     /*
@@ -557,12 +560,22 @@ public class EthResultSet extends AbstractResultSet
         LOGGER.info("Result set type validation Completed ");
     }
 
-    protected int getColumnIndex(String columnLabel){
-        if(!aliasMapping.isEmpty()&&aliasMapping.containsKey(columnLabel)){
+    /**
+     * Gets the column index.
+     *
+     * @param columnLabel
+     *            the column label
+     * @return the column index
+     */
+    protected int getColumnIndex(String columnLabel)
+    {
+        if (!aliasMapping.isEmpty() && aliasMapping.containsKey(columnLabel))
+        {
             return columnNamesMap.get(aliasMapping.get(columnLabel));
-        }else
+        }
+        else
             return columnNamesMap.get(columnLabel);
-        
+
     }
 
 }

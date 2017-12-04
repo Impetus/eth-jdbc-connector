@@ -48,17 +48,18 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData
     /** The index to column map. */
     private Map<Integer, String> indexToColumnMap = null;
 
+    /** The index to alias map. */
     private Map<Integer, String> indexToAliasMap = null;
 
+    /** The alias mapping. */
     private Map<String, String> aliasMapping;
 
     /**
      * Instantiates a new eth result set meta data.
      *
-     * @param tableName
-     *            the table name
-     * @param columnNamesMap
-     *            the column names map
+     * @param tableName            the table name
+     * @param columnNamesMap            the column names map
+     * @param aliasMapping the alias mapping
      */
     public EthResultSetMetaData(String tableName, HashMap<String, Integer> columnNamesMap,
             Map<String, String> aliasMapping)
@@ -70,6 +71,8 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData
         indexToColumnMap = columnNamesMap.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
         this.aliasMapping = aliasMapping;
+        if (!aliasMapping.isEmpty())
+            setIndexToAlias();
     }
 
     /*
@@ -148,7 +151,6 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData
     {
         if (!aliasMapping.isEmpty())
         {
-            setIndexToAlias();
             return indexToColumnMap.get(column);
         }
         else
@@ -331,6 +333,9 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData
         throw new SQLFeatureNotSupportedException();
     }
 
+    /**
+     * Sets the index to alias.
+     */
     private void setIndexToAlias()
     {
         indexToAliasMap = indexToColumnMap;
