@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +70,8 @@ public class EthResultSet extends AbstractResultSet
 
     /** The table name. */
     protected String tableName;
+    
+    protected Map<String,String> aliasMapping;
 
     /**
      * Instantiates a new eth result set.
@@ -86,6 +89,7 @@ public class EthResultSet extends AbstractResultSet
         this.resultSetType = resultSetType;
         this.rSetConcurrency = rSetConcurrency;
         this.tableName = dataframe.getTable();
+        this.aliasMapping=dataframe.getAliasMapping();
         currentRowCursor = BEFORE_FIRST_ROW;
         totalRowCount = rowData.size();
     }
@@ -279,7 +283,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public String getString(String columnLabel) throws SQLException
     {
-        return (String) currentRow[columnNamesMap.get(columnLabel)];
+        return (String) currentRow[getColumnIndex(columnLabel)];
     }
 
     /*
@@ -301,7 +305,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public Object getObject(String columnLabel) throws SQLException
     {
-        return currentRow[columnNamesMap.get(columnLabel)];
+        return currentRow[getColumnIndex(columnLabel)];
     }
 
     /*
@@ -334,7 +338,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public int getInt(String columnLabel) throws SQLException
     {
-        return (int) currentRow[columnNamesMap.get(columnLabel)];
+        return (int) currentRow[getColumnIndex(columnLabel)];
     }
 
     /*
@@ -356,7 +360,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public long getLong(String columnLabel) throws SQLException
     {
-        return (long) currentRow[columnNamesMap.get(columnLabel)];
+        return (long) currentRow[getColumnIndex(columnLabel)];
     }
 
     /*
@@ -379,7 +383,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public BigDecimal getBigDecimal(String columnLabel) throws SQLException
     {
-        return (BigDecimal) currentRow[columnNamesMap.get(columnLabel)];
+        return (BigDecimal) currentRow[getColumnIndex(columnLabel)];
     }
 
     /*
@@ -401,7 +405,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public boolean getBoolean(String columnLabel) throws SQLException
     {
-        return (boolean) currentRow[columnNamesMap.get(columnLabel)];
+        return (boolean) currentRow[getColumnIndex(columnLabel)];
     }
 
     /*
@@ -423,7 +427,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public byte getByte(String columnLabel) throws SQLException
     {
-        return (byte) currentRow[columnNamesMap.get(columnLabel)];
+        return (byte) currentRow[getColumnIndex(columnLabel)];
     }
 
     /*
@@ -445,7 +449,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public byte[] getBytes(String columnLabel) throws SQLException
     {
-        return (byte[]) currentRow[columnNamesMap.get(columnLabel)];
+        return (byte[]) currentRow[getColumnIndex(columnLabel)];
     }
 
     /*
@@ -467,7 +471,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public double getDouble(String columnLabel) throws SQLException
     {
-        return (double) currentRow[columnNamesMap.get(columnLabel)];
+        return (double) currentRow[getColumnIndex(columnLabel)];
     }
 
     /*
@@ -489,7 +493,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public short getShort(String columnLabel) throws SQLException
     {
-        return (short) currentRow[columnNamesMap.get(columnLabel)];
+        return (short) currentRow[getColumnIndex(columnLabel)];
     }
 
     /*
@@ -522,7 +526,7 @@ public class EthResultSet extends AbstractResultSet
     @Override
     public ResultSetMetaData getMetaData() throws SQLException
     {
-        return new EthResultSetMetaData(tableName, columnNamesMap);
+        return new EthResultSetMetaData(tableName, columnNamesMap,aliasMapping);
     }
 
     /*
@@ -551,6 +555,14 @@ public class EthResultSet extends AbstractResultSet
             throw new SQLException("Result Set is Type Forward only", "1000");
         }
         LOGGER.info("Result set type validation Completed ");
+    }
+
+    protected int getColumnIndex(String columnLabel){
+        if(!aliasMapping.isEmpty()&&aliasMapping.containsKey(columnLabel)){
+            return columnNamesMap.get(aliasMapping.get(columnLabel));
+        }else
+            return columnNamesMap.get(columnLabel);
+        
     }
 
 }

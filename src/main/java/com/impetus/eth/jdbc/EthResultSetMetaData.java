@@ -35,7 +35,7 @@ import com.impetus.blkch.jdbc.BlkchnResultSetMetaData;
  */
 public class EthResultSetMetaData implements BlkchnResultSetMetaData
 {
-    
+
     /** The Constant LOGGER. */
     private static final Logger LOGGER = LoggerFactory.getLogger(EthResultSetMetaData.class);
 
@@ -48,6 +48,10 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData
     /** The index to column map. */
     private Map<Integer, String> indexToColumnMap = null;
 
+    private Map<Integer, String> indexToAliasMap = null;
+
+    private Map<String, String> aliasMapping;
+
     /**
      * Instantiates a new eth result set meta data.
      *
@@ -56,7 +60,8 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData
      * @param columnNamesMap
      *            the column names map
      */
-    public EthResultSetMetaData(String tableName, HashMap<String, Integer> columnNamesMap)
+    public EthResultSetMetaData(String tableName, HashMap<String, Integer> columnNamesMap,
+            Map<String, String> aliasMapping)
     {
         super();
         LOGGER.info("Instatiating new EthResultSetMetaData Object ");
@@ -64,6 +69,7 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData
         this.columnNamesMap = columnNamesMap;
         indexToColumnMap = columnNamesMap.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+        this.aliasMapping = aliasMapping;
     }
 
     /*
@@ -140,7 +146,13 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData
     @Override
     public String getColumnLabel(int column) throws SQLException
     {
-        return indexToColumnMap.get(column);
+        if (!aliasMapping.isEmpty())
+        {
+            setIndexToAlias();
+            return indexToColumnMap.get(column);
+        }
+        else
+            return getColumnName(column);
     }
 
     /*
@@ -317,6 +329,19 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData
     public boolean isWritable(int column) throws SQLException
     {
         throw new SQLFeatureNotSupportedException();
+    }
+
+    private void setIndexToAlias()
+    {
+        indexToAliasMap = indexToColumnMap;
+        for (Map.Entry<String, String> aliasMapEntrySet : aliasMapping.entrySet())
+        {
+            if (indexToAliasMap.containsValue((aliasMapEntrySet.getValue())))
+            {
+                indexToAliasMap.put(columnNamesMap.get(aliasMapEntrySet.getValue()), aliasMapEntrySet.getKey());
+            }
+        }
+
     }
 
 }
