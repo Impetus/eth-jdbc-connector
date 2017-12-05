@@ -43,7 +43,7 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
 
     private Map<Integer, String> indexToColumnMap = null;
 
-    private Map<Integer, String> indexToAliasMap = null;
+    private Map<Integer, String> indexToAliasMap = new HashMap<Integer, String>();
 
     private Map<String, String> aliasMapping;
 
@@ -93,7 +93,7 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
     @Override
     public String getColumnLabel(int column) throws SQLException {
         if (!aliasMapping.isEmpty()) {
-            return indexToColumnMap.get(column);
+            return indexToAliasMap.get(column);
         } else
             return getColumnName(column);
     }
@@ -179,13 +179,12 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
     }
 
     private void setIndexToAlias() {
-        indexToAliasMap = indexToColumnMap;
+        indexToAliasMap.putAll(indexToColumnMap);
         for (Map.Entry<String, String> aliasMapEntrySet : aliasMapping.entrySet()) {
             if (indexToAliasMap.containsValue((aliasMapEntrySet.getValue()))) {
                 indexToAliasMap.put(columnNamesMap.get(aliasMapEntrySet.getValue()), aliasMapEntrySet.getKey());
             }
         }
-
     }
 
 }
