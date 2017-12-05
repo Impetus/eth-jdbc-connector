@@ -121,6 +121,7 @@ public class APIConverter
 
                     if (aliasMapping.containsKey(alias))
                     {
+                        LOGGER.error("Alias " + alias + " is ambiguous");
                         throw new RuntimeException("Alias " + alias + " is ambiguous");
                     }
                     else
@@ -142,6 +143,7 @@ public class APIConverter
 
                     if (aliasMapping.containsKey(alias))
                     {
+                        LOGGER.error("Alias " + alias + " is ambiguous");
                         throw new RuntimeException("Alias " + alias + " is ambiguous");
                     }
                     else
@@ -273,11 +275,13 @@ public class APIConverter
             }
             else
             {
+                LOGGER.error("Query without where clause not supported.");
                 throw new RuntimeException("Query without where clause not supported.");
             }
         }
         else
         {
+            LOGGER.error("Unidentified table " + tableName);
             throw new RuntimeException("Unidentified table " + tableName);
         }
         return recordList;
