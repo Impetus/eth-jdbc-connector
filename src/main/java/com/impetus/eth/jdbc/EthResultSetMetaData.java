@@ -33,288 +33,158 @@ import com.impetus.blkch.jdbc.BlkchnResultSetMetaData;
  * @author ashishk.shukla
  * 
  */
-public class EthResultSetMetaData implements BlkchnResultSetMetaData
-{
+public class EthResultSetMetaData implements BlkchnResultSetMetaData {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(EthResultSetMetaData.class);
 
-    /** The table name. */
     private String tableName;
 
-    /** The column names map. */
     private HashMap<String, Integer> columnNamesMap = new HashMap<String, Integer>();
 
-    /** The index to column map. */
     private Map<Integer, String> indexToColumnMap = null;
 
-    /**
-     * Instantiates a new eth result set meta data.
-     *
-     * @param tableName
-     *            the table name
-     * @param columnNamesMap
-     *            the column names map
-     */
-    public EthResultSetMetaData(String tableName, HashMap<String, Integer> columnNamesMap)
-    {
+    private Map<Integer, String> indexToAliasMap = new HashMap<Integer, String>();
+
+    private Map<String, String> aliasMapping;
+
+    public EthResultSetMetaData(String tableName, HashMap<String, Integer> columnNamesMap,
+            Map<String, String> aliasMapping) {
         super();
         LOGGER.info("Instatiating new EthResultSetMetaData Object ");
         this.tableName = tableName;
         this.columnNamesMap = columnNamesMap;
         indexToColumnMap = columnNamesMap.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+        this.aliasMapping = aliasMapping;
+        if (!aliasMapping.isEmpty())
+            setIndexToAlias();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.Wrapper#isWrapperFor(java.lang.Class)
-     */
     @Override
-    public boolean isWrapperFor(Class<?> arg0) throws SQLException
-    {
+    public boolean isWrapperFor(Class<?> arg0) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.Wrapper#unwrap(java.lang.Class)
-     */
     @Override
-    public <T> T unwrap(Class<T> arg0) throws SQLException
-    {
+    public <T> T unwrap(Class<T> arg0) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#getCatalogName(int)
-     */
     @Override
-    public String getCatalogName(int column) throws SQLException
-    {
+    public String getCatalogName(int column) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#getColumnClassName(int)
-     */
     @Override
-    public String getColumnClassName(int column) throws SQLException
-    {
+    public String getColumnClassName(int column) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#getColumnCount()
-     */
     @Override
-    public int getColumnCount() throws SQLException
-    {
+    public int getColumnCount() throws SQLException {
         return columnNamesMap.size();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#getColumnDisplaySize(int)
-     */
     @Override
-    public int getColumnDisplaySize(int column) throws SQLException
-    {
+    public int getColumnDisplaySize(int column) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#getColumnLabel(int)
-     */
     @Override
-    public String getColumnLabel(int column) throws SQLException
-    {
+    public String getColumnLabel(int column) throws SQLException {
+        if (!aliasMapping.isEmpty()) {
+            return indexToAliasMap.get(column);
+        } else
+            return getColumnName(column);
+    }
+
+    @Override
+    public String getColumnName(int column) throws SQLException {
         return indexToColumnMap.get(column);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#getColumnName(int)
-     */
     @Override
-    public String getColumnName(int column) throws SQLException
-    {
-        return indexToColumnMap.get(column);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#getColumnType(int)
-     */
-    @Override
-    public int getColumnType(int column) throws SQLException
-    {
+    public int getColumnType(int column) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#getColumnTypeName(int)
-     */
     @Override
-    public String getColumnTypeName(int column) throws SQLException
-    {
+    public String getColumnTypeName(int column) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#getPrecision(int)
-     */
     @Override
-    public int getPrecision(int column) throws SQLException
-    {
+    public int getPrecision(int column) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#getScale(int)
-     */
     @Override
-    public int getScale(int column) throws SQLException
-    {
+    public int getScale(int column) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#getSchemaName(int)
-     */
     @Override
-    public String getSchemaName(int column) throws SQLException
-    {
+    public String getSchemaName(int column) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#getTableName(int)
-     */
     @Override
-    public String getTableName(int column) throws SQLException
-    {
+    public String getTableName(int column) throws SQLException {
         return tableName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#isAutoIncrement(int)
-     */
     @Override
-    public boolean isAutoIncrement(int column) throws SQLException
-    {
+    public boolean isAutoIncrement(int column) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#isCaseSensitive(int)
-     */
     @Override
-    public boolean isCaseSensitive(int column) throws SQLException
-    {
+    public boolean isCaseSensitive(int column) throws SQLException {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#isCurrency(int)
-     */
     @Override
-    public boolean isCurrency(int column) throws SQLException
-    {
+    public boolean isCurrency(int column) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#isDefinitelyWritable(int)
-     */
     @Override
-    public boolean isDefinitelyWritable(int column) throws SQLException
-    {
+    public boolean isDefinitelyWritable(int column) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#isNullable(int)
-     */
     @Override
-    public int isNullable(int column) throws SQLException
-    {
+    public int isNullable(int column) throws SQLException {
         return ResultSetMetaData.columnNullableUnknown;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#isReadOnly(int)
-     */
     @Override
-    public boolean isReadOnly(int column) throws SQLException
-    {
+    public boolean isReadOnly(int column) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#isSearchable(int)
-     */
     @Override
-    public boolean isSearchable(int column) throws SQLException
-    {
+    public boolean isSearchable(int column) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#isSigned(int)
-     */
     @Override
-    public boolean isSigned(int column) throws SQLException
-    {
+    public boolean isSigned(int column) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.sql.ResultSetMetaData#isWritable(int)
-     */
     @Override
-    public boolean isWritable(int column) throws SQLException
-    {
+    public boolean isWritable(int column) throws SQLException {
         throw new SQLFeatureNotSupportedException();
+    }
+
+    private void setIndexToAlias() {
+        indexToAliasMap.putAll(indexToColumnMap);
+        for (Map.Entry<String, String> aliasMapEntrySet : aliasMapping.entrySet()) {
+            if (indexToAliasMap.containsValue((aliasMapEntrySet.getValue()))) {
+                indexToAliasMap.put(columnNamesMap.get(aliasMapEntrySet.getValue()), aliasMapEntrySet.getKey());
+            }
+        }
     }
 
 }

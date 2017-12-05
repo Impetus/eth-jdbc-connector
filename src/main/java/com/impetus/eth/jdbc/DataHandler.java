@@ -16,7 +16,10 @@
 package com.impetus.eth.jdbc;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import com.impetus.blkch.sql.query.SelectItem;
 
 /**
  * The Interface DataHandler.
@@ -24,23 +27,15 @@ import java.util.List;
  * @author karthikp.manchala
  * 
  */
-public interface DataHandler
-{
+public interface DataHandler {
 
-    /**
-     * Convert to obj array.
-     *
-     * @param rows
-     *            the rows
-     * @return the array list
-     */
-    public ArrayList<Object[]> convertToObjArray(List<?> rows);
+    public ArrayList<List<Object>> convertToObjArray(List rows, List<SelectItem> selItems, List<String> extraSelectCols);
 
-    /**
-     * Gets the table name.
-     *
-     * @return the table name
-     */
     public String getTableName();
+
+    public HashMap<String, Integer> getColumnNamesMap();
+
+    public ArrayList<List<Object>> convertGroupedDataToObjArray(List rows, List<SelectItem> selItems,
+            List<String> groupByCols);
 
 }
