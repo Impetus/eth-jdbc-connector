@@ -26,69 +26,36 @@ import com.impetus.blkch.sql.query.Column;
 import com.impetus.blkch.sql.query.FunctionNode;
 import com.impetus.blkch.sql.query.IdentifierNode;
 
-/**
- * The Class Function.
- */
-public class Function
-{
+public class Function {
 
-    /** The rows. */
     public List rows;
 
-    /** The column names map. */
     private HashMap<String, Integer> columnNamesMap;
 
-    /** The table. */
     private String table;
 
-    /**
-     * Instantiates a new function.
-     */
-    public Function(){
-        
+    public Function() {
+
     }
-    /**
-     * Instantiates a new function.
-     *
-     * @param rows
-     *            the rows
-     * @param columnNamesMap
-     *            the column names map
-     * @param table
-     *            the table
-     */
-    public Function(List rows, HashMap<String, Integer> columnNamesMap, String table)
-    {
+
+    public Function(List rows, HashMap<String, Integer> columnNamesMap, String table) {
         super();
         this.rows = rows;
         this.columnNamesMap = columnNamesMap;
         this.table = table;
     }
 
-    /**
-     * Compute function.
-     *
-     * @param function
-     *            the function
-     * @return the object
-     */
-    public Object computeFunction(FunctionNode function)
-    {
+    public Object computeFunction(FunctionNode function) {
         String func = function.getChildType(IdentifierNode.class, 0).getValue();
         List<Object> columnData = new ArrayList<>();
-        if (function.hasChildType(FunctionNode.class))
-        {
+        if (function.hasChildType(FunctionNode.class)) {
             columnData.add(computeFunction(function.getChildType(FunctionNode.class, 0)));
-        }
-        else
-        {
+        } else {
             String colName = function.getChildType(Column.class, 0).getChildType(IdentifierNode.class, 0).getValue();
-            if (!columnNamesMap.containsKey((colName.toLowerCase())))
-            {
+            if (!columnNamesMap.containsKey((colName.toLowerCase()))) {
                 throw new RuntimeException("Column " + colName + " doesn't exist in table");
             }
-            for (Object recordInfo : rows)
-            {
+            for (Object recordInfo : rows) {
                 if ("transactions".equalsIgnoreCase(table))
                     columnData.add(Utils.getTransactionColumnValue((Transaction) recordInfo, colName));
                 else
@@ -96,33 +63,21 @@ public class Function
 
             }
         }
-        switch (func)
-        {
-        case "count":
-            return AggregationFunctions.count(columnData);
-        case "sum":
-            return AggregationFunctions.sum(columnData);
-        default:
-            throw new RuntimeException("Unidentified function: " + func);
+        switch (func) {
+            case "count":
+                return AggregationFunctions.count(columnData);
+            case "sum":
+                return AggregationFunctions.sum(columnData);
+            default:
+                throw new RuntimeException("Unidentified function: " + func);
         }
     }
 
-    /**
-     * Creates the function col name.
-     *
-     * @param function
-     *            the function
-     * @return the string
-     */
-    public String createFunctionColName(FunctionNode function)
-    {
+    public String createFunctionColName(FunctionNode function) {
         String func = function.getChildType(IdentifierNode.class, 0).getValue();
-        if (function.hasChildType(FunctionNode.class))
-        {
+        if (function.hasChildType(FunctionNode.class)) {
             return func + "(" + createFunctionColName(function.getChildType(FunctionNode.class, 0)) + ")";
-        }
-        else
-        {
+        } else {
             String colName = function.getChildType(Column.class, 0).getChildType(IdentifierNode.class, 0).getValue();
             return func + "(" + colName + ")";
         }

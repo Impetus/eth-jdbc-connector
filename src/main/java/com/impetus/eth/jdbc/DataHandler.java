@@ -27,41 +27,15 @@ import com.impetus.blkch.sql.query.SelectItem;
  * @author karthikp.manchala
  * 
  */
-public interface DataHandler
-{
+public interface DataHandler {
 
-    /**
-     * Convert to obj array.
-     *
-     * @param rows            the rows
-     * @param selItems the sel items
-     * @param extraSelectCols the extra select cols
-     * @return the array list
-     */
-    public ArrayList<List<Object>> convertToObjArray(List rows, List<SelectItem> selItems,List<String> extraSelectCols);
+    public ArrayList<List<Object>> convertToObjArray(List rows, List<SelectItem> selItems, List<String> extraSelectCols);
 
-    /**
-     * Gets the table name.
-     *
-     * @return the table name
-     */
     public String getTableName();
-    
-    /**
-     * Gets the column names map.
-     *
-     * @return the column names map
-     */
-    public  HashMap<String, Integer> getColumnNamesMap();
-    
-    /**
-     * Convert grouped data to obj array.
-     *
-     * @param rows the rows
-     * @param selItems the sel items
-     * @param groupByCols the group by cols
-     * @return the array list
-     */
-    public ArrayList<List<Object>> convertGroupedDataToObjArray(List rows, List<SelectItem> selItems, List<String> groupByCols);
+
+    public HashMap<String, Integer> getColumnNamesMap();
+
+    public ArrayList<List<Object>> convertGroupedDataToObjArray(List rows, List<SelectItem> selItems,
+            List<String> groupByCols);
 
 }

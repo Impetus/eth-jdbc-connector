@@ -21,34 +21,24 @@ package com.impetus.eth.jdbc;
  * @author ashishk.shukla
  * 
  */
-public class DriverConstants
-{
+public class DriverConstants {
 
-    /** The Constant HOSTNAME. */
     public static final String HOSTNAME = "HOSTNAME";
-    
-    /** The Constant IPC. */
+
     public static final String IPC = "IPC";
 
-    /** The Constant PORTNUMBER. */
     public static final String PORTNUMBER = "PORTNUMBER";
 
-    /** The Constant DRIVERPREFIX. */
     public static final String DRIVERPREFIX = "jdbc:blkchn:";
 
-    /** The Constant HTTPPREFIX. */
     public static final String HTTPPREFIX = "http://";
 
-    /** The Constant COLON. */
     public static final String COLON = ":";
 
-    /** The Constant MAJOR_VERSION. */
     public static final int MAJOR_VERSION = 1;
 
-    /** The Constant MINOR_VERSION. */
     public static final int MINOR_VERSION = 0;
 
-    /** The Constant IPC_OS. */
     static final String IPC_OS = "IPC_OS";
 
 }

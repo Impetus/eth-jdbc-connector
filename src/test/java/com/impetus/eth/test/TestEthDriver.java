@@ -32,9 +32,7 @@ import junit.framework.TestCase;
 public class TestEthDriver extends TestCase
 {
     
-    /**
-     * Test major version.
-     */
+    
     @Test
     public void testMajorVersion()
     {
@@ -43,9 +41,7 @@ public class TestEthDriver extends TestCase
         assertEquals(1, x);
     }
     
-    /**
-     * Test prop map.
-     */
+    
     @Test
     public void testPropMap()
     {

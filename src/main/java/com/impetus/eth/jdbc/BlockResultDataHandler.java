@@ -40,17 +40,13 @@ import com.impetus.eth.parser.Utils;
  * @author ashishk.shukla
  * 
  */
-public class BlockResultDataHandler implements DataHandler
-{
+public class BlockResultDataHandler implements DataHandler {
 
-    /** The Constant LOGGER. */
     private static final Logger LOGGER = LoggerFactory.getLogger(BlockResultDataHandler.class);
 
-    /** The column names map. */
     private static HashMap<String, Integer> columnNamesMap = new HashMap<String, Integer>();
 
-    static
-    {
+    static {
         columnNamesMap.put("blocknumber", 0);
         columnNamesMap.put("hash", 1);
         columnNamesMap.put("parenthash", 2);
@@ -74,70 +70,41 @@ public class BlockResultDataHandler implements DataHandler
         columnNamesMap.put("sealfields", 20);
     }
 
-    /** The return column names map. */
     public HashMap<String, Integer> returnColumnNamesMap = new HashMap<>();
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.eth.jdbc.DataHandler#getColumnNamesMap()
-     */
-    public HashMap<String, Integer> getColumnNamesMap()
-    {
+    public HashMap<String, Integer> getColumnNamesMap() {
         return returnColumnNamesMap;
     }
 
-    /** The result. */
     private ArrayList<List<Object>> result = new ArrayList<>();
 
-    /** The columns initialized. */
     private boolean columnsInitialized = false;
 
-    /** The is groupby select. */
     private boolean isGroupbySelect = false;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.impetus.eth.jdbc.DataHandler#convertGroupedDataToObjArray(java.util
-     * .List, java.util.List, java.util.List)
-     */
     @Override
     public ArrayList<List<Object>> convertGroupedDataToObjArray(List rows, List<SelectItem> selItems,
-            List<String> groupByCols)
-    {
+            List<String> groupByCols) {
         isGroupbySelect = true;
         Map<Object, List<Object>> groupedData = ((List<Object>) rows).stream().collect(
                 Collectors.groupingBy(
                         blockInfo -> groupByCols.stream()
                                 .map(column -> Utils.getBlockColumnValue((Block) blockInfo, column))
                                 .collect(Collectors.toList()), Collectors.toList()));
-        for (Entry<Object, List<Object>> entry : groupedData.entrySet())
-        {
+        for (Entry<Object, List<Object>> entry : groupedData.entrySet()) {
             convertToObjArray((List<Object>) entry.getValue(), selItems, null);
         }
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.eth.jdbc.DataHandler#convertToObjArray(java.util.List,
-     * java.util.List)
-     */
     @Override
-    public ArrayList<List<Object>> convertToObjArray(List rows, List<SelectItem> selItems, List<String> extraSelectCols)
-    {
+    public ArrayList<List<Object>> convertToObjArray(List rows, List<SelectItem> selItems, List<String> extraSelectCols) {
         LOGGER.info("Conversion of Block objects to Result set Objects started");
-        for (Object record : rows)
-        {
+        for (Object record : rows) {
             Block blockInfo = (Block) record;
             List<Object> returnRec = new ArrayList<>();
-            for (SelectItem col : selItems)
-            {
-                if (col.hasChildType(StarNode.class))
-                {
+            for (SelectItem col : selItems) {
+                if (col.hasChildType(StarNode.class)) {
 
                     returnRec.add(blockInfo.getNumber().longValueExact());
                     returnRec.add(blockInfo.getHash());
@@ -160,56 +127,40 @@ public class BlockResultDataHandler implements DataHandler
                     returnRec.add(blockInfo.getTransactions());
                     returnRec.add(blockInfo.getUncles());
                     returnRec.add(blockInfo.getSealFields());
-                    if (!columnsInitialized)
-                    {
+                    if (!columnsInitialized) {
                         returnColumnNamesMap = columnNamesMap;
                     }
-                }
-                else if (col.hasChildType(Column.class))
-                {
+                } else if (col.hasChildType(Column.class)) {
                     String colName = col.getChildType(Column.class, 0).getChildType(IdentifierNode.class, 0).getValue();
-                    if (!columnsInitialized)
-                    {
-                        if (columnNamesMap.containsKey(colName.toLowerCase()))
-                        {
+                    if (!columnsInitialized) {
+                        if (columnNamesMap.containsKey(colName.toLowerCase())) {
                             returnColumnNamesMap.put(colName, returnColumnNamesMap.size());
-                        }
-                        else
-                        {
+                        } else {
                             throw new RuntimeException("Column " + colName + " doesn't exist in table");
                         }
 
                     }
 
                     returnRec.add(Utils.getBlockColumnValue(blockInfo, colName));
-                }
-                else if (col.hasChildType(FunctionNode.class))
-                {
+                } else if (col.hasChildType(FunctionNode.class)) {
                     Function computFunc = new Function(rows, columnNamesMap, getTableName());
                     Object computeResult = computFunc.computeFunction(col.getChildType(FunctionNode.class, 0));
                     returnRec.add(computeResult);
-                    if (!columnsInitialized)
-                    {
-                        returnColumnNamesMap.put(computFunc.createFunctionColName(col.getChildType(FunctionNode.class, 0)),
-                                    returnColumnNamesMap.size());
-                       
-                       
+                    if (!columnsInitialized) {
+                        returnColumnNamesMap.put(
+                                computFunc.createFunctionColName(col.getChildType(FunctionNode.class, 0)),
+                                returnColumnNamesMap.size());
+
                     }
                 }
             }
-            if (!(null == extraSelectCols))
-            {
+            if (!(null == extraSelectCols)) {
 
-                for (String extraSelectColumn : extraSelectCols)
-                {
-                    if (!columnsInitialized)
-                    {
-                        if (columnNamesMap.containsKey(extraSelectColumn.toLowerCase()))
-                        {
+                for (String extraSelectColumn : extraSelectCols) {
+                    if (!columnsInitialized) {
+                        if (columnNamesMap.containsKey(extraSelectColumn.toLowerCase())) {
                             returnColumnNamesMap.put(extraSelectColumn, returnColumnNamesMap.size());
-                        }
-                        else
-                        {
+                        } else {
                             LOGGER.error("Column " + extraSelectColumn + " doesn't exist in table");
                             throw new RuntimeException("Column " + extraSelectColumn + " doesn't exist in table");
                         }
@@ -227,14 +178,8 @@ public class BlockResultDataHandler implements DataHandler
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.impetus.eth.jdbc.DataHandler#getTableName()
-     */
     @Override
-    public String getTableName()
-    {
+    public String getTableName() {
 
         return "blocks";
     }

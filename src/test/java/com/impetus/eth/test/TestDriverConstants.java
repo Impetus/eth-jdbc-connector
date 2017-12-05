@@ -30,19 +30,13 @@ import junit.framework.TestCase;
 public class TestDriverConstants extends TestCase
 {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see junit.framework.TestCase#setUp()
-     */
+    
     protected void setUp()
     {
 
     }
 
-    /**
-     * Test constants.
-     */
+    
     @Test
     public void testConstants()
     {
