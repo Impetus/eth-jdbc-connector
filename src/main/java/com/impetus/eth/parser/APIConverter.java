@@ -222,7 +222,7 @@ public class APIConverter {
     public List<?> executeSingleWhereClause(String tableName, FilterItem filterItem) {
         String filterColumn = null;
 
-        filterColumn = filterItem.getChildType(Column.class, 0).getName();
+        filterColumn = filterItem.getChildType(Column.class, 0).getChildType(IdentifierNode.class,0).getValue();
         // TODO Implement comparator function to take other operators(for now
         // only =)
         String value = filterItem.getChildType(IdentifierNode.class, 0).getValue();

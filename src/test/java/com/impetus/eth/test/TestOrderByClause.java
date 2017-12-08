@@ -1,0 +1,97 @@
+package com.impetus.eth.test;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.Test;
+
+import com.impetus.blkch.sql.query.OrderingDirection;
+import com.impetus.blkch.sql.query.OrderingDirection.Direction;
+import com.impetus.eth.parser.DataFrame;
+
+import junit.framework.TestCase;
+
+public class TestOrderByClause extends TestCase {
+    private List<List<Object>> data = new ArrayList<List<Object>>();
+
+    private HashMap<String, Integer> columnNamesMap = new HashMap<>();
+
+    private Map<String, String> aliasMapping = new HashMap<String, String>();
+
+    String table;
+
+    protected void setUp() {
+        columnNamesMap.put("value", 0);
+        columnNamesMap.put("gas", 1);
+        columnNamesMap.put("blocknumber", 2);
+
+        List<Object> returnRec = new ArrayList<Object>();
+        returnRec.add(544444);
+        returnRec.add(213234);
+        returnRec.add(15675);
+        data.add(returnRec);
+        returnRec = new ArrayList<Object>();
+        returnRec.add(544434);
+        returnRec.add(213233);
+        returnRec.add(156333);
+        data.add(returnRec);
+        returnRec = new ArrayList<Object>();
+        returnRec.add(544434);
+        returnRec.add(213233);
+        returnRec.add(156333);
+        data.add(returnRec);
+
+        returnRec = new ArrayList<Object>();
+        returnRec.add(544410);
+        returnRec.add(213232);
+        returnRec.add(156334);
+        data.add(returnRec);
+        returnRec = new ArrayList<Object>();
+        returnRec.add(544411);
+        returnRec.add(2132235);
+        returnRec.add(1563324);
+        data.add(returnRec);
+        aliasMapping.put("val", "value");
+    }
+    @Test
+    public void testOrderBy() {
+
+        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping, table);
+        Map<String, OrderingDirection> orderList = new HashMap<String, OrderingDirection>();
+        OrderingDirection direction = new OrderingDirection(Direction.ASC);
+
+        orderList.put("val", direction);
+        df = df.order(orderList, null);
+        assertEquals(544444, df.getData().get(4).get(0));
+
+    }
+    @Test
+    public void testOrderByWithAlias() {
+
+        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping, table);
+        Map<String, OrderingDirection> orderList = new HashMap<String, OrderingDirection>();
+        OrderingDirection direction = new OrderingDirection(Direction.ASC);
+
+        orderList.put("val", direction);
+        df = df.order(orderList, null);
+        assertEquals(544444, df.getData().get(4).get(0));
+
+    }
+    @Test
+    public void testOrderByExtraSelect() {
+
+        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping, table);
+        Map<String, OrderingDirection> orderList = new HashMap<String, OrderingDirection>();
+        OrderingDirection direction = new OrderingDirection(Direction.ASC);
+
+        orderList.put("blocknumber", direction);
+        List<String> extraSelect= new ArrayList<String>();
+        extraSelect.add("blocknumber");
+        df = df.order(orderList, extraSelect);
+        
+        assertEquals(544411, df.getData().get(4).get(0));
+
+    }
+}
