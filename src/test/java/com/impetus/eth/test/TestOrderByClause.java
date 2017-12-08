@@ -7,6 +7,9 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.impetus.blkch.sql.parser.TreeNode;
+import com.impetus.blkch.sql.query.IdentifierNode;
+import com.impetus.blkch.sql.query.LimitClause;
 import com.impetus.blkch.sql.query.OrderingDirection;
 import com.impetus.blkch.sql.query.OrderingDirection.Direction;
 import com.impetus.eth.parser.DataFrame;
@@ -55,6 +58,7 @@ public class TestOrderByClause extends TestCase {
         data.add(returnRec);
         aliasMapping.put("val", "value");
     }
+
     @Test
     public void testOrderBy() {
 
@@ -67,6 +71,7 @@ public class TestOrderByClause extends TestCase {
         assertEquals(544444, df.getData().get(4).get(0));
 
     }
+
     @Test
     public void testOrderByWithAlias() {
 
@@ -79,6 +84,7 @@ public class TestOrderByClause extends TestCase {
         assertEquals(544444, df.getData().get(4).get(0));
 
     }
+
     @Test
     public void testOrderByExtraSelect() {
 
@@ -87,11 +93,21 @@ public class TestOrderByClause extends TestCase {
         OrderingDirection direction = new OrderingDirection(Direction.ASC);
 
         orderList.put("blocknumber", direction);
-        List<String> extraSelect= new ArrayList<String>();
+        List<String> extraSelect = new ArrayList<String>();
         extraSelect.add("blocknumber");
         df = df.order(orderList, extraSelect);
-        
+
         assertEquals(544411, df.getData().get(4).get(0));
 
+    }
+
+    @Test
+    public void testLimit() {
+        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping, table);
+        LimitClause limitClause = new LimitClause();
+        IdentifierNode ifn = new IdentifierNode("2");
+        limitClause.addChildNode(ifn);
+        df = df.limit(limitClause);
+        assertEquals(2, df.getData().size());
     }
 }
