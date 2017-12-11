@@ -3,12 +3,14 @@ package com.impetus.eth.test;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import junit.framework.TestCase;
 
 import org.junit.Test;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.Transaction;
 
+import com.impetus.blkch.sql.parser.TreeNode;
 import com.impetus.blkch.sql.query.Column;
 import com.impetus.blkch.sql.query.FunctionNode;
 import com.impetus.blkch.sql.query.IdentifierNode;
@@ -103,7 +105,7 @@ public class TestFunction extends TestCase {
 
     private FunctionNode getFunctionNode(String operation) {
         FunctionNode funcNode = new FunctionNode();
-        Column col = new Column();
+        TreeNode col = new Column();
         IdentifierNode colIn = new IdentifierNode("blocknumber");
         col.addChildNode(colIn);
         IdentifierNode funcIdent = new IdentifierNode(operation);
