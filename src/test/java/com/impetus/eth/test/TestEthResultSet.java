@@ -10,6 +10,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.impetus.eth.jdbc.EthResultSet;
+import com.impetus.eth.jdbc.EthResultSetMetaData;
 import com.impetus.eth.parser.DataFrame;
 
 import junit.framework.TestCase;
@@ -178,6 +179,24 @@ public class TestEthResultSet extends TestCase {
 
         }
         assertEquals(5, size);
+    }
+    @Test
+    public void testEthResultSetMetadata() {
+        int columnCount = 0;
+        try {
+            
+           ethResultSet.next();
+           EthResultSetMetaData rsMetaData= (EthResultSetMetaData) ethResultSet.getMetaData();
+           columnCount=rsMetaData.getColumnCount();
+           rsMetaData.getColumnLabel(0);
+           rsMetaData.getColumnName(0);
+           rsMetaData.getTableName(0);
+           rsMetaData.isCaseSensitive(0);
+            ethResultSet.beforeFirst();
+        } catch (SQLException e) {
+
+        }
+        assertEquals(3,columnCount );
     }
 
 }
