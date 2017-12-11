@@ -90,6 +90,21 @@ public class TestTransactionResultDataHandler extends TestCase {
         List<List<Object>> result = trdh.convertGroupedDataToObjArray(data, selItems, groupByCols);
         assertEquals(2, Integer.parseInt(result.get(0).get(0).toString()));
     }
+    
+    @Test
+    public void testTransactionResultStar() {
+        TransactionResultDataHandler trdh = new TransactionResultDataHandler();
+        String query = "select * from transactions";
+        LogicalPlan logicalPlan = getLogicalPlan(query);
+        SelectClause selectClause = logicalPlan.getQuery().getChildType(SelectClause.class, 0);
+        List<SelectItem> selItems = selectClause.getChildType(SelectItem.class);
+        Transaction transInfo = new Transaction("0x1313", "0x1313", "0x1313", "0x1313", "0x1313", "0x1313", "0x1313", "0x1313", "0x1313", "0x1313"
+                , "0x1313", "0x1313", "0x1313", "0x1313", "0x1313", "0x1313", 1);
+       data.add(transInfo);
+        
+        List<List<Object>> result = trdh.convertToObjArray(data, selItems, null);
+        assertEquals(1, Integer.parseInt(result.get(0).get(15).toString()));
+    }
 
     private LogicalPlan getLogicalPlan(String query) {
         SqlBaseLexer lexer = new SqlBaseLexer(new CaseInsensitiveCharStream(query));

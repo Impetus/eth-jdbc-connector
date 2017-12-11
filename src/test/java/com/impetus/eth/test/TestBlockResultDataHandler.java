@@ -32,12 +32,17 @@ public class TestBlockResultDataHandler extends TestCase {
         columnNamesMap.put("blocknumber", 0);
         columnNamesMap.put("gasused", 1);
         columnNamesMap.put("size", 2);
-        for(int i=0;i<3;i++){
-        Block blockInfo = new Block();
-        blockInfo.setNumber("0x1313");
-        blockInfo.setGasUsed("0x131");
-        blockInfo.setSize("0x131");
-        data.add(blockInfo);
+        for (int i = 0; i < 3; i++) {
+            Block blockInfo = new Block();
+            blockInfo.setNumber("0x1313");
+            blockInfo.setGasUsed("0x131");
+            blockInfo.setSize("0x131");
+            blockInfo.setTotalDifficulty("0x131");
+            blockInfo.setSize("0x131");
+            blockInfo.setGasLimit("0x131");
+            blockInfo.setGasUsed("0x131");
+            blockInfo.setTimestamp("0x131");
+            data.add(blockInfo);
         }
 
     }
@@ -49,7 +54,7 @@ public class TestBlockResultDataHandler extends TestCase {
         LogicalPlan logicalPlan = getLogicalPlan(query);
         SelectClause selectClause = logicalPlan.getQuery().getChildType(SelectClause.class, 0);
         List<SelectItem> selItems = selectClause.getChildType(SelectItem.class);
-       
+
         List<List<Object>> result = brdh.convertToObjArray(data, selItems, null);
         assertEquals(4883, Integer.parseInt(result.get(0).get(0).toString()));
     }
@@ -79,6 +84,17 @@ public class TestBlockResultDataHandler extends TestCase {
 
         List<List<Object>> result = trdh.convertGroupedDataToObjArray(data, selItems, groupByCols);
         assertEquals(3, Integer.parseInt(result.get(0).get(0).toString()));
+    }
+
+    @Test
+    public void testBlockResultStar() {
+        BlockResultDataHandler trdh = new BlockResultDataHandler();
+        String query = "select * from transactions";
+        LogicalPlan logicalPlan = getLogicalPlan(query);
+        SelectClause selectClause = logicalPlan.getQuery().getChildType(SelectClause.class, 0);
+        List<SelectItem> selItems = selectClause.getChildType(SelectItem.class);
+        List<List<Object>> result = trdh.convertToObjArray(data, selItems, null);
+        assertEquals(4883, Integer.parseInt(result.get(0).get(0).toString()));
     }
 
     private LogicalPlan getLogicalPlan(String query) {
