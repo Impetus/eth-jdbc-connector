@@ -46,6 +46,21 @@ public class TestAPIConvertor extends TestCase {
         assertTrue(true);
     }
 
+    @Test
+    public void testExecuteQuery() {
+        boolean status = false;
+        try {
+            APIConverter apic = new APIConverter(
+                    getLogicalPlan("select count(name) as count, name as name  from transactions where blocknumber=123"),
+                    null);
+            apic.executeQuery();
+            status=true;
+        } catch (Exception e) {
+
+        }
+        assertFalse(status);
+    }
+
     private LogicalPlan getLogicalPlan(String query) {
         SqlBaseLexer lexer = new SqlBaseLexer(new CaseInsensitiveCharStream(query));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
