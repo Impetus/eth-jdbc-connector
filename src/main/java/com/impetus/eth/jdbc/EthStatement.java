@@ -21,7 +21,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -40,7 +39,6 @@ import com.impetus.blkch.sql.parser.AbstractSyntaxTreeVisitor;
 import com.impetus.blkch.sql.parser.BlockchainVisitor;
 import com.impetus.blkch.sql.parser.CaseInsensitiveCharStream;
 import com.impetus.blkch.sql.parser.LogicalPlan;
-import com.impetus.blkch.sql.query.SelectClause;
 import com.impetus.eth.parser.APIConverter;
 import com.impetus.eth.parser.DataFrame;
 
@@ -129,7 +127,12 @@ public class EthStatement implements BlkchnStatement {
 
     @Override
     public boolean execute(String sql) throws SQLException {
-        throw new UnsupportedOperationException();
+        LOGGER.info("Entering into execute Block");
+        LogicalPlan logicalPlan = getLogicalPlan(sql);
+        Boolean result = new APIConverter(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
+                .execute();
+        LOGGER.info("Exiting from execute Block with result: " + result);
+        return result;
     }
 
     @Override
@@ -157,7 +160,8 @@ public class EthStatement implements BlkchnStatement {
         LOGGER.info("Entering into executeQuery Block");
         ResultSet queryResultSet = null;
         LogicalPlan logicalPlan = getLogicalPlan(sql);
-        DataFrame dataframe = new APIConverter(logicalPlan, connection.getWeb3jClient()).executeQuery();
+        DataFrame dataframe = new APIConverter(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
+                .executeQuery();
         queryResultSet = new EthResultSet(dataframe, rSetType, rSetConcurrency);
         LOGGER.info("Exiting from executeQuery Block");
         return queryResultSet;

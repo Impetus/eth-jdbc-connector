@@ -16,23 +16,34 @@
 package com.impetus.eth.parser;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.web3j.crypto.CipherException;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult;
 import org.web3j.protocol.core.methods.response.Transaction;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.TransactionTimeoutException;
+import org.web3j.tx.Transfer;
+import org.web3j.utils.Convert;
 
 import com.impetus.blkch.sql.parser.LogicalPlan;
 import com.impetus.blkch.sql.query.Column;
@@ -54,6 +65,7 @@ import com.impetus.blkch.sql.query.Table;
 import com.impetus.blkch.sql.query.WhereClause;
 import com.impetus.eth.jdbc.BlockResultDataHandler;
 import com.impetus.eth.jdbc.DataHandler;
+import com.impetus.eth.jdbc.DriverConstants;
 import com.impetus.eth.jdbc.TransactionResultDataHandler;
 
 public class APIConverter {
@@ -63,6 +75,8 @@ public class APIConverter {
     private LogicalPlan logicalPlan;
 
     private Web3j web3jClient;
+    
+    private Properties properties;
 
     private List<SelectItem> selectItems = new ArrayList<>();
 
@@ -78,9 +92,10 @@ public class APIConverter {
 
     private HashMap<String, Integer> columnNamesMap;
 
-    public APIConverter(LogicalPlan logicalPlan, Web3j web3jClient) {
+    public APIConverter(LogicalPlan logicalPlan, Web3j web3jClient, Properties properties) {
         this.logicalPlan = logicalPlan;
         this.web3jClient = web3jClient;
+        this.properties = properties;
         SelectClause selectClause = logicalPlan.getQuery().getChildType(SelectClause.class, 0);
         List<SelectItem> selItems = selectClause.getChildType(SelectItem.class);
         for (SelectItem selItem : selItems) {
@@ -365,6 +380,45 @@ public class APIConverter {
                 .getResult();
         return transaction;
     }
+    
+    private boolean insertTransaction(String toAddress, String value, String unit, boolean syncRequest)
+            throws IOException, CipherException, InterruptedException, TransactionTimeoutException, ExecutionException
+    {
+        Object val;
+        try
+        {
+            if (value.indexOf('.') > 0)
+            {
+                val = Double.parseDouble(value);
+            }
+            else
+            {
+                val = Long.parseLong(value);
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            LOGGER.error("Exception while parsing value", e);
+            throw new RuntimeException("Exception while parsing value", e);
+        }
+        Credentials credentials = WalletUtils.loadCredentials(
+                properties.getProperty(DriverConstants.KEYSTORE_PASSWORD),
+                properties.getProperty(DriverConstants.KEYSTORE_PATH));
+
+        if (syncRequest)
+        {
+            TransactionReceipt transactionReceipt = Transfer.sendFunds(web3jClient, credentials, toAddress,
+                    BigDecimal.valueOf((val instanceof Long) ? (Long) val : (Double) val), Convert.Unit.valueOf(unit));
+        }
+        else
+        {
+            Future<TransactionReceipt> transactionReceipt = Transfer.sendFundsAsync(web3jClient, credentials,
+                    toAddress, BigDecimal.valueOf((val instanceof Long) ? (Long) val : (Double) val),
+                    Convert.Unit.valueOf(unit));
+        }
+
+        return true;
+    }
 
     private DataFrame performHaving(DataFrame dataframe, List<String> groupByCols) {
         if (logicalPlan.getQuery().hasChildType(HavingClause.class)) {
@@ -497,5 +551,21 @@ public class APIConverter {
                 extraSelectCols.add(col);
 
         }
+    }
+
+    public Boolean execute()
+    {
+            //get values from logical plan and pass it to insertTransaction method
+            try
+            {
+                insertTransaction(null, null, null, false);
+            }
+            catch (IOException | CipherException | InterruptedException | TransactionTimeoutException
+                    | ExecutionException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        return null;
     }
 }

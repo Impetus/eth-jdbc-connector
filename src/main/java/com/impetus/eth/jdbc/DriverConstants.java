@@ -39,6 +39,10 @@ public class DriverConstants {
 
     public static final int MINOR_VERSION = 0;
 
-    static final String IPC_OS = "IPC_OS";
+    public static final String IPC_OS = "IPC_OS";
+    
+    public static final String KEYSTORE_PATH = "KEYSTORE_PATH";
+    
+    public static final String KEYSTORE_PASSWORD = "KEYSTORE_PASSWORD";
 
 }

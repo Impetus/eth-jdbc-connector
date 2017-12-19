@@ -56,7 +56,12 @@ public class EthDriver implements BlkchnDriver {
         if (url == null || !url.toLowerCase().startsWith(DriverConstants.DRIVERPREFIX)) {
             return null;
         }
+        
         Properties props = getPropMap(url);
+        if (info != null && props != null)
+        {
+            props.putAll(info);
+        }
         try {
             return new EthConnection(url, props);
         } catch (Exception e) {
