@@ -45,6 +45,9 @@ import org.web3j.protocol.exceptions.TransactionTimeoutException;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
 
+import com.impetus.blkch.sql.insert.ColumnName;
+import com.impetus.blkch.sql.insert.ColumnValue;
+import com.impetus.blkch.sql.insert.Insert;
 import com.impetus.blkch.sql.parser.LogicalPlan;
 import com.impetus.blkch.sql.query.Column;
 import com.impetus.blkch.sql.query.Comparator;
@@ -96,6 +99,13 @@ public class APIConverter {
         this.logicalPlan = logicalPlan;
         this.web3jClient = web3jClient;
         this.properties = properties;
+        if(logicalPlan.getQuery() != null && logicalPlan.getQuery().hasChildType(SelectClause.class)){
+            preprocessSelectClause(logicalPlan);
+        }
+    }
+
+    private void preprocessSelectClause(LogicalPlan logicalPlan)
+    {
         SelectClause selectClause = logicalPlan.getQuery().getChildType(SelectClause.class, 0);
         List<SelectItem> selItems = selectClause.getChildType(SelectItem.class);
         for (SelectItem selItem : selItems) {
@@ -384,6 +394,9 @@ public class APIConverter {
     private boolean insertTransaction(String toAddress, String value, String unit, boolean syncRequest)
             throws IOException, CipherException, InterruptedException, TransactionTimeoutException, ExecutionException
     {
+        toAddress = toAddress.replaceAll("'", "");
+        value = value.replaceAll("'", "");
+        unit = unit.replaceAll("'", "").toUpperCase();
         Object val;
         try
         {
@@ -555,17 +568,34 @@ public class APIConverter {
 
     public Boolean execute()
     {
-            //get values from logical plan and pass it to insertTransaction method
-            try
-            {
-                insertTransaction(null, null, null, false);
-            }
-            catch (IOException | CipherException | InterruptedException | TransactionTimeoutException
-                    | ExecutionException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        return null;
+        // get values from logical plan and pass it to insertTransaction method
+        Insert insert = logicalPlan.getInsert();
+        ColumnName names = insert.getChildType(ColumnName.class).get(0);
+        ColumnValue values = insert.getChildType(ColumnValue.class).get(0);
+        Map<String, String> namesMap = new HashMap<String, String>();
+        namesMap.put(names.getChildType(IdentifierNode.class, 0).getValue(),
+                values.getChildType(IdentifierNode.class, 0).getValue());
+        namesMap.put(names.getChildType(IdentifierNode.class, 1).getValue(),
+                values.getChildType(IdentifierNode.class, 1).getValue());
+        namesMap.put(names.getChildType(IdentifierNode.class, 2).getValue(),
+                values.getChildType(IdentifierNode.class, 2).getValue());
+        if (names.getChildType(IdentifierNode.class, 3) != null
+                && values.getChildType(IdentifierNode.class, 3) != null)
+        {
+            namesMap.put(names.getChildType(IdentifierNode.class, 3).getValue(),
+                    values.getChildType(IdentifierNode.class, 3).getValue());
+        }
+        boolean async = namesMap.get("async") == null ? true : Boolean.parseBoolean(namesMap.get("async"));
+        boolean result = false;
+        try
+        {
+            result = insertTransaction(namesMap.get("toAddress"), namesMap.get("value"), namesMap.get("unit"), false);
+        }
+        catch (IOException | CipherException | InterruptedException | TransactionTimeoutException | ExecutionException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return result;
     }
 }

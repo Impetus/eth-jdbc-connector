@@ -33,8 +33,8 @@ import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult;
 import org.web3j.protocol.core.methods.response.Transaction;
 
 import com.impetus.blkch.jdbc.BlkchnStatement;
-import com.impetus.blkch.sql.generated.SqlBaseLexer;
-import com.impetus.blkch.sql.generated.SqlBaseParser;
+import com.impetus.blkch.sql.generated.BlkchnSqlLexer;
+import com.impetus.blkch.sql.generated.BlkchnSqlParser;
 import com.impetus.blkch.sql.parser.AbstractSyntaxTreeVisitor;
 import com.impetus.blkch.sql.parser.BlockchainVisitor;
 import com.impetus.blkch.sql.parser.CaseInsensitiveCharStream;
@@ -358,11 +358,18 @@ public class EthStatement implements BlkchnStatement {
         return transaction;
     }
 
-    private LogicalPlan getLogicalPlan(String query) {
-        SqlBaseLexer lexer = new SqlBaseLexer(new CaseInsensitiveCharStream(query));
+    public LogicalPlan getLogicalPlan(String sqlText) {
+        LogicalPlan logicalPlan = null;
+        BlkchnSqlParser parser = getParser(sqlText);
+        AbstractSyntaxTreeVisitor astBuilder = new BlockchainVisitor();
+        logicalPlan = (LogicalPlan) astBuilder.visitSingleStatement(parser.singleStatement());
+        return logicalPlan;
+    }
+
+    public BlkchnSqlParser getParser(String sqlText) {
+        BlkchnSqlLexer lexer = new BlkchnSqlLexer(new CaseInsensitiveCharStream(sqlText));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-        SqlBaseParser parser = new SqlBaseParser(tokens);
-        AbstractSyntaxTreeVisitor visitor = new BlockchainVisitor();
-        return visitor.visitSingleStatement(parser.singleStatement());
+        BlkchnSqlParser parser = new BlkchnSqlParser(tokens);
+        return parser;
     }
 }
