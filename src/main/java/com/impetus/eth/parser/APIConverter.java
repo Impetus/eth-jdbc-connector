@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -40,7 +39,6 @@ import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult;
 import org.web3j.protocol.core.methods.response.Transaction;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionTimeoutException;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
@@ -391,7 +389,7 @@ public class APIConverter {
         return transaction;
     }
     
-    private boolean insertTransaction(String toAddress, String value, String unit, boolean syncRequest)
+    private Object insertTransaction(String toAddress, String value, String unit, boolean syncRequest)
             throws IOException, CipherException, InterruptedException, TransactionTimeoutException, ExecutionException
     {
         toAddress = toAddress.replaceAll("'", "");
@@ -417,20 +415,21 @@ public class APIConverter {
         Credentials credentials = WalletUtils.loadCredentials(
                 properties.getProperty(DriverConstants.KEYSTORE_PASSWORD),
                 properties.getProperty(DriverConstants.KEYSTORE_PATH));
-
+        Object transactionReceipt;
         if (syncRequest)
         {
-            TransactionReceipt transactionReceipt = Transfer.sendFunds(web3jClient, credentials, toAddress,
+            transactionReceipt = Transfer.sendFunds(web3jClient, credentials, toAddress,
                     BigDecimal.valueOf((val instanceof Long) ? (Long) val : (Double) val), Convert.Unit.valueOf(unit));
         }
         else
         {
-            Future<TransactionReceipt> transactionReceipt = Transfer.sendFundsAsync(web3jClient, credentials,
+            transactionReceipt = Transfer.sendFundsAsync(web3jClient, credentials,
                     toAddress, BigDecimal.valueOf((val instanceof Long) ? (Long) val : (Double) val),
                     Convert.Unit.valueOf(unit));
         }
 
-        return true;
+       
+        return transactionReceipt;
     }
 
     private DataFrame performHaving(DataFrame dataframe, List<String> groupByCols) {
@@ -568,6 +567,20 @@ public class APIConverter {
 
     public Boolean execute()
     {
+            try
+            {
+                executeAndReturn();
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        return true;
+    }
+    
+    
+    public Object executeAndReturn()
+    {
         // get values from logical plan and pass it to insertTransaction method
         Insert insert = logicalPlan.getInsert();
         ColumnName names = insert.getChildType(ColumnName.class).get(0);
@@ -586,16 +599,17 @@ public class APIConverter {
                     values.getChildType(IdentifierNode.class, 3).getValue());
         }
         boolean async = namesMap.get("async") == null ? true : Boolean.parseBoolean(namesMap.get("async"));
-        boolean result = false;
+        Object result = null;
         try
         {
-            result = insertTransaction(namesMap.get("toAddress"), namesMap.get("value"), namesMap.get("unit"), false);
+            result = insertTransaction(namesMap.get("toAddress"), namesMap.get("value"), namesMap.get("unit"), !async);
         }
         catch (IOException | CipherException | InterruptedException | TransactionTimeoutException | ExecutionException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
+            throw new RuntimeException("Error while executing query", e);
         }
         return result;
     }
+    
 }
