@@ -5,23 +5,25 @@ import java.util.List;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
-import com.impetus.blkch.sql.generated.SqlBaseLexer;
-import com.impetus.blkch.sql.generated.SqlBaseParser;
+import com.impetus.blkch.sql.generated.BlkchnSqlLexer;
+import com.impetus.blkch.sql.generated.BlkchnSqlParser;
 import com.impetus.blkch.sql.parser.AbstractSyntaxTreeVisitor;
 import com.impetus.blkch.sql.parser.BlockchainVisitor;
 import com.impetus.blkch.sql.parser.CaseInsensitiveCharStream;
 import com.impetus.blkch.sql.parser.LogicalPlan;
 import com.impetus.blkch.sql.query.Column;
 import com.impetus.blkch.sql.query.IdentifierNode;
-import com.impetus.blkch.sql.query.OrderByClause;
 import com.impetus.blkch.sql.query.OrderItem;
 import com.impetus.blkch.sql.query.OrderingDirection;
 import com.impetus.blkch.sql.query.OrderingDirection.Direction;
 import com.impetus.eth.parser.APIConverter;
+import com.impetus.test.catagory.UnitTest;
 
 import junit.framework.TestCase;
 
+@Category(UnitTest.class)
 public class TestAPIConvertor extends TestCase {
 
     @Override
@@ -32,7 +34,7 @@ public class TestAPIConvertor extends TestCase {
     @Test
     public void testBaseAPIConvert() {
         APIConverter apic = new APIConverter(
-                getLogicalPlan("select count(name) as count, name as name  from transactions"), null);
+                getLogicalPlan("select count(name) as count, name as name  from transactions"), null,null);
         OrderItem orderItem = new OrderItem();
         OrderingDirection orderDir = new OrderingDirection(Direction.ASC);
         orderItem.addChildNode(orderDir);
@@ -52,7 +54,7 @@ public class TestAPIConvertor extends TestCase {
         try {
             APIConverter apic = new APIConverter(
                     getLogicalPlan("select count(name) as count, name as name  from transactions where blocknumber=123"),
-                    null);
+                    null,null);
             apic.executeQuery();
             status=true;
         } catch (Exception e) {
@@ -61,12 +63,18 @@ public class TestAPIConvertor extends TestCase {
         assertFalse(status);
     }
 
-    private LogicalPlan getLogicalPlan(String query) {
-        SqlBaseLexer lexer = new SqlBaseLexer(new CaseInsensitiveCharStream(query));
+    public LogicalPlan getLogicalPlan(String sqlText) {
+        LogicalPlan logicalPlan = null;
+        BlkchnSqlParser parser = getParser(sqlText);
+        AbstractSyntaxTreeVisitor astBuilder = new BlockchainVisitor();
+        logicalPlan = (LogicalPlan) astBuilder.visitSingleStatement(parser.singleStatement());
+        return logicalPlan;
+    }
+    public BlkchnSqlParser getParser(String sqlText) {
+        BlkchnSqlLexer lexer = new BlkchnSqlLexer(new CaseInsensitiveCharStream(sqlText));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-        SqlBaseParser parser = new SqlBaseParser(tokens);
-        AbstractSyntaxTreeVisitor visitor = new BlockchainVisitor();
-        return visitor.visitSingleStatement(parser.singleStatement());
+        BlkchnSqlParser parser = new BlkchnSqlParser(tokens);
+        return parser;
     }
 
 }

@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.impetus.eth.parser.AggregationFunctions;
+import com.impetus.test.catagory.UnitTest;
 
 import junit.framework.TestCase;
 
+@Category(UnitTest.class)
 public class TestAggregationFunctions extends TestCase {
     private List<Object> data = new ArrayList<Object>();
 

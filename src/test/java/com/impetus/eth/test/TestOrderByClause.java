@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.impetus.blkch.sql.parser.TreeNode;
 import com.impetus.blkch.sql.query.IdentifierNode;
@@ -13,9 +14,12 @@ import com.impetus.blkch.sql.query.LimitClause;
 import com.impetus.blkch.sql.query.OrderingDirection;
 import com.impetus.blkch.sql.query.OrderingDirection.Direction;
 import com.impetus.eth.parser.DataFrame;
+import com.impetus.test.catagory.UnitTest;
 
 import junit.framework.TestCase;
 
+
+@Category(UnitTest.class)
 public class TestOrderByClause extends TestCase {
     private List<List<Object>> data = new ArrayList<List<Object>>();
 

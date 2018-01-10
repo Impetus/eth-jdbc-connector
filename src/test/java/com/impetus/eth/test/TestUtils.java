@@ -6,11 +6,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.impetus.eth.parser.Utils;
+import com.impetus.test.catagory.UnitTest;
 
 import junit.framework.TestCase;
 
+@Category(UnitTest.class)
 public class TestUtils extends TestCase {
     private List<String> selectColumns = new ArrayList<String>();
 

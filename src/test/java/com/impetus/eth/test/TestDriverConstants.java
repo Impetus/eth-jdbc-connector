@@ -16,8 +16,10 @@
 package com.impetus.eth.test;
 
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.impetus.eth.jdbc.DriverConstants;
+import com.impetus.test.catagory.UnitTest;
 
 import junit.framework.TestCase;
 
@@ -27,6 +29,7 @@ import junit.framework.TestCase;
  * @author ashishk.shukla
  * 
  */
+@Category(UnitTest.class)
 public class TestDriverConstants extends TestCase
 {
 

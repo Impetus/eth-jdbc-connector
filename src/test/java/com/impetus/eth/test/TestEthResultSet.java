@@ -8,13 +8,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.impetus.eth.jdbc.EthResultSet;
 import com.impetus.eth.jdbc.EthResultSetMetaData;
 import com.impetus.eth.parser.DataFrame;
+import com.impetus.test.catagory.UnitTest;
 
 import junit.framework.TestCase;
 
+@Category(UnitTest.class)
 public class TestEthResultSet extends TestCase {
     private List<List<Object>> data = new ArrayList<List<Object>>();
 

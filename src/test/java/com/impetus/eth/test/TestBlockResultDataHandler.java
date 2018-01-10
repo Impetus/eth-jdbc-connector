@@ -8,6 +8,7 @@ import junit.framework.TestCase;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
 
 import com.impetus.blkch.sql.generated.BlkchnSqlLexer;
@@ -19,7 +20,10 @@ import com.impetus.blkch.sql.parser.LogicalPlan;
 import com.impetus.blkch.sql.query.SelectClause;
 import com.impetus.blkch.sql.query.SelectItem;
 import com.impetus.eth.jdbc.BlockResultDataHandler;
+import com.impetus.test.catagory.UnitTest;
 
+
+@Category(UnitTest.class)
 public class TestBlockResultDataHandler extends TestCase {
     private List<Object> data = new ArrayList<Object>();
 

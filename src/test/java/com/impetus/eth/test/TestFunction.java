@@ -7,6 +7,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.Transaction;
 
@@ -15,7 +16,9 @@ import com.impetus.blkch.sql.query.Column;
 import com.impetus.blkch.sql.query.FunctionNode;
 import com.impetus.blkch.sql.query.IdentifierNode;
 import com.impetus.eth.parser.Function;
+import com.impetus.test.catagory.UnitTest;
 
+@Category(UnitTest.class)
 public class TestFunction extends TestCase {
 
     private List<Object> blockdata = new ArrayList<Object>();
