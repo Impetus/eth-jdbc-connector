@@ -21,7 +21,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -34,13 +33,12 @@ import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult;
 import org.web3j.protocol.core.methods.response.Transaction;
 
 import com.impetus.blkch.jdbc.BlkchnStatement;
-import com.impetus.blkch.sql.generated.SqlBaseLexer;
-import com.impetus.blkch.sql.generated.SqlBaseParser;
+import com.impetus.blkch.sql.generated.BlkchnSqlLexer;
+import com.impetus.blkch.sql.generated.BlkchnSqlParser;
 import com.impetus.blkch.sql.parser.AbstractSyntaxTreeVisitor;
 import com.impetus.blkch.sql.parser.BlockchainVisitor;
 import com.impetus.blkch.sql.parser.CaseInsensitiveCharStream;
 import com.impetus.blkch.sql.parser.LogicalPlan;
-import com.impetus.blkch.sql.query.SelectClause;
 import com.impetus.eth.parser.APIConverter;
 import com.impetus.eth.parser.DataFrame;
 
@@ -129,7 +127,21 @@ public class EthStatement implements BlkchnStatement {
 
     @Override
     public boolean execute(String sql) throws SQLException {
-        throw new UnsupportedOperationException();
+        LOGGER.info("Entering into execute Block");
+        LogicalPlan logicalPlan = getLogicalPlan(sql);
+        Boolean result = new APIConverter(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
+                .execute();
+        LOGGER.info("Exiting from execute Block with result: " + result);
+        return result;
+    }
+    
+    public Object executeAndReturn(String sql) throws SQLException {
+        LOGGER.info("Entering into execute Block");
+        LogicalPlan logicalPlan = getLogicalPlan(sql);
+        Object result = new APIConverter(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
+                .executeAndReturn();
+        LOGGER.info("Exiting from execute Block with result: " + result);
+        return result;
     }
 
     @Override
@@ -157,7 +169,8 @@ public class EthStatement implements BlkchnStatement {
         LOGGER.info("Entering into executeQuery Block");
         ResultSet queryResultSet = null;
         LogicalPlan logicalPlan = getLogicalPlan(sql);
-        DataFrame dataframe = new APIConverter(logicalPlan, connection.getWeb3jClient()).executeQuery();
+        DataFrame dataframe = new APIConverter(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
+                .executeQuery();
         queryResultSet = new EthResultSet(dataframe, rSetType, rSetConcurrency);
         LOGGER.info("Exiting from executeQuery Block");
         return queryResultSet;
@@ -354,11 +367,18 @@ public class EthStatement implements BlkchnStatement {
         return transaction;
     }
 
-    private LogicalPlan getLogicalPlan(String query) {
-        SqlBaseLexer lexer = new SqlBaseLexer(new CaseInsensitiveCharStream(query));
+    public LogicalPlan getLogicalPlan(String sqlText) {
+        LogicalPlan logicalPlan = null;
+        BlkchnSqlParser parser = getParser(sqlText);
+        AbstractSyntaxTreeVisitor astBuilder = new BlockchainVisitor();
+        logicalPlan = (LogicalPlan) astBuilder.visitSingleStatement(parser.singleStatement());
+        return logicalPlan;
+    }
+
+    public BlkchnSqlParser getParser(String sqlText) {
+        BlkchnSqlLexer lexer = new BlkchnSqlLexer(new CaseInsensitiveCharStream(sqlText));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-        SqlBaseParser parser = new SqlBaseParser(tokens);
-        AbstractSyntaxTreeVisitor visitor = new BlockchainVisitor();
-        return visitor.visitSingleStatement(parser.singleStatement());
+        BlkchnSqlParser parser = new BlkchnSqlParser(tokens);
+        return parser;
     }
 }
