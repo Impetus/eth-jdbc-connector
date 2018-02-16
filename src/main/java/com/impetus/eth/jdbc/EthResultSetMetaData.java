@@ -39,7 +39,7 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
 
     private String tableName;
 
-    private HashMap<String, Integer> columnNamesMap = new HashMap<String, Integer>();
+    private Map<String, Integer> columnNamesMap = new HashMap<String, Integer>();
 
     private Map<Integer, String> indexToColumnMap = null;
 
@@ -47,7 +47,7 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
 
     private Map<String, String> aliasMapping;
 
-    public EthResultSetMetaData(String tableName, HashMap<String, Integer> columnNamesMap,
+    public EthResultSetMetaData(String tableName, Map<String, Integer> columnNamesMap,
             Map<String, String> aliasMapping) {
         super();
         LOGGER.info("Instatiating new EthResultSetMetaData Object ");

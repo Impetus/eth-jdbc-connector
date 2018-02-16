@@ -3,11 +3,11 @@ package com.impetus.eth.test;
 import java.util.ArrayList;
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import org.junit.Test;
 
-import com.impetus.eth.parser.AggregationFunctions;
-
-import junit.framework.TestCase;
+import com.impetus.blkch.sql.AggregationFunctions;
 
 public class TestAggregationFunctions extends TestCase {
     private List<Object> data = new ArrayList<Object>();

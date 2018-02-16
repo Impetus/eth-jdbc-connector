@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.impetus.blkch.jdbc.AbstractResultSet;
-import com.impetus.eth.parser.DataFrame;
+import com.impetus.blkch.sql.DataFrame;
 
 /**
  * The Class EthResultSet.
@@ -51,7 +51,7 @@ public class EthResultSet extends AbstractResultSet {
 
     protected Object[] currentRow;
 
-    protected HashMap<String, Integer> columnNamesMap;
+    protected Map<String, Integer> columnNamesMap;
 
     protected int resultSetType;
 
@@ -61,13 +61,13 @@ public class EthResultSet extends AbstractResultSet {
 
     protected Map<String, String> aliasMapping;
 
-    public EthResultSet(DataFrame dataframe, int resultSetType, int rSetConcurrency) {
+    public EthResultSet(DataFrame dataframe, int resultSetType, int rSetConcurrency, String tableName) {
         LOGGER.info("Instantiating new Result Set ");
         this.rowData = dataframe.getData();
         this.columnNamesMap = dataframe.getColumnNamesMap();
         this.resultSetType = resultSetType;
         this.rSetConcurrency = rSetConcurrency;
-        this.tableName = dataframe.getTable();
+        this.tableName = tableName;
         this.aliasMapping = dataframe.getAliasMapping();
         currentRowCursor = BEFORE_FIRST_ROW;
         totalRowCount = rowData.size();

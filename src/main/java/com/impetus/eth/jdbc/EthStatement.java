@@ -33,14 +33,17 @@ import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult;
 import org.web3j.protocol.core.methods.response.Transaction;
 
 import com.impetus.blkch.jdbc.BlkchnStatement;
+import com.impetus.blkch.sql.DataFrame;
 import com.impetus.blkch.sql.generated.BlkchnSqlLexer;
 import com.impetus.blkch.sql.generated.BlkchnSqlParser;
 import com.impetus.blkch.sql.parser.AbstractSyntaxTreeVisitor;
 import com.impetus.blkch.sql.parser.BlockchainVisitor;
 import com.impetus.blkch.sql.parser.CaseInsensitiveCharStream;
 import com.impetus.blkch.sql.parser.LogicalPlan;
-import com.impetus.eth.parser.APIConverter;
-import com.impetus.eth.parser.DataFrame;
+import com.impetus.blkch.sql.query.FromItem;
+import com.impetus.blkch.sql.query.IdentifierNode;
+import com.impetus.blkch.sql.query.Table;
+import com.impetus.eth.parser.EthQueryExecutor;
 
 /**
  * The Class EthStatement.
@@ -129,7 +132,7 @@ public class EthStatement implements BlkchnStatement {
     public boolean execute(String sql) throws SQLException {
         LOGGER.info("Entering into execute Block");
         LogicalPlan logicalPlan = getLogicalPlan(sql);
-        Boolean result = new APIConverter(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
+        Boolean result = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
                 .execute();
         LOGGER.info("Exiting from execute Block with result: " + result);
         return result;
@@ -138,7 +141,7 @@ public class EthStatement implements BlkchnStatement {
     public Object executeAndReturn(String sql) throws SQLException {
         LOGGER.info("Entering into execute Block");
         LogicalPlan logicalPlan = getLogicalPlan(sql);
-        Object result = new APIConverter(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
+        Object result = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
                 .executeAndReturn();
         LOGGER.info("Exiting from execute Block with result: " + result);
         return result;
@@ -169,9 +172,11 @@ public class EthStatement implements BlkchnStatement {
         LOGGER.info("Entering into executeQuery Block");
         ResultSet queryResultSet = null;
         LogicalPlan logicalPlan = getLogicalPlan(sql);
-        DataFrame dataframe = new APIConverter(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
+        Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
+        String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
+        DataFrame dataframe = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
                 .executeQuery();
-        queryResultSet = new EthResultSet(dataframe, rSetType, rSetConcurrency);
+        queryResultSet = new EthResultSet(dataframe, rSetType, rSetConcurrency, tableName);
         LOGGER.info("Exiting from executeQuery Block");
         return queryResultSet;
     }

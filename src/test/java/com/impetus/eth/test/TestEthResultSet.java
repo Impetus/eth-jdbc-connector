@@ -1,19 +1,18 @@
 package com.impetus.eth.test;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import org.junit.Test;
 
+import com.impetus.blkch.sql.DataFrame;
 import com.impetus.eth.jdbc.EthResultSet;
 import com.impetus.eth.jdbc.EthResultSetMetaData;
-import com.impetus.eth.parser.DataFrame;
-
-import junit.framework.TestCase;
 
 public class TestEthResultSet extends TestCase {
     private List<List<Object>> data = new ArrayList<List<Object>>();
@@ -60,8 +59,8 @@ public class TestEthResultSet extends TestCase {
         returnRec.add(1563324);
         data.add(returnRec);
         aliasMapping.put("val", "value");
-        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping, table);
-        ethResultSet = new EthResultSet(df, java.sql.ResultSet.FETCH_FORWARD, java.sql.ResultSet.CONCUR_READ_ONLY);
+        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping);
+        ethResultSet = new EthResultSet(df, java.sql.ResultSet.FETCH_FORWARD, java.sql.ResultSet.CONCUR_READ_ONLY, table);
     }
 
     @Test

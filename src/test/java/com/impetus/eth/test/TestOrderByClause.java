@@ -1,20 +1,22 @@
 package com.impetus.eth.test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import org.junit.Test;
 
-import com.impetus.blkch.sql.parser.TreeNode;
+import com.impetus.blkch.sql.DataFrame;
+import com.impetus.blkch.sql.query.Column;
 import com.impetus.blkch.sql.query.IdentifierNode;
 import com.impetus.blkch.sql.query.LimitClause;
+import com.impetus.blkch.sql.query.OrderItem;
 import com.impetus.blkch.sql.query.OrderingDirection;
 import com.impetus.blkch.sql.query.OrderingDirection.Direction;
-import com.impetus.eth.parser.DataFrame;
-
-import junit.framework.TestCase;
 
 public class TestOrderByClause extends TestCase {
     private List<List<Object>> data = new ArrayList<List<Object>>();
@@ -62,12 +64,9 @@ public class TestOrderByClause extends TestCase {
     @Test
     public void testOrderBy() {
 
-        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping, table);
-        Map<String, OrderingDirection> orderList = new HashMap<String, OrderingDirection>();
-        OrderingDirection direction = new OrderingDirection(Direction.ASC);
-
-        orderList.put("val", direction);
-        df = df.order(orderList, null);
+        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping);
+        List<OrderItem> orderitems = Arrays.asList(createOrderItem("val", Direction.ASC));
+        df = df.order(orderitems);
         assertEquals(544444, df.getData().get(4).get(0));
 
     }
@@ -75,12 +74,9 @@ public class TestOrderByClause extends TestCase {
     @Test
     public void testOrderByWithAlias() {
 
-        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping, table);
-        Map<String, OrderingDirection> orderList = new HashMap<String, OrderingDirection>();
-        OrderingDirection direction = new OrderingDirection(Direction.ASC);
-
-        orderList.put("val", direction);
-        df = df.order(orderList, null);
+        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping);
+        List<OrderItem> orderitems = Arrays.asList(createOrderItem("val", Direction.ASC));
+        df = df.order(orderitems);
         assertEquals(544444, df.getData().get(4).get(0));
 
     }
@@ -88,26 +84,35 @@ public class TestOrderByClause extends TestCase {
     @Test
     public void testOrderByExtraSelect() {
 
-        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping, table);
-        Map<String, OrderingDirection> orderList = new HashMap<String, OrderingDirection>();
-        OrderingDirection direction = new OrderingDirection(Direction.ASC);
-
-        orderList.put("blocknumber", direction);
-        List<String> extraSelect = new ArrayList<String>();
-        extraSelect.add("blocknumber");
-        df = df.order(orderList, extraSelect);
-
+        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping);
+        List<OrderItem> orderitems = Arrays.asList(createOrderItem("blocknumber", Direction.ASC));
+        df = df.order(orderitems);
         assertEquals(544411, df.getData().get(4).get(0));
 
     }
 
     @Test
     public void testLimit() {
-        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping, table);
+        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping);
         LimitClause limitClause = new LimitClause();
         IdentifierNode ifn = new IdentifierNode("2");
         limitClause.addChildNode(ifn);
         df = df.limit(limitClause);
         assertEquals(2, df.getData().size());
+    }
+    
+    private static OrderItem createOrderItem(String colName, Direction direction) {
+        OrderItem orderItem = new OrderItem();
+        orderItem.addChildNode(new OrderingDirection(direction));
+        Column column = createColumn(colName);
+        orderItem.addChildNode(column);
+        return orderItem;
+    }
+    
+    private static Column createColumn(String colName) {
+        Column column = new Column();
+        IdentifierNode identifierNode = new IdentifierNode(colName);
+        column.addChildNode(identifierNode);
+        return column;
     }
 }
