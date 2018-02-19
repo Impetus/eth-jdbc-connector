@@ -316,9 +316,13 @@ public class EthResultSet extends AbstractResultSet {
     protected int getColumnIndex(String columnLabel) {
         if (!aliasMapping.isEmpty() && aliasMapping.containsKey(columnLabel)) {
             return columnNamesMap.get(aliasMapping.get(columnLabel));
-        } else
+        } else {
+            if(columnNamesMap.get(columnLabel) == null){
+                LOGGER.error("Column: " + columnLabel + " is not a part of query");
+                throw new RuntimeException("Column: " + columnLabel + " is not a part of query");
+            }
             return columnNamesMap.get(columnLabel);
-
+        }
     }
 
 }
