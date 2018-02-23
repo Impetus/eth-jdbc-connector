@@ -17,6 +17,7 @@ package com.impetus.eth.jdbc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,7 +45,7 @@ public class BlockResultDataHandler implements DataHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlockResultDataHandler.class);
 
-    private static HashMap<String, Integer> columnNamesMap = new HashMap<String, Integer>();
+    private static Map<String, Integer> columnNamesMap = new LinkedHashMap<String, Integer>();
 
     static {
         columnNamesMap.put("blocknumber", 0);
@@ -70,9 +71,9 @@ public class BlockResultDataHandler implements DataHandler {
         columnNamesMap.put("sealfields", 20);
     }
 
-    public HashMap<String, Integer> returnColumnNamesMap = new HashMap<>();
+    public Map<String, Integer> returnColumnNamesMap = new LinkedHashMap<>();
 
-    public HashMap<String, Integer> getColumnNamesMap() {
+    public Map<String, Integer> getColumnNamesMap() {
         return returnColumnNamesMap;
     }
 

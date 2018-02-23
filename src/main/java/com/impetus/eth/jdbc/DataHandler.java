@@ -16,8 +16,8 @@
 package com.impetus.eth.jdbc;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.impetus.blkch.sql.query.SelectItem;
 
@@ -33,7 +33,7 @@ public interface DataHandler {
 
     public String getTableName();
 
-    public HashMap<String, Integer> getColumnNamesMap();
+    public Map<String, Integer> getColumnNamesMap();
 
     public ArrayList<List<Object>> convertGroupedDataToObjArray(List rows, List<SelectItem> selItems,
             List<String> groupByCols);

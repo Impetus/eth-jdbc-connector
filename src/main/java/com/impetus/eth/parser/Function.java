@@ -18,6 +18,7 @@ package com.impetus.eth.parser;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.Transaction;
@@ -31,7 +32,7 @@ public class Function {
 
     public List rows;
 
-    private HashMap<String, Integer> columnNamesMap;
+    private Map<String, Integer> columnNamesMap;
 
     private String table;
 
@@ -39,7 +40,7 @@ public class Function {
 
     }
 
-    public Function(List rows, HashMap<String, Integer> columnNamesMap, String table) {
+    public Function(List rows, Map<String, Integer> columnNamesMap, String table) {
         super();
         this.rows = rows;
         this.columnNamesMap = columnNamesMap;
