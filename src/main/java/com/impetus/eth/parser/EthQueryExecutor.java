@@ -266,6 +266,9 @@ public class EthQueryExecutor extends AbstractQueryExecutor
                     node.getRangeList().addRange(new Range<T>(blockNo, blockNo));
                     return node;
                 }).collect(Collectors.toList());
+                if(dataRanges.isEmpty()){
+                    return rangeNode;
+                }
                 RangeNode<T> dataRangeNodes = dataRanges.get(0);
                 if (dataRanges.size() > 1) {
                     for (int i = 1; i < dataRanges.size(); i++) {
@@ -311,16 +314,16 @@ public class EthQueryExecutor extends AbstractQueryExecutor
                 break;
             case "gaslimit":
                 if(comparator.isEQ()) {
-                    retValue = blockInfo.getGasLimit().equals(value.replaceAll("'", ""));
+                    retValue = blockInfo.getGasLimit().toString().equals(value.replaceAll("'", ""));
                 } else {
-                    retValue = !blockInfo.getGasLimit().equals(value.replaceAll("'", ""));
+                    retValue = !blockInfo.getGasLimit().toString().equals(value.replaceAll("'", ""));
                 }
                 break;
             case "gasused":
                 if(comparator.isEQ()) {
-                    retValue = blockInfo.getGasUsed().equals(value.replaceAll("'", ""));
+                    retValue = blockInfo.getGasUsed().toString().equals(value.replaceAll("'", ""));
                 } else {
-                    retValue = !blockInfo.getGasUsed().equals(value.replaceAll("'", ""));
+                    retValue = !blockInfo.getGasUsed().toString().equals(value.replaceAll("'", ""));
                 }
                 break;
             }
