@@ -80,7 +80,7 @@ public class TestEthResultSet extends TestCase {
         String value = "";
         try {
             ethResultSet.next();
-            value = ethResultSet.getObject(0).toString();
+            value = ethResultSet.getObject(1).toString();
             ethResultSet.beforeFirst();
         } catch (SQLException e) {
 
