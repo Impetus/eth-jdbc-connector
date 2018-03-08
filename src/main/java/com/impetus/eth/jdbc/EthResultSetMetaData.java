@@ -93,14 +93,14 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
     @Override
     public String getColumnLabel(int column) throws SQLException {
         if (!aliasMapping.isEmpty()) {
-            return indexToAliasMap.get(column + 1);
+            return indexToAliasMap.get(column - 1);
         } else
             return getColumnName(column);
     }
 
     @Override
     public String getColumnName(int column) throws SQLException {
-        return indexToColumnMap.get(column + 1);
+        return indexToColumnMap.get(column - 1);
     }
 
     @Override

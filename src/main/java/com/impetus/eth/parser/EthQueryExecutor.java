@@ -499,6 +499,10 @@ public class EthQueryExecutor extends AbstractQueryExecutor
     {
         // get values from logical plan and pass it to insertTransaction method
         Insert insert = logicalPlan.getInsert();
+        String tableName = insert.getChildType(Table.class).get(0).getChildType(IdentifierNode.class, 0).getValue();
+        if(!"transaction".equalsIgnoreCase(tableName)){
+            throw new BlkchnException("Please give valid table name in insert query. Expected: transaction");
+        }
         ColumnName names = insert.getChildType(ColumnName.class).get(0);
         ColumnValue values = insert.getChildType(ColumnValue.class).get(0);
         Map<String, String> namesMap = new HashMap<String, String>();
