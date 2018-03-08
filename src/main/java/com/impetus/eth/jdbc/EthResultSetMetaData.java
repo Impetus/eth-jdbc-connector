@@ -95,7 +95,7 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
         if (!aliasMapping.isEmpty()) {
             return indexToAliasMap.get(column + 1);
         } else
-            return getColumnName(column + 1);
+            return getColumnName(column);
     }
 
     @Override
