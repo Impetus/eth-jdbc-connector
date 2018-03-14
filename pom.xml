@@ -17,7 +17,19 @@
 		<mockito.version>1.10.19</mockito.version>
 		<slf4j.version>1.7.22</slf4j.version>
 		<logback.version>1.0.1</logback.version>
+		<skip.unit.tests>false</skip.unit.tests>
+		<skip.integration.tests>true</skip.integration.tests>
 	</properties>
+
+	<profiles>
+		<profile>
+			<id>integration-test</id>
+			<properties>
+				<skip.integration.tests>false</skip.integration.tests>
+				<skip.unit.tests>true</skip.unit.tests>
+			</properties>
+		</profile>
+	</profiles>
 
 
 	<dependencies>
@@ -35,7 +47,7 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit.version}</version>
-			<scope>test</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
@@ -58,6 +70,18 @@
 			<artifactId>logback-core</artifactId>
 			<version>${logback.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<version>1.6.4</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito</artifactId>
+			<version>1.6.4</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<!-- 1. specify JDK version -->
@@ -65,12 +89,37 @@
 	<build>
 		<finalName>blockchain</finalName>
 		<plugins>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.13</version>
+				<configuration>
+					<groups>com.impetus.test.catagory.UnitTest</groups>
+					<skipTests>${skip.unit.tests}</skipTests>
+				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.19.1</version>
+				<executions>
+					<execution>
+						<id>integration-tests</id>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+						<configuration>
+							<includes>
+								<include>**/*.java</include>
+							</includes>
+							<groups>com.impetus.test.catagory.IntegrationTest</groups>
+							<skipTests>${skip.integration.tests}</skipTests>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>

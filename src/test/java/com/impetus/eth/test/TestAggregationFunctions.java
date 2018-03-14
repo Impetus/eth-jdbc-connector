@@ -6,9 +6,12 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.impetus.blkch.sql.AggregationFunctions;
+import com.impetus.test.catagory.UnitTest;
 
+@Category(UnitTest.class)
 public class TestAggregationFunctions extends TestCase {
     private List<Object> data = new ArrayList<Object>();
 

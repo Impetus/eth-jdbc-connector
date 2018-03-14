@@ -9,11 +9,14 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import com.impetus.blkch.sql.DataFrame;
 import com.impetus.eth.jdbc.EthResultSet;
 import com.impetus.eth.jdbc.EthResultSetMetaData;
+import com.impetus.test.catagory.UnitTest;
 
+@Category(UnitTest.class)
 public class TestEthResultSet extends TestCase {
     private List<List<Object>> data = new ArrayList<List<Object>>();
 
