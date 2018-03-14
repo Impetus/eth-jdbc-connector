@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.impetus.blkch.sql.DataFrame;
 import com.impetus.eth.jdbc.EthResultSet;
-import com.impetus.eth.parser.DataFrame;
 
 public class ResultSetMockData {
 
@@ -90,8 +90,8 @@ public class ResultSetMockData {
         columnNamesMap.put("v", 15);
         columnNamesMap.put("value", 16);
         Map<String, String> aliasMapping = new HashMap<String, String>();
-        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping, "transactions");
-        return new EthResultSet(df, 0, 0);
+        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping);
+        return new EthResultSet(df, 0, 0, "transaction");
 
     }
 
@@ -131,8 +131,8 @@ public class ResultSetMockData {
         columnNamesMap.put("count(to)", 0);
         columnNamesMap.put("to", 1);
         Map<String, String> aliasMapping = new HashMap<String, String>();
-        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping, "transactions");
-        return new EthResultSet(df, 0, 0);
+        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping);
+        return new EthResultSet(df, 0, 0, "transactions");
 
     }
 
@@ -201,8 +201,8 @@ public class ResultSetMockData {
         columnNamesMap.put("value", 3);
         columnNamesMap.put("gasprice", 4);
         Map<String, String> aliasMapping = new HashMap<String, String>();
-        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping, "transactions");
-        return new EthResultSet(df, 0, 0);
+        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping);
+        return new EthResultSet(df, 0, 0, "transaction");
 
     }
 
@@ -271,8 +271,8 @@ public class ResultSetMockData {
         columnNamesMap.put("value", 3);
         columnNamesMap.put("gasprice", 4);
         Map<String, String> aliasMapping = new HashMap<String, String>();
-        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping, "transactions");
-        return new EthResultSet(df, 0, 0);
+        DataFrame df = new DataFrame(data, columnNamesMap, aliasMapping);
+        return new EthResultSet(df, 0, 0, "transaction");
 
     }
 
