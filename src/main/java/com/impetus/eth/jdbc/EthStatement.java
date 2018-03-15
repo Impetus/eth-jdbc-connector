@@ -32,6 +32,7 @@ import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult;
 import org.web3j.protocol.core.methods.response.Transaction;
 
+import com.impetus.blkch.BlkchnErrorListener;
 import com.impetus.blkch.jdbc.BlkchnStatement;
 import com.impetus.blkch.sql.DataFrame;
 import com.impetus.blkch.sql.generated.BlkchnSqlLexer;
@@ -375,6 +376,8 @@ public class EthStatement implements BlkchnStatement {
     public LogicalPlan getLogicalPlan(String sqlText) {
         LogicalPlan logicalPlan = null;
         BlkchnSqlParser parser = getParser(sqlText);
+        parser.removeErrorListeners();
+        parser.addErrorListener(BlkchnErrorListener.INSTANCE);
         AbstractSyntaxTreeVisitor astBuilder = new BlockchainVisitor();
         logicalPlan = (LogicalPlan) astBuilder.visitSingleStatement(parser.singleStatement());
         return logicalPlan;
@@ -382,6 +385,8 @@ public class EthStatement implements BlkchnStatement {
 
     public BlkchnSqlParser getParser(String sqlText) {
         BlkchnSqlLexer lexer = new BlkchnSqlLexer(new CaseInsensitiveCharStream(sqlText));
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(BlkchnErrorListener.INSTANCE);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         BlkchnSqlParser parser = new BlkchnSqlParser(tokens);
         return parser;
