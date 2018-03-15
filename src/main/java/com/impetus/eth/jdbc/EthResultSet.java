@@ -16,6 +16,7 @@
 package com.impetus.eth.jdbc;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -187,13 +188,20 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public String getString(String columnLabel) throws SQLException {
-        return (String) currentRow[getColumnIndex(columnLabel)];
+        int idx = getColumnIndex(columnLabel);
+        if(currentRow[idx] instanceof BigInteger){
+            return ((BigInteger) currentRow[idx]).toString();
+        }
+        return (String) currentRow[idx];
     }
 
     @Override
     public String getString(int columnIndex) throws SQLException {
         if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
+        }
+        if(currentRow[columnIndex - 1] instanceof BigInteger){
+            return ((BigInteger) currentRow[columnIndex - 1]).toString();
         }
         return (String) currentRow[columnIndex - 1];
     }

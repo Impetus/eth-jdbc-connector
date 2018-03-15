@@ -433,10 +433,10 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
 
             for (Object key : dataNode.getKeys()) {
                 Block blockInfo = (Block) dataMap.get(key.toString());
-                String blocknumber = blockInfo.getNumber().toString();
+                BigInteger blocknumber = blockInfo.getNumber();
                 String hash = blockInfo.getHash();
                 String parenthash = blockInfo.getParentHash();
-                String nonce = blockInfo.getNonce().toString();
+                BigInteger nonce = blockInfo.getNonce();
                 String sha3uncles = blockInfo.getSha3Uncles();
                 String logsbloom = blockInfo.getLogsBloom();
                 String transactionsroot = blockInfo.getTransactionsRoot();
@@ -445,12 +445,12 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 String author = blockInfo.getAuthor();
                 String miner = blockInfo.getMiner();
                 String mixhash = blockInfo.getMixHash();
-                String totaldifficulty = blockInfo.getTotalDifficulty().toString();
+                BigInteger totaldifficulty = blockInfo.getTotalDifficulty();
                 String extradata = blockInfo.getExtraData();
-                String size = blockInfo.getSize().toString();
-                String gaslimit = blockInfo.getGasLimit().toString();
-                String gasused = blockInfo.getGasUsed().toString();
-                String timestamp = blockInfo.getTimestamp().toString();
+                BigInteger size = blockInfo.getSize();
+                BigInteger gaslimit = blockInfo.getGasLimit();
+                BigInteger gasused = blockInfo.getGasUsed();
+                BigInteger timestamp = blockInfo.getTimestamp();
                 List<TransactionResult> transactions = blockInfo.getTransactions();
                 List<String> uncles = blockInfo.getUncles();
                 List<String> sealfields = blockInfo.getSealFields();
