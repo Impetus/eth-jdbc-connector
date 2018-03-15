@@ -56,30 +56,28 @@ import com.impetus.blkch.util.Range;
 import com.impetus.blkch.util.RangeOperations;
 import com.impetus.eth.jdbc.DriverConstants;
 
-public class EthQueryExecutor extends AbstractQueryExecutor
-{
-    
+public class EthQueryExecutor extends AbstractQueryExecutor {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(EthQueryExecutor.class);
-    
+
     private Web3j web3jClient;
-    
+
     private Properties properties;
-    
-    public EthQueryExecutor(LogicalPlan logicalPlan, Web3j web3jClient, Properties properties)
-    {
-       this.logicalPlan = logicalPlan;
-       this.web3jClient = web3jClient;
-       this.properties = properties;
-       this.physicalPlan = new EthPhysicalPlan(logicalPlan);
+
+    public EthQueryExecutor(LogicalPlan logicalPlan, Web3j web3jClient, Properties properties) {
+        this.logicalPlan = logicalPlan;
+        this.web3jClient = web3jClient;
+        this.properties = properties;
+        this.physicalPlan = new EthPhysicalPlan(logicalPlan);
     }
-    
+
     public DataFrame executeQuery() {
         physicalPlan.getWhereClause().traverse();
         if (!physicalPlan.validateLogicalPlan()) {
             throw new BlkchnException("This query can't be executed");
         }
         DataFrame dataframe = getFromTable();
-        if(dataframe.isEmpty()) {
+        if (dataframe.isEmpty()) {
             return dataframe;
         }
         List<OrderItem> orderItems = null;
@@ -98,8 +96,9 @@ public class EthQueryExecutor extends AbstractQueryExecutor
                     .map(col -> col.getChildType(IdentifierNode.class, 0).getValue()).collect(Collectors.toList());
             GroupedDataFrame groupedDF = dataframe.group(groupByCols);
             DataFrame afterSelect;
-            if(logicalPlan.getQuery().hasChildType(HavingClause.class)) {
-                afterSelect = groupedDF.having(logicalPlan.getQuery().getChildType(HavingClause.class, 0)).select(physicalPlan.getSelectItems());
+            if (logicalPlan.getQuery().hasChildType(HavingClause.class)) {
+                afterSelect = groupedDF.having(logicalPlan.getQuery().getChildType(HavingClause.class, 0))
+                        .select(physicalPlan.getSelectItems());
             } else {
                 afterSelect = groupedDF.select(physicalPlan.getSelectItems());
             }
@@ -136,10 +135,10 @@ public class EthQueryExecutor extends AbstractQueryExecutor
         if (physicalPlan.getWhereClause() != null) {
             DataNode<?> finalData;
             if (physicalPlan.getWhereClause().hasChildType(LogicalOperation.class)) {
-                TreeNode directAPIOptimizedTree = executeDirectAPIs(tableName, physicalPlan.getWhereClause()
-                        .getChildType(LogicalOperation.class, 0));
+                TreeNode directAPIOptimizedTree = executeDirectAPIs(tableName,
+                        physicalPlan.getWhereClause().getChildType(LogicalOperation.class, 0));
                 TreeNode optimizedTree = optimize(directAPIOptimizedTree);
-                 finalData = execute(optimizedTree);
+                finalData = execute(optimizedTree);
             } else if (physicalPlan.getWhereClause().hasChildType(DirectAPINode.class)) {
                 DirectAPINode node = physicalPlan.getWhereClause().getChildType(DirectAPINode.class, 0);
                 finalData = getDataNode(node.getTable(), node.getColumn(), node.getValue());
@@ -158,8 +157,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor
     }
 
     @Override
-    protected DataNode<?> getDataNode(String table, String column, String value)
-    {
+    protected DataNode<?> getDataNode(String table, String column, String value) {
         if (dataMap.containsKey(value)) {
             return new DataNode<>(table, Arrays.asList(value));
         }
@@ -172,23 +170,24 @@ public class EthQueryExecutor extends AbstractQueryExecutor
             }
         } else if (table.equals("block") && column.equals("blockhash")) {
             try {
-                block = getBlockByHash(value);
+                block = getBlockByHash(value.replace("'", ""));
             } catch (Exception e) {
                 throw new BlkchnException("Error querying block by hash " + value.replace("'", ""), e);
             }
         } else if (table.equals("transaction") && column.equals("hash")) {
             try {
-                //TODO: check for unique representation of transaction with blocknumber
-                Transaction transaction = getTransactionByHash(value);
-                dataMap.put(block.getNumber().toString(), block);
-                return new DataNode<>(table, Arrays.asList(block.getNumber().toString()));
+                // TODO: check for unique representation of transaction with
+                // blocknumber
+                Transaction transaction = getTransactionByHash(value.replace("'", ""));
+                dataMap.put(transaction.getBlockNumber().toString(), transaction);
+                return new DataNode<>(table, Arrays.asList(transaction.getBlockNumber().toString()));
             } catch (Exception e) {
                 throw new BlkchnException("Error querying block by hash " + value.replace("'", ""), e);
             }
-        } 
-        if(block == null){
-            throw new BlkchnException(String.format("There is no direct API for table %s and column %s combination",
-                    table, column));
+        }
+        if (block == null) {
+            throw new BlkchnException(
+                    String.format("There is no direct API for table %s and column %s combination", table, column));
         }
         dataMap.put(block.getNumber().toString(), block);
         return new DataNode<>(table, Arrays.asList(block.getNumber().toString()));
@@ -196,9 +195,8 @@ public class EthQueryExecutor extends AbstractQueryExecutor
 
     @Override
     @SuppressWarnings("unchecked")
-    protected <T extends Number & Comparable<T>> DataNode<T> executeRangeNode(RangeNode<T> rangeNode)
-    {
-        if(rangeNode.getRangeList().getRanges().isEmpty()) {
+    protected <T extends Number & Comparable<T>> DataNode<T> executeRangeNode(RangeNode<T> rangeNode) {
+        if (rangeNode.getRangeList().getRanges().isEmpty()) {
             return new DataNode<>(rangeNode.getTable(), new ArrayList<>());
         }
         RangeOperations<T> rangeOps = (RangeOperations<T>) physicalPlan.getRangeOperations(rangeNode.getTable(),
@@ -214,7 +212,8 @@ public class EthQueryExecutor extends AbstractQueryExecutor
         List<DataNode<T>> dataNodes = rangeNode.getRangeList().getRanges().stream().map(range -> {
             List<T> keys = new ArrayList<>();
             T current = range.getMin().equals(rangeOps.getMinValue()) ? (T) new BigInteger("0") : range.getMin();
-            T max = range.getMax().equals(rangeOps.getMaxValue()) ? (T) rangeOps.subtract((T) height, 1) : range.getMax();
+            T max = range.getMax().equals(rangeOps.getMaxValue()) ? (T) rangeOps.subtract((T) height, 1)
+                    : range.getMax();
             do {
                 if ("block".equals(rangeTable) && "blocknumber".equals(rangeCol)) {
                     try {
@@ -245,8 +244,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor
     @Override
     @SuppressWarnings("unchecked")
     protected <T extends Number & Comparable<T>> RangeNode<T> combineRangeAndDataNodes(RangeNode<T> rangeNode,
-            DataNode<?> dataNode, LogicalOperation oper)
-    {
+            DataNode<?> dataNode, LogicalOperation oper) {
         String tableName = dataNode.getTable();
         List<String> keys = dataNode.getKeys().stream().map(x -> x.toString()).collect(Collectors.toList());
         String rangeCol = rangeNode.getColumn();
@@ -266,7 +264,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor
                     node.getRangeList().addRange(new Range<T>(blockNo, blockNo));
                     return node;
                 }).collect(Collectors.toList());
-                if(dataRanges.isEmpty()){
+                if (dataRanges.isEmpty()) {
                     return rangeNode;
                 }
                 RangeNode<T> dataRangeNodes = dataRanges.get(0);
@@ -288,8 +286,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor
     }
 
     @Override
-    protected boolean filterField(String fieldName, Object obj, String value, Comparator comparator)
-    {
+    protected boolean filterField(String fieldName, Object obj, String value, Comparator comparator) {
         boolean retValue = false;
         if (!comparator.isEQ() && !comparator.isNEQ()) {
             throw new BlkchnException(String.format(
@@ -297,43 +294,42 @@ public class EthQueryExecutor extends AbstractQueryExecutor
         }
         if (obj instanceof Block) {
             Block blockInfo = (Block) obj;
-            switch(fieldName){
-            case "hash":
-                if(comparator.isEQ()) {
-                    retValue = blockInfo.getHash().equals(value.replaceAll("'", ""));
-                } else {
-                    retValue = !blockInfo.getHash().equals(value.replaceAll("'", ""));
-                }
-                break;
-            case "parenthash":
-                if(comparator.isEQ()) {
-                    retValue = blockInfo.getParentHash().equals(value.replaceAll("'", ""));
-                } else {
-                    retValue = !blockInfo.getParentHash().equals(value.replaceAll("'", ""));
-                }
-                break;
-            case "gaslimit":
-                if(comparator.isEQ()) {
-                    retValue = blockInfo.getGasLimit().toString().equals(value.replaceAll("'", ""));
-                } else {
-                    retValue = !blockInfo.getGasLimit().toString().equals(value.replaceAll("'", ""));
-                }
-                break;
-            case "gasused":
-                if(comparator.isEQ()) {
-                    retValue = blockInfo.getGasUsed().toString().equals(value.replaceAll("'", ""));
-                } else {
-                    retValue = !blockInfo.getGasUsed().toString().equals(value.replaceAll("'", ""));
-                }
-                break;
+            switch (fieldName) {
+                case "hash":
+                    if (comparator.isEQ()) {
+                        retValue = blockInfo.getHash().equals(value.replaceAll("'", ""));
+                    } else {
+                        retValue = !blockInfo.getHash().equals(value.replaceAll("'", ""));
+                    }
+                    break;
+                case "parenthash":
+                    if (comparator.isEQ()) {
+                        retValue = blockInfo.getParentHash().equals(value.replaceAll("'", ""));
+                    } else {
+                        retValue = !blockInfo.getParentHash().equals(value.replaceAll("'", ""));
+                    }
+                    break;
+                case "gaslimit":
+                    if (comparator.isEQ()) {
+                        retValue = blockInfo.getGasLimit().toString().equals(value.replaceAll("'", ""));
+                    } else {
+                        retValue = !blockInfo.getGasLimit().toString().equals(value.replaceAll("'", ""));
+                    }
+                    break;
+                case "gasused":
+                    if (comparator.isEQ()) {
+                        retValue = blockInfo.getGasUsed().toString().equals(value.replaceAll("'", ""));
+                    } else {
+                        retValue = !blockInfo.getGasUsed().toString().equals(value.replaceAll("'", ""));
+                    }
+                    break;
             }
         }
         return retValue;
     }
 
     @Override
-    protected <T> DataNode<T> filterRangeNodeWithValue(RangeNode<?> rangeNode, DataNode<T> dataNode)
-    {
+    protected <T> DataNode<T> filterRangeNodeWithValue(RangeNode<?> rangeNode, DataNode<T> dataNode) {
         List<T> filteredKeys = dataNode.getKeys().stream().filter(key -> {
             if ("block".equals(dataNode.getTable()) && "blocknumber".equals(rangeNode.getColumn())) {
                 boolean include = false;
@@ -350,20 +346,19 @@ public class EthQueryExecutor extends AbstractQueryExecutor
         }).collect(Collectors.toList());
         return new DataNode<>(dataNode.getTable(), filteredKeys);
     }
-    
-    
+
     private List<TransactionResult> getTransactions(String blockNumber) throws IOException {
         LOGGER.info("Getting details of transactions stored in block - " + blockNumber);
-        EthBlock block = web3jClient.ethGetBlockByNumber(DefaultBlockParameter.valueOf(new BigInteger(blockNumber)),
-                true).send();
+        EthBlock block = web3jClient
+                .ethGetBlockByNumber(DefaultBlockParameter.valueOf(new BigInteger(blockNumber)), true).send();
 
         return block.getBlock().getTransactions();
     }
 
     private Block getBlockByNumber(String blockNumber) throws IOException {
         LOGGER.info("Getting block - " + blockNumber + " Information ");
-        EthBlock block = web3jClient.ethGetBlockByNumber(DefaultBlockParameter.valueOf(new BigInteger(blockNumber)),
-                true).send();
+        EthBlock block = web3jClient
+                .ethGetBlockByNumber(DefaultBlockParameter.valueOf(new BigInteger(blockNumber)), true).send();
         return block.getBlock();
     }
 
@@ -375,7 +370,6 @@ public class EthQueryExecutor extends AbstractQueryExecutor
 
     private Transaction getTransactionByHash(String transactionHash) throws IOException {
         LOGGER.info("Getting information of Transaction by hash - " + transactionHash);
-
         Transaction transaction = web3jClient.ethGetTransactionByHash(transactionHash).send().getResult();
         return transaction;
     }
@@ -389,65 +383,54 @@ public class EthQueryExecutor extends AbstractQueryExecutor
                 .getResult();
         return transaction;
     }
-    
+
     private BigInteger getBlockHeight() throws IOException {
         LOGGER.info("Getting block height ");
         EthBlockNumber block = web3jClient.ethBlockNumber().send();
         return block.getBlockNumber();
     }
-    
+
     private Object insertTransaction(String toAddress, String value, String unit, boolean syncRequest)
-            throws IOException, CipherException, InterruptedException, TransactionTimeoutException, ExecutionException
-    {
+            throws IOException, CipherException, InterruptedException, TransactionTimeoutException, ExecutionException {
         toAddress = toAddress.replaceAll("'", "");
         value = value.replaceAll("'", "");
         unit = unit.replaceAll("'", "").toUpperCase();
         Object val;
-        try
-        {
-            if (value.indexOf('.') > 0)
-            {
+        try {
+            if (value.indexOf('.') > 0) {
                 val = Double.parseDouble(value);
-            }
-            else
-            {
+            } else {
                 val = Long.parseLong(value);
             }
-        }
-        catch (NumberFormatException e)
-        {
+        } catch (NumberFormatException e) {
             LOGGER.error("Exception while parsing value", e);
             throw new RuntimeException("Exception while parsing value", e);
         }
-        Credentials credentials = WalletUtils.loadCredentials(
-                properties.getProperty(DriverConstants.KEYSTORE_PASSWORD),
+        Credentials credentials = WalletUtils.loadCredentials(properties.getProperty(DriverConstants.KEYSTORE_PASSWORD),
                 properties.getProperty(DriverConstants.KEYSTORE_PATH));
         Object transactionReceipt;
-        if (syncRequest)
-        {
+        if (syncRequest) {
             transactionReceipt = Transfer.sendFunds(web3jClient, credentials, toAddress,
                     BigDecimal.valueOf((val instanceof Long) ? (Long) val : (Double) val), Convert.Unit.valueOf(unit));
-        }
-        else
-        {
-            transactionReceipt = Transfer.sendFundsAsync(web3jClient, credentials,
-                    toAddress, BigDecimal.valueOf((val instanceof Long) ? (Long) val : (Double) val),
-                    Convert.Unit.valueOf(unit));
+        } else {
+            transactionReceipt = Transfer.sendFundsAsync(web3jClient, credentials, toAddress,
+                    BigDecimal.valueOf((val instanceof Long) ? (Long) val : (Double) val), Convert.Unit.valueOf(unit));
         }
 
-       
         return transactionReceipt;
     }
-    
+
     protected DataFrame createDataFrame(DataNode<?> dataNode) {
-        if(dataNode.getKeys().isEmpty()) {
+        if (dataNode.getKeys().isEmpty()) {
             return new DataFrame(new ArrayList<>(), new ArrayList<>(), physicalPlan.getColumnAliasMapping());
         }
+        DataFrame df = null;
+        List<List<Object>> data = new ArrayList<>();
         if (dataMap.get(dataNode.getKeys().get(0).toString()) instanceof Block) {
             String[] columns = { "blocknumber", "hash", "parenthash", "nonce", "sha3uncles", "logsbloom",
                     "transactionsroot", "stateroot", "receiptsroot", "author", "miner", "mixhash", "totaldifficulty",
                     "extradata", "size", "gaslimit", "gasused", "timestamp", "transactions", "uncles", "sealfields" };
-            List<List<Object>> data = new ArrayList<>();
+
             for (Object key : dataNode.getKeys()) {
                 Block blockInfo = (Block) dataMap.get(key.toString());
                 String blocknumber = blockInfo.getNumber().toString();
@@ -475,32 +458,55 @@ public class EthQueryExecutor extends AbstractQueryExecutor
                         stateroot, receiptsroot, author, miner, mixhash, totaldifficulty, extradata, size, gaslimit,
                         gasused, timestamp, transactions, uncles, sealfields));
             }
-            DataFrame df = new DataFrame(data, columns, physicalPlan.getColumnAliasMapping());
+            df = new DataFrame(data, columns, physicalPlan.getColumnAliasMapping());
             df.setRawData(dataMap.values());
             return df;
-        }
-        throw new BlkchnException("Cannot create dataframe from unknown object type");
+        } else if (dataMap.get(dataNode.getKeys().get(0).toString()) instanceof Transaction) {
+            String columns[] = { "blockhash", "blocknumber", "creates", "from", "gas", "gasprice", "hash", "input",
+                    "nonce", "publickey", "r", "raw", "s", "to", "transactionindex", "v", "value" };
+            for (Object key : dataNode.getKeys()) {
+                Transaction txnInfo = (Transaction) dataMap.get(key.toString());
+                String blockhash = txnInfo.getBlockHash();
+                String blocknumber = txnInfo.getBlockNumber().toString();
+                String creates = txnInfo.getCreates();
+                String from = txnInfo.getFrom();
+                String gas = txnInfo.getGas().toString();
+                String gasprice = txnInfo.getGasPrice().toString();
+                String hash = txnInfo.getHash();
+                String input = txnInfo.getInput();
+                String nonce = txnInfo.getNonce().toString();
+                String publickey = txnInfo.getPublicKey();
+                String r = txnInfo.getR();
+                String raw = txnInfo.getRaw();
+                String s = txnInfo.getS();
+                String to = txnInfo.getTo();
+                String transactionindex = txnInfo.getTransactionIndex().toString();
+                String v = String.valueOf(txnInfo.getV());
+                String value = txnInfo.getValue().toString();
+                data.add(Arrays.asList(blockhash, blocknumber, creates, from, gas, gasprice, hash, input, nonce,
+                        publickey, r, raw, s, to, transactionindex, v, value));
+            }
+            df = new DataFrame(data, columns, physicalPlan.getColumnAliasMapping());
+            df.setRawData(dataMap.values());
+            return df;
+        } else
+            throw new BlkchnException("Cannot create dataframe from unknown object type");
     }
 
-    public Boolean execute()
-    {
-        try
-        {
+    public Boolean execute() {
+        try {
             executeAndReturn();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return false;
         }
         return true;
     }
 
-    public Object executeAndReturn()
-    {
+    public Object executeAndReturn() {
         // get values from logical plan and pass it to insertTransaction method
         Insert insert = logicalPlan.getInsert();
         String tableName = insert.getChildType(Table.class).get(0).getChildType(IdentifierNode.class, 0).getValue();
-        if(!"transaction".equalsIgnoreCase(tableName)){
+        if (!"transaction".equalsIgnoreCase(tableName)) {
             throw new BlkchnException("Please give valid table name in insert query. Expected: transaction");
         }
         ColumnName names = insert.getChildType(ColumnName.class).get(0);
@@ -512,19 +518,17 @@ public class EthQueryExecutor extends AbstractQueryExecutor
                 values.getChildType(IdentifierNode.class, 1).getValue());
         namesMap.put(names.getChildType(IdentifierNode.class, 2).getValue(),
                 values.getChildType(IdentifierNode.class, 2).getValue());
-        if (names.getChildType(IdentifierNode.class, 3) != null && values.getChildType(IdentifierNode.class, 3) != null)
-        {
+        if (names.getChildType(IdentifierNode.class, 3) != null
+                && values.getChildType(IdentifierNode.class, 3) != null) {
             namesMap.put(names.getChildType(IdentifierNode.class, 3).getValue(),
                     values.getChildType(IdentifierNode.class, 3).getValue());
         }
         boolean async = namesMap.get("async") == null ? true : Boolean.parseBoolean(namesMap.get("async"));
         Object result = null;
-        try
-        {
+        try {
             result = insertTransaction(namesMap.get("toAddress"), namesMap.get("value"), namesMap.get("unit"), !async);
-        }
-        catch (IOException | CipherException | InterruptedException | TransactionTimeoutException | ExecutionException e)
-        {
+        } catch (IOException | CipherException | InterruptedException | TransactionTimeoutException
+                | ExecutionException e) {
             e.printStackTrace();
             throw new RuntimeException("Error while executing query", e);
         }
