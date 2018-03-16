@@ -144,9 +144,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 finalData = getDataNode(node.getTable(), node.getColumn(), node.getValue());
             } else {
                 RangeNode<?> rangeNode = physicalPlan.getWhereClause().getChildType(RangeNode.class, 0);
-                System.out.println("-- Executing Range Node");
                 finalData = executeRangeNode(rangeNode);
-                System.out.println("DataNode: ");
                 finalData.traverse();
             }
             return createDataFrame(finalData);
@@ -161,40 +159,49 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         if (dataMap.containsKey(value)) {
             return new DataNode<>(table, Arrays.asList(value));
         }
-        Block block = null;
-        if (table.equals("block") && column.equals("blocknumber")) {
-            try {
-                block = getBlockByNumber(value);
-            } catch (Exception e) {
-                throw new BlkchnException("Error querying block by number " + value, e);
+
+        if (table.equals("block")) {
+            Block block = null;
+            if (column.equals("blocknumber")) {
+                try {
+                    block = getBlockByNumber(value);
+                } catch (Exception e) {
+                    throw new BlkchnException("Error querying block by number " + value, e);
+                }
+            } else if (column.equals("blockhash")) {
+                try {
+                    block = getBlockByHash(value.replace("'", ""));
+                } catch (Exception e) {
+                    throw new BlkchnException("Error querying block by hash " + value.replace("'", ""), e);
+                }
             }
-        } else if (table.equals("block") && column.equals("blockhash")) {
-            try {
-                block = getBlockByHash(value.replace("'", ""));
-            } catch (Exception e) {
-                throw new BlkchnException("Error querying block by hash " + value.replace("'", ""), e);
+            dataMap.put(block.getNumber().toString(), block);
+            return new DataNode<>(table, Arrays.asList(block.getNumber().toString()));
+
+        } else if (table.equals("transaction")) {
+            Transaction transaction = null;
+            if (column.equals("hash")) {
+                try {
+                    transaction = getTransactionByHash(value.replace("'", ""));
+                    dataMap.put(transaction.getHash(), transaction);
+                } catch (Exception e) {
+                    throw new BlkchnException("Error querying transaction by hash " + value.replace("'", ""), e);
+                }
+            } else if (column.equals("blocknumber")) {
+                try {
+                    transaction = getTransactionByHash(value.replace("'", ""));
+                    dataMap.put(transaction.getHash(), transaction);
+                } catch (Exception e) {
+                    throw new BlkchnException("Error querying transaction by hash " + value.replace("'", ""), e);
+                }
             }
-        } else if (table.equals("transaction") && column.equals("hash")) {
-            try {
-                // TODO: check for unique representation of transaction with
-                // blocknumber
-                Transaction transaction = getTransactionByHash(value.replace("'", ""));
-                dataMap.put(transaction.getBlockNumber().toString(), transaction);
-                return new DataNode<>(table, Arrays.asList(transaction.getBlockNumber().toString()));
-            } catch (Exception e) {
-                throw new BlkchnException("Error querying block by hash " + value.replace("'", ""), e);
-            }
-        }
-        if (block == null) {
+            return new DataNode<>(table, Arrays.asList(transaction.getHash()));
+        } else
             throw new BlkchnException(
                     String.format("There is no direct API for table %s and column %s combination", table, column));
-        }
-        dataMap.put(block.getNumber().toString(), block);
-        return new DataNode<>(table, Arrays.asList(block.getNumber().toString()));
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     protected <T extends Number & Comparable<T>> DataNode<T> executeRangeNode(RangeNode<T> rangeNode) {
         if (rangeNode.getRangeList().getRanges().isEmpty()) {
             return new DataNode<>(rangeNode.getTable(), new ArrayList<>());
@@ -209,8 +216,8 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         } catch (Exception e) {
             throw new BlkchnException("Error getting height of ledger", e);
         }
-        List<DataNode<T>> dataNodes = rangeNode.getRangeList().getRanges().stream().map(range -> {
-            List<T> keys = new ArrayList<>();
+        List<DataNode> dataNodes = rangeNode.getRangeList().getRanges().stream().map(range -> {
+            List keys = new ArrayList<>();
             T current = range.getMin().equals(rangeOps.getMinValue()) ? (T) new BigInteger("0") : range.getMin();
             T max = range.getMax().equals(rangeOps.getMaxValue()) ? (T) rangeOps.subtract((T) height, 1)
                     : range.getMax();
@@ -227,18 +234,34 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     } catch (Exception e) {
                         throw new BlkchnException("Error query block by number " + current, e);
                     }
+                } else if ("transaction".equals(rangeTable) && "blocknumber".equals(rangeCol)) {
+                    try {
+                        if (dataMap.get(current.toString()) != null) {
+                            keys.add(current);
+                        } else {
+                            List<?> txnList = getTransactions(current.toString());
+                            for (Transaction txnInfo : (List<Transaction>) txnList) {
+                                dataMap.put(txnInfo.getHash(), txnInfo);
+                                keys.add(txnInfo.getHash());
+                            }
+                        }
+                    } catch (Exception e) {
+                        throw new BlkchnException("Error query transaction by number " + current, e);
+                    }
+
                 }
                 current = rangeOps.add(current, 1);
             } while (max.compareTo(current) >= 0);
+
             return new DataNode<>(rangeTable, keys);
         }).collect(Collectors.toList());
-        DataNode<T> finalDataNode = dataNodes.get(0);
+        DataNode<T> finalDataNode = (DataNode<T>) dataNodes.get(0);
         if (dataNodes.size() > 1) {
             for (int i = 1; i < dataNodes.size(); i++) {
-                finalDataNode = mergeDataNodes(finalDataNode, dataNodes.get(i), Operator.OR);
+                finalDataNode = mergeDataNodes(finalDataNode, (DataNode<T>) dataNodes.get(i), Operator.OR);
             }
         }
-        return finalDataNode;
+        return (DataNode<T>) finalDataNode;
     }
 
     @Override
