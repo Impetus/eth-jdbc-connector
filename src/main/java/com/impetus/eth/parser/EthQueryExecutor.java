@@ -490,22 +490,22 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             for (Object key : dataNode.getKeys()) {
                 Transaction txnInfo = (Transaction) dataMap.get(key.toString());
                 String blockhash = txnInfo.getBlockHash();
-                String blocknumber = txnInfo.getBlockNumber().toString();
+                BigInteger blocknumber = txnInfo.getBlockNumber();
                 String creates = txnInfo.getCreates();
                 String from = txnInfo.getFrom();
                 String gas = txnInfo.getGas().toString();
-                String gasprice = txnInfo.getGasPrice().toString();
+                BigInteger gasprice = txnInfo.getGasPrice();
                 String hash = txnInfo.getHash();
                 String input = txnInfo.getInput();
-                String nonce = txnInfo.getNonce().toString();
+                BigInteger nonce = txnInfo.getNonce();
                 String publickey = txnInfo.getPublicKey();
                 String r = txnInfo.getR();
                 String raw = txnInfo.getRaw();
                 String s = txnInfo.getS();
                 String to = txnInfo.getTo();
-                String transactionindex = txnInfo.getTransactionIndex().toString();
+                BigInteger transactionindex = txnInfo.getTransactionIndex();
                 String v = String.valueOf(txnInfo.getV());
-                String value = txnInfo.getValue().toString();
+                BigInteger value = txnInfo.getValue();
                 data.add(Arrays.asList(blockhash, blocknumber, creates, from, gas, gasprice, hash, input, nonce,
                         publickey, r, raw, s, to, transactionindex, v, value));
             }
