@@ -25,8 +25,8 @@ public class EthPhysicalPlan extends PhysicalPlan {
         rangeColMap.put("block", Arrays.asList("blocknumber"));
         rangeColMap.put("transaction", Arrays.asList("blocknumber"));
         
-        queryColMap.put("block", Arrays.asList("blockhash","blocknumber"));
-        queryColMap.put("transaction", Arrays.asList("hash","blocknumber"));
+        queryColMap.put("block", Arrays.asList("blockhash"));
+        queryColMap.put("transaction", Arrays.asList("hash"));
         
         rangeOpMap.put(new Tuple2<>("block", "blocknumber"), new BigIntegerRangeOperations());
         rangeOpMap.put(new Tuple2<>("transaction", "blocknumber"), new BigIntegerRangeOperations());

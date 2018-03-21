@@ -64,6 +64,8 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
 
     private Properties properties;
 
+    protected Map<String, List<String>> blkTxnHashMap = new HashMap<>();
+
     public EthQueryExecutor(LogicalPlan logicalPlan, Web3j web3jClient, Properties properties) {
         this.logicalPlan = logicalPlan;
         this.web3jClient = web3jClient;
@@ -140,6 +142,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 TreeNode optimizedTree = optimize(directAPIOptimizedTree);
                 finalData = execute(optimizedTree);
             } else if (physicalPlan.getWhereClause().hasChildType(DirectAPINode.class)) {
+                System.out.println("in direct API Block");
                 DirectAPINode node = physicalPlan.getWhereClause().getChildType(DirectAPINode.class, 0);
                 finalData = getDataNode(node.getTable(), node.getColumn(), node.getValue());
             } else {
@@ -154,6 +157,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
 
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     protected DataNode<?> getDataNode(String table, String column, String value) {
         if (dataMap.containsKey(value)) {
@@ -184,18 +188,29 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 try {
                     transaction = getTransactionByHash(value.replace("'", ""));
                     dataMap.put(transaction.getHash(), transaction);
+                    blkTxnHashMap.put(transaction.getBlockNumber().toString(), Arrays.asList(transaction.getHash()));
                 } catch (Exception e) {
                     throw new BlkchnException("Error querying transaction by hash " + value.replace("'", ""), e);
                 }
+                return new DataNode<>(table, Arrays.asList(transaction.getHash()));
             } else if (column.equals("blocknumber")) {
+                List keys = new ArrayList();
                 try {
-                    transaction = getTransactionByHash(value.replace("'", ""));
-                    dataMap.put(transaction.getHash(), transaction);
+
+                    List<?> txnList = getTransactions(value.replace("'", ""));
+                    for (Transaction txnInfo : (List<Transaction>) txnList) {
+                        dataMap.put(txnInfo.getHash(), txnInfo);
+                        keys.add(txnInfo.getHash());
+                        blkTxnHashMap.put(txnInfo.getBlockNumber().toString(), keys);
+                    }
                 } catch (Exception e) {
                     throw new BlkchnException("Error querying transaction by hash " + value.replace("'", ""), e);
                 }
-            }
-            return new DataNode<>(table, Arrays.asList(transaction.getHash()));
+                return new DataNode<>(table, keys);
+            } else
+                throw new BlkchnException(
+                        String.format("There is no direct API for table %s and column %s combination", table, column));
+
         } else
             throw new BlkchnException(
                     String.format("There is no direct API for table %s and column %s combination", table, column));
@@ -217,6 +232,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             throw new BlkchnException("Error getting height of ledger", e);
         }
         List<DataNode> dataNodes = rangeNode.getRangeList().getRanges().stream().map(range -> {
+
             List keys = new ArrayList<>();
             T current = range.getMin().equals(rangeOps.getMinValue()) ? (T) new BigInteger("0") : range.getMin();
             T max = range.getMax().equals(rangeOps.getMaxValue()) ? (T) rangeOps.subtract((T) height, 1)
@@ -236,8 +252,11 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     }
                 } else if ("transaction".equals(rangeTable) && "blocknumber".equals(rangeCol)) {
                     try {
-                        if (dataMap.get(current.toString()) != null) {
-                            keys.add(current);
+
+                        if (blkTxnHashMap.containsKey(String.valueOf(current))) {
+                            for (String txnHash : blkTxnHashMap.get(String.valueOf(current)))
+                                keys.add(txnHash);
+
                         } else {
                             List<?> txnList = getTransactions(current.toString());
                             for (Transaction txnInfo : (List<Transaction>) txnList) {
@@ -272,9 +291,10 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         List<String> keys = dataNode.getKeys().stream().map(x -> x.toString()).collect(Collectors.toList());
         String rangeCol = rangeNode.getColumn();
         RangeOperations<T> rangeOps = (RangeOperations<T>) physicalPlan.getRangeOperations(tableName, rangeCol);
-        if ("block".equals(tableName)) {
-            if ("blocknumber".equals(rangeCol)) {
-                List<RangeNode<T>> dataRanges = keys.stream().map(key -> {
+        if ("blocknumber".equals(rangeCol)) {
+            List<RangeNode<T>> dataRanges = keys.stream().map(key -> {
+                T blockNo = null;
+                if ("block".equals(tableName)) {
                     Block blockInfo = (Block) dataMap.get(key);
                     if (auxillaryDataMap.containsKey("blocknumber")) {
                         auxillaryDataMap.get("blocknumber").put(key, blockInfo);
@@ -282,27 +302,39 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                         auxillaryDataMap.put("blocknumber", new HashMap<>());
                         auxillaryDataMap.get("blocknumber").put(key, blockInfo);
                     }
-                    T blockNo = (T) blockInfo.getNumber();
-                    RangeNode<T> node = new RangeNode<>(rangeNode.getTable(), rangeCol);
-                    node.getRangeList().addRange(new Range<T>(blockNo, blockNo));
-                    return node;
-                }).collect(Collectors.toList());
-                if (dataRanges.isEmpty()) {
-                    return rangeNode;
-                }
-                RangeNode<T> dataRangeNodes = dataRanges.get(0);
-                if (dataRanges.size() > 1) {
-                    for (int i = 1; i < dataRanges.size(); i++) {
-                        dataRangeNodes = rangeOps.rangeNodeOr(dataRangeNodes, dataRanges.get(i));
+                    blockNo = (T) blockInfo.getNumber();
+
+                } else if ("transaction".equals(tableName)) {
+                    Transaction txnInfo = (Transaction) dataMap.get(key);
+                    if (auxillaryDataMap.containsKey("blocknumber")) {
+                        auxillaryDataMap.get("blocknumber").put(key, txnInfo);
+                    } else {
+                        auxillaryDataMap.put("blocknumber", new HashMap<>());
+                        auxillaryDataMap.get("blocknumber").put(key, txnInfo);
                     }
+                    blockNo = (T) txnInfo.getBlockNumber();
                 }
-                if (oper.isAnd()) {
-                    return rangeOps.rangeNodeAnd(dataRangeNodes, rangeNode);
-                } else {
-                    return rangeOps.rangeNodeOr(dataRangeNodes, rangeNode);
+
+                RangeNode<T> node = new RangeNode<>(rangeNode.getTable(), rangeCol);
+                node.getRangeList().addRange(new Range<T>(blockNo, blockNo));
+                return node;
+            }).collect(Collectors.toList());
+            if (dataRanges.isEmpty()) {
+                return rangeNode;
+            }
+            RangeNode<T> dataRangeNodes = dataRanges.get(0);
+            if (dataRanges.size() > 1) {
+                for (int i = 1; i < dataRanges.size(); i++) {
+                    dataRangeNodes = rangeOps.rangeNodeOr(dataRangeNodes, dataRanges.get(i));
                 }
             }
+            if (oper.isAnd()) {
+                return rangeOps.rangeNodeAnd(dataRangeNodes, rangeNode);
+            } else {
+                return rangeOps.rangeNodeOr(dataRangeNodes, rangeNode);
+            }
         }
+
         RangeNode<T> emptyRangeNode = new RangeNode<>(rangeNode.getTable(), rangeNode.getColumn());
         emptyRangeNode.getRangeList().addRange(new Range<T>(rangeOps.getMinValue(), rangeOps.getMinValue()));
         return emptyRangeNode;
@@ -556,6 +588,12 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             throw new RuntimeException("Error while executing query", e);
         }
         return result;
+    }
+
+    public String getTransactionHash() {
+        // dataMap.
+        return null;
+
     }
 
 }
