@@ -183,12 +183,13 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             return new DataNode<>(table, Arrays.asList(block.getNumber().toString()));
 
         } else if (table.equals("transaction")) {
-            Transaction transaction = null;
+
             if (column.equals("hash")) {
+                Transaction transaction = null;
                 try {
                     transaction = getTransactionByHash(value.replace("'", ""));
                     dataMap.put(transaction.getHash(), transaction);
-                    blkTxnHashMap.put(transaction.getBlockNumber().toString(), Arrays.asList(transaction.getHash()));
+
                 } catch (Exception e) {
                     throw new BlkchnException("Error querying transaction by hash " + value.replace("'", ""), e);
                 }
@@ -201,8 +202,8 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     for (Transaction txnInfo : (List<Transaction>) txnList) {
                         dataMap.put(txnInfo.getHash(), txnInfo);
                         keys.add(txnInfo.getHash());
-                        blkTxnHashMap.put(txnInfo.getBlockNumber().toString(), keys);
                     }
+
                 } catch (Exception e) {
                     throw new BlkchnException("Error querying transaction by hash " + value.replace("'", ""), e);
                 }
@@ -312,7 +313,16 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                         auxillaryDataMap.put("blocknumber", new HashMap<>());
                         auxillaryDataMap.get("blocknumber").put(key, txnInfo);
                     }
+
                     blockNo = (T) txnInfo.getBlockNumber();
+
+                    if (!blkTxnHashMap.isEmpty() && blkTxnHashMap.containsKey(String.valueOf(blockNo))) {
+                        List<String> newValue = blkTxnHashMap.get(blockNo);
+                        if (!newValue.contains(key))
+                            newValue.add(key);
+                        blkTxnHashMap.put(String.valueOf(blockNo), newValue);
+                    } else
+                        blkTxnHashMap.put(String.valueOf(blockNo), Arrays.asList(key));
                 }
 
                 RangeNode<T> node = new RangeNode<>(rangeNode.getTable(), rangeCol);
@@ -379,6 +389,33 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     }
                     break;
             }
+        } else if(obj instanceof Transaction){
+
+            Transaction txnInfo = (Transaction) obj;
+            switch (fieldName) {
+                case "from":
+                    if (comparator.isEQ()) {
+                        retValue = txnInfo.getFrom().equals(value.replaceAll("'", ""));
+                    } else {
+                        retValue = !txnInfo.getFrom().equals(value.replaceAll("'", ""));
+                    }
+                    break;
+                case "blockhash":
+                    if (comparator.isEQ()) {
+                        retValue = txnInfo.getBlockHash().equals(value.replaceAll("'", ""));
+                    } else {
+                        retValue = !txnInfo.getBlockHash().equals(value.replaceAll("'", ""));
+                    }
+                    break;
+                case "gas":
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(txnInfo.getGas()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(txnInfo.getGas()).equals(value);
+                    }
+                    break;
+            }
+        
         }
         return retValue;
     }
