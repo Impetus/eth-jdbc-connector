@@ -626,11 +626,4 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         }
         return result;
     }
-
-    public String getTransactionHash() {
-        // dataMap.
-        return null;
-
-    }
-
 }
