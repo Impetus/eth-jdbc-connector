@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -55,6 +56,8 @@ import com.impetus.blkch.sql.query.Table;
 import com.impetus.blkch.util.Range;
 import com.impetus.blkch.util.RangeOperations;
 import com.impetus.eth.jdbc.DriverConstants;
+import com.impetus.eth.query.EthColumns;
+import com.impetus.eth.query.EthTables;
 
 public class EthQueryExecutor extends AbstractQueryExecutor {
 
@@ -164,15 +167,15 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             return new DataNode<>(table, Arrays.asList(value));
         }
 
-        if (table.equals("block")) {
+        if (table.equals(EthTables.BLOCK)) {
             Block block = null;
-            if (column.equals("blocknumber")) {
+            if (column.equals(EthColumns.BLOCKNUMBER)) {
                 try {
                     block = getBlockByNumber(value);
                 } catch (Exception e) {
                     throw new BlkchnException("Error querying block by number " + value, e);
                 }
-            } else if (column.equals("blockhash")) {
+            } else if (column.equals(EthColumns.BLOCKHASH)) {
                 try {
                     block = getBlockByHash(value.replace("'", ""));
                 } catch (Exception e) {
@@ -182,9 +185,9 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             dataMap.put(block.getNumber().toString(), block);
             return new DataNode<>(table, Arrays.asList(block.getNumber().toString()));
 
-        } else if (table.equals("transaction")) {
+        } else if (table.equals(EthTables.TRANSACTION)) {
 
-            if (column.equals("hash")) {
+            if (column.equals(EthColumns.HASH)) {
                 Transaction transaction = null;
                 try {
                     transaction = getTransactionByHash(value.replace("'", ""));
@@ -194,7 +197,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     throw new BlkchnException("Error querying transaction by hash " + value.replace("'", ""), e);
                 }
                 return new DataNode<>(table, Arrays.asList(transaction.getHash()));
-            } else if (column.equals("blocknumber")) {
+            } else if (column.equals(EthColumns.BLOCKNUMBER)) {
                 List keys = new ArrayList();
                 try {
 
@@ -239,7 +242,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             T max = range.getMax().equals(rangeOps.getMaxValue()) ? (T) rangeOps.subtract((T) height, 1)
                     : range.getMax();
             do {
-                if ("block".equals(rangeTable) && "blocknumber".equals(rangeCol)) {
+                if (EthTables.BLOCK.equals(rangeTable) && EthColumns.BLOCKNUMBER.equals(rangeCol)) {
                     try {
                         if (dataMap.get(current.toString()) != null) {
                             keys.add(current);
@@ -251,7 +254,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     } catch (Exception e) {
                         throw new BlkchnException("Error query block by number " + current, e);
                     }
-                } else if ("transaction".equals(rangeTable) && "blocknumber".equals(rangeCol)) {
+                } else if (EthTables.TRANSACTION.equals(rangeTable) && EthColumns.BLOCKNUMBER.equals(rangeCol)) {
                     try {
 
                         if (blkTxnHashMap.containsKey(String.valueOf(current))) {
@@ -283,68 +286,53 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         }
         return (DataNode<T>) finalDataNode;
     }
-
+    
+    
     @Override
     @SuppressWarnings("unchecked")
-    protected <T extends Number & Comparable<T>> RangeNode<T> combineRangeAndDataNodes(RangeNode<T> rangeNode,
+    protected <T extends Number & Comparable<T>> TreeNode combineRangeAndDataNodes(RangeNode<T> rangeNode,
             DataNode<?> dataNode, LogicalOperation oper) {
         String tableName = dataNode.getTable();
         List<String> keys = dataNode.getKeys().stream().map(x -> x.toString()).collect(Collectors.toList());
         String rangeCol = rangeNode.getColumn();
         RangeOperations<T> rangeOps = (RangeOperations<T>) physicalPlan.getRangeOperations(tableName, rangeCol);
-        if ("blocknumber".equals(rangeCol)) {
-            List<RangeNode<T>> dataRanges = keys.stream().map(key -> {
-                T blockNo = null;
-                if ("block".equals(tableName)) {
+        if (EthTables.BLOCK.equals(tableName)) {
+            if (EthColumns.BLOCKNUMBER.equals(rangeCol)) {
+                List<RangeNode<T>> dataRanges = keys.stream().map(key -> {
                     Block blockInfo = (Block) dataMap.get(key);
-                    if (auxillaryDataMap.containsKey("blocknumber")) {
-                        auxillaryDataMap.get("blocknumber").put(key, blockInfo);
+                    if (auxillaryDataMap.containsKey(EthColumns.BLOCKNUMBER)) {
+                        auxillaryDataMap.get(EthColumns.BLOCKNUMBER).put(key, blockInfo);
                     } else {
-                        auxillaryDataMap.put("blocknumber", new HashMap<>());
-                        auxillaryDataMap.get("blocknumber").put(key, blockInfo);
+                        auxillaryDataMap.put(EthColumns.BLOCKNUMBER, new HashMap<>());
+                        auxillaryDataMap.get(EthColumns.BLOCKNUMBER).put(key, blockInfo);
                     }
-                    blockNo = (T) blockInfo.getNumber();
-
-                } else if ("transaction".equals(tableName)) {
-                    Transaction txnInfo = (Transaction) dataMap.get(key);
-                    if (auxillaryDataMap.containsKey("blocknumber")) {
-                        auxillaryDataMap.get("blocknumber").put(key, txnInfo);
-                    } else {
-                        auxillaryDataMap.put("blocknumber", new HashMap<>());
-                        auxillaryDataMap.get("blocknumber").put(key, txnInfo);
+                    T blockNo = (T) blockInfo.getNumber();
+                    RangeNode<T> node = new RangeNode<>(rangeNode.getTable(), rangeCol);
+                    node.getRangeList().addRange(new Range<T>(blockNo, blockNo));
+                    return node;
+                }).collect(Collectors.toList());
+                RangeNode<T> dataRangeNodes = dataRanges.get(0);
+                if (dataRanges.size() > 1) {
+                    for (int i = 1; i < dataRanges.size(); i++) {
+                        dataRangeNodes = rangeOps.rangeNodeOr(dataRangeNodes, dataRanges.get(i));
                     }
-
-                    blockNo = (T) txnInfo.getBlockNumber();
-
-                    if (!blkTxnHashMap.isEmpty() && blkTxnHashMap.containsKey(String.valueOf(blockNo))) {
-                        List<String> newValue = blkTxnHashMap.get(blockNo);
-                        if (!newValue.contains(key))
-                            newValue.add(key);
-                        blkTxnHashMap.put(String.valueOf(blockNo), newValue);
-                    } else
-                        blkTxnHashMap.put(String.valueOf(blockNo), Arrays.asList(key));
                 }
-
-                RangeNode<T> node = new RangeNode<>(rangeNode.getTable(), rangeCol);
-                node.getRangeList().addRange(new Range<T>(blockNo, blockNo));
-                return node;
-            }).collect(Collectors.toList());
-            if (dataRanges.isEmpty()) {
-                return rangeNode;
-            }
-            RangeNode<T> dataRangeNodes = dataRanges.get(0);
-            if (dataRanges.size() > 1) {
-                for (int i = 1; i < dataRanges.size(); i++) {
-                    dataRangeNodes = rangeOps.rangeNodeOr(dataRangeNodes, dataRanges.get(i));
+                if (oper.isAnd()) {
+                    return rangeOps.rangeNodeAnd(dataRangeNodes, rangeNode);
+                } else {
+                    return rangeOps.rangeNodeOr(dataRangeNodes, rangeNode);
                 }
             }
-            if (oper.isAnd()) {
-                return rangeOps.rangeNodeAnd(dataRangeNodes, rangeNode);
+        } else if(EthColumns.BLOCKNUMBER.equals(rangeCol)) {
+            if(oper.isOr()) {
+                LogicalOperation newOper = new LogicalOperation(Operator.OR);
+                newOper.addChildNode(dataNode);
+                newOper.addChildNode(rangeNode);
+                return newOper;
             } else {
-                return rangeOps.rangeNodeOr(dataRangeNodes, rangeNode);
+                return filterRangeNodeWithValue(rangeNode, dataNode);
             }
         }
-
         RangeNode<T> emptyRangeNode = new RangeNode<>(rangeNode.getTable(), rangeNode.getColumn());
         emptyRangeNode.getRangeList().addRange(new Range<T>(rangeOps.getMinValue(), rangeOps.getMinValue()));
         return emptyRangeNode;
@@ -360,28 +348,28 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         if (obj instanceof Block) {
             Block blockInfo = (Block) obj;
             switch (fieldName) {
-                case "hash":
+                case EthColumns.HASH:
                     if (comparator.isEQ()) {
                         retValue = blockInfo.getHash().equals(value.replaceAll("'", ""));
                     } else {
                         retValue = !blockInfo.getHash().equals(value.replaceAll("'", ""));
                     }
                     break;
-                case "parenthash":
+                case EthColumns.PARENTHASH:
                     if (comparator.isEQ()) {
                         retValue = blockInfo.getParentHash().equals(value.replaceAll("'", ""));
                     } else {
                         retValue = !blockInfo.getParentHash().equals(value.replaceAll("'", ""));
                     }
                     break;
-                case "gaslimit":
+                case EthColumns.GASLIMIT:
                     if (comparator.isEQ()) {
                         retValue = blockInfo.getGasLimit().toString().equals(value.replaceAll("'", ""));
                     } else {
                         retValue = !blockInfo.getGasLimit().toString().equals(value.replaceAll("'", ""));
                     }
                     break;
-                case "gasused":
+                case EthColumns.GASUSED:
                     if (comparator.isEQ()) {
                         retValue = blockInfo.getGasUsed().toString().equals(value.replaceAll("'", ""));
                     } else {
@@ -393,21 +381,21 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
 
             Transaction txnInfo = (Transaction) obj;
             switch (fieldName) {
-                case "from":
+                case EthColumns.FROM:
                     if (comparator.isEQ()) {
                         retValue = txnInfo.getFrom().equals(value.replaceAll("'", ""));
                     } else {
                         retValue = !txnInfo.getFrom().equals(value.replaceAll("'", ""));
                     }
                     break;
-                case "blockhash":
+                case EthColumns.BLOCKHASH:
                     if (comparator.isEQ()) {
                         retValue = txnInfo.getBlockHash().equals(value.replaceAll("'", ""));
                     } else {
                         retValue = !txnInfo.getBlockHash().equals(value.replaceAll("'", ""));
                     }
                     break;
-                case "gas":
+                case EthColumns.GAS:
                     if (comparator.isEQ()) {
                         retValue = String.valueOf(txnInfo.getGas()).equals(value);
                     } else {
@@ -423,11 +411,22 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     @Override
     protected <T> DataNode<T> filterRangeNodeWithValue(RangeNode<?> rangeNode, DataNode<T> dataNode) {
         List<T> filteredKeys = dataNode.getKeys().stream().filter(key -> {
-            if ("block".equals(dataNode.getTable()) && "blocknumber".equals(rangeNode.getColumn())) {
+            if (EthTables.BLOCK.equals(dataNode.getTable()) && EthColumns.BLOCKNUMBER.equals(rangeNode.getColumn())) {
                 boolean include = false;
-                Long longKey = (Long) key;
+                BigInteger bigIntKey = (BigInteger) key;
                 for (Range<?> range : rangeNode.getRangeList().getRanges()) {
-                    if (((Long) range.getMin()) <= longKey && ((Long) range.getMax()) >= longKey) {
+                    if (((BigInteger) range.getMin()).compareTo(bigIntKey) == -1 && ((BigInteger) range.getMax()).compareTo(bigIntKey) == 1) {
+                        include = true;
+                        break;
+                    }
+                }
+                return include;
+            } else if(EthTables.TRANSACTION.equals(dataNode.getTable()) && EthColumns.BLOCKNUMBER.equals(rangeNode.getColumn())) {
+                boolean include = false;
+                Transaction transaction = (Transaction) dataMap.get(key);
+                BigInteger blockNo = transaction.getBlockNumber();
+                for (Range<?> range : rangeNode.getRangeList().getRanges()) {
+                    if (((BigInteger) range.getMin()).compareTo(blockNo) == -1 && ((BigInteger) range.getMax()).compareTo(blockNo) == 1) {
                         include = true;
                         break;
                     }
@@ -519,9 +518,9 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         DataFrame df = null;
         List<List<Object>> data = new ArrayList<>();
         if (dataMap.get(dataNode.getKeys().get(0).toString()) instanceof Block) {
-            String[] columns = { "blocknumber", "hash", "parenthash", "nonce", "sha3uncles", "logsbloom",
-                    "transactionsroot", "stateroot", "receiptsroot", "author", "miner", "mixhash", "totaldifficulty",
-                    "extradata", "size", "gaslimit", "gasused", "timestamp", "transactions", "uncles", "sealfields" };
+            String[] columns = { EthColumns.BLOCKNUMBER, EthColumns.HASH, EthColumns.PARENTHASH, EthColumns.NONCE, EthColumns.SHA3UNCLES, EthColumns.LOGSBLOOM,
+                    EthColumns.TRANSACTIONSROOT, EthColumns.STATEROOT, EthColumns.RECEIPTSROOT, EthColumns.AUTHOR, EthColumns.MINER, EthColumns.MIXHASH, EthColumns.TOTALDIFFICULTY,
+                    EthColumns.EXTRADATA, EthColumns.SIZE, EthColumns.GASLIMIT, EthColumns.GASUSED, EthColumns.TIMESTAMP, EthColumns.TRANSACTIONS, EthColumns.UNCLES, EthColumns.SEALFIELDS };
 
             for (Object key : dataNode.getKeys()) {
                 Block blockInfo = (Block) dataMap.get(key.toString());
@@ -554,8 +553,8 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             df.setRawData(dataMap.values());
             return df;
         } else if (dataMap.get(dataNode.getKeys().get(0).toString()) instanceof Transaction) {
-            String columns[] = { "blockhash", "blocknumber", "creates", "from", "gas", "gasprice", "hash", "input",
-                    "nonce", "publickey", "r", "raw", "s", "to", "transactionindex", "v", "value" };
+            String columns[] = { EthColumns.BLOCKHASH, EthColumns.BLOCKNUMBER, EthColumns.CREATES, EthColumns.FROM, EthColumns.GAS, EthColumns.GASPRICE, EthColumns.HASH, EthColumns.INPUT,
+                    EthColumns.NONCE, EthColumns.PUBLICKEY, EthColumns.R, EthColumns.RAW, EthColumns.S, EthColumns.TO, EthColumns.TRANSACTIONINDEX, EthColumns.V, EthColumns.VALUE };
             for (Object key : dataNode.getKeys()) {
                 Transaction txnInfo = (Transaction) dataMap.get(key.toString());
                 String blockhash = txnInfo.getBlockHash();
@@ -618,7 +617,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         boolean async = namesMap.get("async") == null ? true : Boolean.parseBoolean(namesMap.get("async"));
         Object result = null;
         try {
-            result = insertTransaction(namesMap.get("toAddress"), namesMap.get("value"), namesMap.get("unit"), !async);
+            result = insertTransaction(namesMap.get("toAddress"), namesMap.get(EthColumns.VALUE), namesMap.get("unit"), !async);
         } catch (IOException | CipherException | InterruptedException | TransactionTimeoutException
                 | ExecutionException e) {
             e.printStackTrace();
