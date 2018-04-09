@@ -220,9 +220,9 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    protected <T extends Number & Comparable<T>> DataNode<T> executeRangeNode(RangeNode<T> rangeNode) {
+    protected <T extends Number & Comparable<T>> DataNode<?> executeRangeNode(RangeNode<T> rangeNode) {
         if (rangeNode.getRangeList().getRanges().isEmpty()) {
-            return new DataNode<>(rangeNode.getTable(), new ArrayList<>());
+            return new DataNode<T>(rangeNode.getTable(), new ArrayList<>());
         }
         RangeOperations<T> rangeOps = (RangeOperations<T>) physicalPlan.getRangeOperations(rangeNode.getTable(),
                 rangeNode.getColumn());
@@ -234,9 +234,9 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         } catch (Exception e) {
             throw new BlkchnException("Error getting height of ledger", e);
         }
-        List<DataNode> dataNodes = rangeNode.getRangeList().getRanges().stream().map(range -> {
+        List<DataNode<String>> dataNodes = rangeNode.getRangeList().getRanges().stream().map(range -> {
 
-            List keys = new ArrayList<>();
+            List<String> keys = new ArrayList<>();
             T current = range.getMin().equals(rangeOps.getMinValue()) ? (T) new BigInteger("0") : range.getMin();
             T max = range.getMax().equals(rangeOps.getMaxValue()) ? (T) rangeOps.subtract((T) height, 1)
                     : range.getMax();
@@ -244,11 +244,11 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 if (EthTables.BLOCK.equals(rangeTable) && EthColumns.BLOCKNUMBER.equals(rangeCol)) {
                     try {
                         if (dataMap.get(current.toString()) != null) {
-                            keys.add(current);
+                            keys.add(current.toString());
                         } else {
                             Block block = getBlockByNumber(current.toString());
                             dataMap.put(block.getNumber().toString(), block);
-                            keys.add(current);
+                            keys.add(current.toString());
                         }
                     } catch (Exception e) {
                         throw new BlkchnException("Error query block by number " + current, e);
@@ -275,15 +275,15 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 current = rangeOps.add(current, 1);
             } while (max.compareTo(current) >= 0);
 
-            return new DataNode<>(rangeTable, keys);
+            return new DataNode<String>(rangeTable, keys);
         }).collect(Collectors.toList());
-        DataNode<T> finalDataNode = (DataNode<T>) dataNodes.get(0);
+        DataNode<String> finalDataNode = (DataNode<String>) dataNodes.get(0);
         if (dataNodes.size() > 1) {
             for (int i = 1; i < dataNodes.size(); i++) {
-                finalDataNode = mergeDataNodes(finalDataNode, (DataNode<T>) dataNodes.get(i), Operator.OR);
+                finalDataNode = mergeDataNodes(finalDataNode, (DataNode<String>) dataNodes.get(i), Operator.OR);
             }
         }
-        return (DataNode<T>) finalDataNode;
+        return (DataNode<String>) finalDataNode;
     }
     
     
