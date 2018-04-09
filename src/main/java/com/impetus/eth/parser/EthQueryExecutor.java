@@ -310,6 +310,9 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     node.getRangeList().addRange(new Range<T>(blockNo, blockNo));
                     return node;
                 }).collect(Collectors.toList());
+                if(dataRanges.isEmpty()){
+                    return rangeNode;
+                }
                 RangeNode<T> dataRangeNodes = dataRanges.get(0);
                 if (dataRanges.size() > 1) {
                     for (int i = 1; i < dataRanges.size(); i++) {
