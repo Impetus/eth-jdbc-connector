@@ -31,7 +31,7 @@ public class EthPhysicalPlan extends PhysicalPlan {
         rangeColMap.put(EthTables.BLOCK, Arrays.asList(EthColumns.BLOCKNUMBER));
         rangeColMap.put(EthTables.TRANSACTION, Arrays.asList(EthColumns.BLOCKNUMBER));
         
-        queryColMap.put(EthTables.BLOCK, Arrays.asList(EthColumns.BLOCKHASH));
+        queryColMap.put(EthTables.BLOCK, Arrays.asList(EthColumns.HASH));
         queryColMap.put(EthTables.TRANSACTION, Arrays.asList(EthColumns.HASH));
         
         rangeOpMap.put(new Tuple2<>(EthTables.BLOCK, EthColumns.BLOCKNUMBER), new BigIntegerRangeOperations());

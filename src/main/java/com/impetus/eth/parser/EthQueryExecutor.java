@@ -174,7 +174,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 } catch (Exception e) {
                     throw new BlkchnException("Error querying block by number " + value, e);
                 }
-            } else if (column.equals(EthColumns.BLOCKHASH)) {
+            } else if (column.equals(EthColumns.HASH)) {
                 try {
                     block = getBlockByHash(value.replace("'", ""));
                 } catch (Exception e) {
