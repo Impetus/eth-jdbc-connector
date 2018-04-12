@@ -353,7 +353,9 @@ public class EthResultSet extends AbstractResultSet {
     }
 
     protected int getColumnIndex(String columnLabel) {
-        if (!aliasMapping.isEmpty() && aliasMapping.containsKey(columnLabel)) {
+        if(columnNamesMap.get(columnLabel) != null){
+            return columnNamesMap.get(columnLabel);
+        } else if (!aliasMapping.isEmpty() && aliasMapping.containsKey(columnLabel)) {
             return columnNamesMap.get(aliasMapping.get(columnLabel));
         } else {
             if(columnNamesMap.get(columnLabel) == null){

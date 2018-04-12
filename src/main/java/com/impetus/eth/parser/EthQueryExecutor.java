@@ -499,6 +499,12 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             LOGGER.error("Exception while parsing value", e);
             throw new RuntimeException("Exception while parsing value", e);
         }
+        
+        if(properties == null || !properties.containsKey(DriverConstants.KEYSTORE_PASSWORD) 
+                || !properties.containsKey(DriverConstants.KEYSTORE_PATH)){
+            throw new BlkchnException("Insert query needs keystore path and password, passed as Properties while creating connection");
+        }
+        
         Credentials credentials = WalletUtils.loadCredentials(properties.getProperty(DriverConstants.KEYSTORE_PASSWORD),
                 properties.getProperty(DriverConstants.KEYSTORE_PATH));
         Object transactionReceipt;
