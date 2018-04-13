@@ -60,6 +60,12 @@ import com.impetus.eth.query.EthTables;
 
 public class EthQueryExecutor extends AbstractQueryExecutor {
 
+    private static final String TO_ADDRESS = "toAddress";
+
+    private static final String UNIT = "unit";
+
+    private static final String ASYNC = "async";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(EthQueryExecutor.class);
 
     private Web3j web3jClient;
@@ -485,6 +491,10 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
 
     private Object insertTransaction(String toAddress, String value, String unit, boolean syncRequest)
             throws IOException, CipherException, InterruptedException, TransactionTimeoutException, ExecutionException {
+        if(toAddress == null || value == null || unit == null){
+            LOGGER.error("Check if [toAddress, value, unit] are correctly used in insert query columns");
+            throw new BlkchnException("Check if [toAddress, value, unit] are correctly used in insert query columns");
+        }
         toAddress = toAddress.replaceAll("'", "");
         value = value.replaceAll("'", "");
         unit = unit.replaceAll("'", "").toUpperCase();
@@ -605,7 +615,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         // get values from logical plan and pass it to insertTransaction method
         Insert insert = logicalPlan.getInsert();
         String tableName = insert.getChildType(Table.class).get(0).getChildType(IdentifierNode.class, 0).getValue();
-        if (!"transaction".equalsIgnoreCase(tableName)) {
+        if (!EthTables.TRANSACTION.equalsIgnoreCase(tableName)) {
             throw new BlkchnException("Please give valid table name in insert query. Expected: transaction");
         }
         ColumnName names = insert.getChildType(ColumnName.class).get(0);
@@ -622,14 +632,14 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             namesMap.put(names.getChildType(IdentifierNode.class, 3).getValue(),
                     values.getChildType(IdentifierNode.class, 3).getValue());
         }
-        boolean async = namesMap.get("async") == null ? true : Boolean.parseBoolean(namesMap.get("async"));
+        boolean async = namesMap.get(ASYNC) == null ? true : Boolean.parseBoolean(namesMap.get(ASYNC));
         Object result = null;
         try {
-            result = insertTransaction(namesMap.get("toAddress"), namesMap.get(EthColumns.VALUE), namesMap.get("unit"), !async);
+            result = insertTransaction(namesMap.get(TO_ADDRESS), namesMap.get(EthColumns.VALUE), namesMap.get(UNIT), !async);
         } catch (IOException | CipherException | InterruptedException | TransactionTimeoutException
                 | ExecutionException e) {
             e.printStackTrace();
-            throw new RuntimeException("Error while executing query", e);
+            throw new BlkchnException("Error while executing query", e);
         }
         return result;
     }
