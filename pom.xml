@@ -4,7 +4,7 @@
 	<groupId>com.impetus.eth</groupId>
 	<artifactId>eth-jdbc-driver</artifactId>
 	<packaging>jar</packaging>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 
 	<properties>
 		<sonar.language>java</sonar.language>
@@ -87,7 +87,6 @@
 	<!-- 1. specify JDK version -->
 	<!-- 2. download sources and javadoc -->
 	<build>
-		<finalName>blockchain</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -173,7 +172,7 @@
 						<transformer
 							implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
 					</transformers>
-					<finalName>${project.artifactId}-${project.version}</finalName>
+					<finalName>${project.artifactId}-assembly-${project.version}</finalName>
 				</configuration>
 			</plugin>
 
@@ -208,5 +207,12 @@
 		</pluginManagement>
 
 	</build>
+	<distributionManagement>
+		<repository>
+			<id>deployment</id>
+			<name>Blockchain JDBC nexus</name>
+			<url>http://172.25.32.44:8081/content/repositories/releases/</url>
+		</repository>
+	</distributionManagement>
 
 </project>
