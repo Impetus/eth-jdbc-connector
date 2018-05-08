@@ -197,5 +197,6 @@
 
 	<modules>
 		<module>eth-jdbc-driver</module>
+		<module>eth-jdbc-examples</module>
 	</modules>
 </project>
