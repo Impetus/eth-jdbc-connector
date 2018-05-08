@@ -2,9 +2,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.impetus.eth</groupId>
-	<artifactId>eth-jdbc-driver</artifactId>
-	<packaging>jar</packaging>
-	<version>1.0.0</version>
+	<artifactId>eth-jdbc-connector</artifactId>
+	<packaging>pom</packaging>
+	<version>1.1.0-SNAPSHOT</version>
 
 	<properties>
 		<sonar.language>java</sonar.language>
@@ -34,16 +34,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.impetus</groupId>
-			<artifactId>blkchn-sql-interfaces</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.web3j</groupId>
-			<artifactId>core</artifactId>
-			<version>${web3j.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${junit.version}</version>
@@ -59,16 +49,6 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>${slf4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>${logback.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
-			<version>${logback.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.powermock</groupId>
@@ -215,4 +195,7 @@
 		</repository>
 	</distributionManagement>
 
+	<modules>
+		<module>eth-jdbc-driver</module>
+	</modules>
 </project>
