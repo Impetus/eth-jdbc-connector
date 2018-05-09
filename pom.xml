@@ -155,7 +155,6 @@
 					<finalName>${project.artifactId}-assembly-${project.version}</finalName>
 				</configuration>
 			</plugin>
-
 		</plugins>
 
 		<pluginManagement>
@@ -198,5 +197,6 @@
 	<modules>
 		<module>eth-jdbc-driver</module>
 		<module>eth-jdbc-examples</module>
+		<module>eth-jdbc-assembly</module>
 	</modules>
 </project>
