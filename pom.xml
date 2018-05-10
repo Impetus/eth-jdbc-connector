@@ -190,7 +190,7 @@
 		<repository>
 			<id>deployment</id>
 			<name>Blockchain JDBC nexus</name>
-			<url>http://172.25.32.44:8081/content/repositories/releases/</url>
+			<url>http://172.25.32.44:8081/content/repositories/snapshots/</url>
 		</repository>
 	</distributionManagement>
 
