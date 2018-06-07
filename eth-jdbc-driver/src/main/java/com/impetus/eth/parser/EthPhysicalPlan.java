@@ -1,3 +1,18 @@
+/******************************************************************************* 
+* * Copyright 2018 Impetus Infotech.
+* *
+* * Licensed under the Apache License, Version 2.0 (the "License");
+* * you may not use this file except in compliance with the License.
+* * You may obtain a copy of the License at
+* *
+* * http://www.apache.org/licenses/LICENSE-2.0
+* *
+* * Unless required by applicable law or agreed to in writing, software
+* * distributed under the License is distributed on an "AS IS" BASIS,
+* * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* * See the License for the specific language governing permissions and
+* * limitations under the License.
+******************************************************************************/
 package com.impetus.eth.parser;
 
 import java.util.Arrays;
@@ -14,35 +29,42 @@ import com.impetus.eth.query.EthColumns;
 import com.impetus.eth.query.EthTables;
 
 public class EthPhysicalPlan extends PhysicalPlan {
-    
+
     public static final String DESCRIPTION = "ETHEREUM_PHYSICAL_PLAN";
-    
+
     private static Map<String, List<String>> rangeColMap = new HashMap<>();
-    
+
     private static Map<String, List<String>> queryColMap = new HashMap<>();
-    
+
     private static List<String> ethTables = Arrays.asList(EthTables.BLOCK, EthTables.TRANSACTION);
-    
+
     private static Map<String, List<String>> ethTableColumnMap = new HashMap<>();
-    
+
     private static Map<Tuple2<String, String>, RangeOperations<?>> rangeOpMap = new HashMap<>();
-    
+
     static {
         rangeColMap.put(EthTables.BLOCK, Arrays.asList(EthColumns.BLOCKNUMBER));
         rangeColMap.put(EthTables.TRANSACTION, Arrays.asList(EthColumns.BLOCKNUMBER));
-        
+
         queryColMap.put(EthTables.BLOCK, Arrays.asList(EthColumns.HASH));
         queryColMap.put(EthTables.TRANSACTION, Arrays.asList(EthColumns.HASH));
-        
+
         rangeOpMap.put(new Tuple2<>(EthTables.BLOCK, EthColumns.BLOCKNUMBER), new BigIntegerRangeOperations());
         rangeOpMap.put(new Tuple2<>(EthTables.TRANSACTION, EthColumns.BLOCKNUMBER), new BigIntegerRangeOperations());
-        
-        ethTableColumnMap.put(EthTables.BLOCK, Arrays.asList(EthColumns.BLOCKNUMBER, EthColumns.HASH, EthColumns.PARENTHASH, EthColumns.NONCE, EthColumns.SHA3UNCLES, EthColumns.LOGSBLOOM,
-                    EthColumns.TRANSACTIONSROOT, EthColumns.STATEROOT, EthColumns.RECEIPTSROOT, EthColumns.AUTHOR, EthColumns.MINER, EthColumns.MIXHASH, EthColumns.TOTALDIFFICULTY,
-                    EthColumns.EXTRADATA, EthColumns.SIZE, EthColumns.GASLIMIT, EthColumns.GASUSED, EthColumns.TIMESTAMP, EthColumns.TRANSACTIONS, EthColumns.UNCLES, EthColumns.SEALFIELDS));
-        
-        ethTableColumnMap.put(EthTables.TRANSACTION, Arrays.asList(EthColumns.BLOCKHASH, EthColumns.BLOCKNUMBER, EthColumns.CREATES, EthColumns.FROM, EthColumns.GAS, EthColumns.GASPRICE, EthColumns.HASH, EthColumns.INPUT,
-                    EthColumns.NONCE, EthColumns.PUBLICKEY, EthColumns.R, EthColumns.RAW, EthColumns.S, EthColumns.TO, EthColumns.TRANSACTIONINDEX, EthColumns.V, EthColumns.VALUE));
+
+        ethTableColumnMap.put(EthTables.BLOCK,
+                Arrays.asList(EthColumns.BLOCKNUMBER, EthColumns.HASH, EthColumns.PARENTHASH, EthColumns.NONCE,
+                        EthColumns.SHA3UNCLES, EthColumns.LOGSBLOOM, EthColumns.TRANSACTIONSROOT, EthColumns.STATEROOT,
+                        EthColumns.RECEIPTSROOT, EthColumns.AUTHOR, EthColumns.MINER, EthColumns.MIXHASH,
+                        EthColumns.TOTALDIFFICULTY, EthColumns.EXTRADATA, EthColumns.SIZE, EthColumns.GASLIMIT,
+                        EthColumns.GASUSED, EthColumns.TIMESTAMP, EthColumns.TRANSACTIONS, EthColumns.UNCLES,
+                        EthColumns.SEALFIELDS));
+
+        ethTableColumnMap.put(EthTables.TRANSACTION,
+                Arrays.asList(EthColumns.BLOCKHASH, EthColumns.BLOCKNUMBER, EthColumns.CREATES, EthColumns.FROM,
+                        EthColumns.GAS, EthColumns.GASPRICE, EthColumns.HASH, EthColumns.INPUT, EthColumns.NONCE,
+                        EthColumns.PUBLICKEY, EthColumns.R, EthColumns.RAW, EthColumns.S, EthColumns.TO,
+                        EthColumns.TRANSACTIONINDEX, EthColumns.V, EthColumns.VALUE));
     }
 
     public EthPhysicalPlan(LogicalPlan logicalPlan) {

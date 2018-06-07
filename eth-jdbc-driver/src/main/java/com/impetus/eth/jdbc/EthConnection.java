@@ -1,5 +1,5 @@
 /******************************************************************************* 
- * * Copyright 2017 Impetus Infotech.
+ * * Copyright 2018 Impetus Infotech.
  * *
  * * Licensed under the Apache License, Version 2.0 (the "License");
  * * you may not use this file except in compliance with the License.
@@ -148,7 +148,8 @@ public class EthConnection implements BlkchnConnection {
 
     @Override
     public void close() throws SQLException {
-        throw new UnsupportedOperationException();
+        // throw new UnsupportedOperationException();
+
     }
 
     @Override
@@ -299,6 +300,8 @@ public class EthConnection implements BlkchnConnection {
 
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
+        System.out.println("Sql : " + sql);
+        prepareStatement(sql, java.sql.ResultSet.FETCH_FORWARD, java.sql.ResultSet.CONCUR_READ_ONLY);
         throw new UnsupportedOperationException();
     }
 
