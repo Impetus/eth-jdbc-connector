@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.web3j.protocol.core.methods.response.EthBlock.TransactionObject;
 
+import com.impetus.eth.test.util.ConnectionUtil;
 import com.impetus.test.catagory.IntegrationTest;
 
 /**
@@ -24,7 +25,7 @@ public class EthDriverTestBlocks
     public  void testBlock()
     {
 
-        String url = "jdbc:blkchn:ethereum://172.25.41.52:8545";
+        String url = ConnectionUtil.getEthUrl();
         String driverClass = "com.impetus.eth.jdbc.EthDriver";
         try
         {
