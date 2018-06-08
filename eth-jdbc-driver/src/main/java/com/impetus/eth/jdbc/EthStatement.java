@@ -1,18 +1,18 @@
 /******************************************************************************* 
-* * Copyright 2018 Impetus Infotech.
-* *
-* * Licensed under the Apache License, Version 2.0 (the "License");
-* * you may not use this file except in compliance with the License.
-* * You may obtain a copy of the License at
-* *
-* * http://www.apache.org/licenses/LICENSE-2.0
-* *
-* * Unless required by applicable law or agreed to in writing, software
-* * distributed under the License is distributed on an "AS IS" BASIS,
-* * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* * See the License for the specific language governing permissions and
-* * limitations under the License.
-******************************************************************************/
+ * * Copyright 2018 Impetus Infotech.
+ * *
+ * * Licensed under the Apache License, Version 2.0 (the "License");
+ * * you may not use this file except in compliance with the License.
+ * * You may obtain a copy of the License at
+ * *
+ * * http://www.apache.org/licenses/LICENSE-2.0
+ * *
+ * * Unless required by applicable law or agreed to in writing, software
+ * * distributed under the License is distributed on an "AS IS" BASIS,
+ * * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * * See the License for the specific language governing permissions and
+ * * limitations under the License.
+ ******************************************************************************/
 package com.impetus.eth.jdbc;
 
 import java.io.IOException;
@@ -61,6 +61,8 @@ public class EthStatement implements BlkchnStatement {
     protected int rSetType;
 
     protected int rSetConcurrency;
+
+    private ResultSet queryResultSet = null;
 
     public int getrSetType() {
         return rSetType;
@@ -132,18 +134,17 @@ public class EthStatement implements BlkchnStatement {
     @Override
     public boolean execute(String sql) throws SQLException {
         LOGGER.info("Entering into execute Block");
-        LogicalPlan logicalPlan = getLogicalPlan(sql);
-        Boolean result = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
-                .execute();
+        ResultSet resultSet = executeQuery(sql);
+        boolean result = false;
+        if(resultSet != null)
+            result = true;
         LOGGER.info("Exiting from execute Block with result: " + result);
         return result;
     }
     
-    public Object executeAndReturn(String sql) throws SQLException {
+    public ResultSet executeAndReturn(String sql) throws SQLException {
         LOGGER.info("Entering into execute Block");
-        LogicalPlan logicalPlan = getLogicalPlan(sql);
-        Object result = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
-                .executeAndReturn();
+        ResultSet result = executeQuery(sql);
         LOGGER.info("Exiting from execute Block with result: " + result);
         return result;
     }
@@ -171,15 +172,25 @@ public class EthStatement implements BlkchnStatement {
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {
         LOGGER.info("Entering into executeQuery Block");
-        ResultSet queryResultSet = null;
         LogicalPlan logicalPlan = getLogicalPlan(sql);
-        Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
-        String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
-        DataFrame dataframe = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
-                .executeQuery();
-        queryResultSet = new EthResultSet(dataframe, rSetType, rSetConcurrency, tableName);
-        LOGGER.info("Exiting from executeQuery Block");
-        return queryResultSet;
+        Object result = null;
+        switch (logicalPlan.getType()) {
+            case INSERT:
+                result = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
+                        .executeAndReturn();
+                LOGGER.info("Exiting from execute Block with result: " + result);
+                queryResultSet = new EthResultSet(result);
+                LOGGER.info("Exiting from executeQuery Block");
+                return queryResultSet;
+            default:
+                Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
+                String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
+                DataFrame dataframe = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
+                            .executeQuery();
+                queryResultSet = new EthResultSet(dataframe, rSetType, rSetConcurrency, tableName);
+                LOGGER.info("Exiting from executeQuery Block");
+                return queryResultSet;
+        }
     }
 
     @Override
@@ -250,7 +261,8 @@ public class EthStatement implements BlkchnStatement {
 
     @Override
     public ResultSet getResultSet() throws SQLException {
-        throw new UnsupportedOperationException();
+        return queryResultSet;
+        //throw new UnsupportedOperationException();
     }
 
     @Override
@@ -392,3 +404,4 @@ public class EthStatement implements BlkchnStatement {
         return parser;
     }
 }
+

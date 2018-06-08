@@ -20,8 +20,7 @@ import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +59,7 @@ public class EthResultSet extends AbstractResultSet {
     protected String tableName;
 
     protected Map<String, String> aliasMapping;
-
+    
     private static final String EXCEPTION_MSG = "Result set doesn't contain index %d";
 
     public EthResultSet(DataFrame dataframe, int resultSetType, int rSetConcurrency, String tableName) {
@@ -71,6 +70,17 @@ public class EthResultSet extends AbstractResultSet {
         this.rSetConcurrency = rSetConcurrency;
         this.tableName = tableName;
         this.aliasMapping = dataframe.getAliasMapping();
+        currentRowCursor = BEFORE_FIRST_ROW;
+        totalRowCount = rowData.size();
+    }
+
+
+    public EthResultSet(Object data) {
+        LOGGER.info("Instantiating new Result Set ");
+        this.rowData = new ArrayList<>();
+        this.rowData.add(Arrays.asList(data));
+        this.columnNamesMap = new HashMap<>();
+        this.columnNamesMap.put("transactionReciept",1);
         currentRowCursor = BEFORE_FIRST_ROW;
         totalRowCount = rowData.size();
     }
@@ -189,7 +199,7 @@ public class EthResultSet extends AbstractResultSet {
     @Override
     public String getString(String columnLabel) throws SQLException {
         int idx = getColumnIndex(columnLabel);
-        if (currentRow[idx] instanceof BigInteger) {
+        if(currentRow[idx] instanceof BigInteger){
             return ((BigInteger) currentRow[idx]).toString();
         }
         return (String) currentRow[idx];
@@ -197,10 +207,10 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public String getString(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > currentRow.length) {
+        if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
-        if (currentRow[columnIndex - 1] instanceof BigInteger) {
+        if(currentRow[columnIndex - 1] instanceof BigInteger){
             return ((BigInteger) currentRow[columnIndex - 1]).toString();
         }
         return (String) currentRow[columnIndex - 1];
@@ -213,7 +223,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public Object getObject(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > currentRow.length) {
+        if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         return currentRow[columnIndex - 1];
@@ -221,7 +231,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public int getInt(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > currentRow.length) {
+        if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         return (int) currentRow[columnIndex - 1];
@@ -234,7 +244,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public long getLong(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > currentRow.length) {
+        if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         return (long) currentRow[columnIndex - 1];
@@ -247,7 +257,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public BigDecimal getBigDecimal(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > currentRow.length) {
+        if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         return (BigDecimal) currentRow[columnIndex - 1];
@@ -260,7 +270,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public boolean getBoolean(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > currentRow.length) {
+        if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         return (boolean) currentRow[columnIndex - 1];
@@ -273,7 +283,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public byte getByte(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > currentRow.length) {
+        if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         return (byte) currentRow[columnIndex - 1];
@@ -286,7 +296,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public byte[] getBytes(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > currentRow.length) {
+        if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         return (byte[]) currentRow[columnIndex - 1];
@@ -299,7 +309,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public double getDouble(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > currentRow.length) {
+        if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         return (double) currentRow[columnIndex - 1];
@@ -312,7 +322,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public short getShort(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > currentRow.length) {
+        if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         return (short) currentRow[columnIndex - 1];
@@ -356,7 +366,7 @@ public class EthResultSet extends AbstractResultSet {
         if (!aliasMapping.isEmpty() && aliasMapping.containsKey(columnLabel)) {
             return columnNamesMap.get(aliasMapping.get(columnLabel));
         } else {
-            if (columnNamesMap.get(columnLabel) == null) {
+            if(columnNamesMap.get(columnLabel) == null){
                 LOGGER.error("Column: " + columnLabel + " is not a part of query");
                 throw new RuntimeException("Column: " + columnLabel + " is not a part of query");
             }
@@ -365,3 +375,4 @@ public class EthResultSet extends AbstractResultSet {
     }
 
 }
+
