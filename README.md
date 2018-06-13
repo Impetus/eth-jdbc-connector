@@ -18,7 +18,7 @@ It uses [blkchn-sql-driver](http://git-impetus.impetus.co.in/RND-LABS/blkchn-sql
 
 # How to Contribute
 
-- [Contribution Guidelines](http://git-impetus.impetus.co.in/RND-LABS/eth-jdbc-connector/wikis/how-to-contribute)
+- [Contribution Guidelines](http://git-impetus.impetus.co.in/RND-LABS/eth-jdbc-connector/blob/master/CONTRIBUTING.md)
 
 About Us
 ========
