@@ -11,6 +11,21 @@ It uses [blkchn-sql-driver](http://git-impetus.impetus.co.in/RND-LABS/blkchn-sql
 - Navigate to [examples](http://git-impetus.impetus.co.in/RND-LABS/eth-jdbc-connector/tree/master/eth-jdbc-examples) folder
 - Check [`Query.java`](http://git-impetus.impetus.co.in/RND-LABS/eth-jdbc-connector/blob/master/eth-jdbc-examples/src/main/java/com/impetus/blkchn/eth/Query.java) and [`Insert.java`](http://git-impetus.impetus.co.in/RND-LABS/eth-jdbc-connector/blob/master/eth-jdbc-examples/src/main/java/com/impetus/blkchn/eth/Insert.java) for quick start
 
+Ethereum JDBC connector is a maven based project. It can be directly added as maven dependency in your project in the following manner :
+ 
+  
+* Add below in dependency:
+  
+  ```
+  <dependency>
+    <groupId>com.impetus</groupId>
+    <artifactId>eth-jdbc-driver</artifactId>
+    <version>${ethjdbcdriver.version}</version>
+  </dependency>
+  ```
+
+Build your project with the above changes to your pom.xml.
+
 # Connection and Querying
 
 - Check [how to connect](http://git-impetus.impetus.co.in/RND-LABS/eth-jdbc-connector/wikis/how-to-connect) to ethereum
