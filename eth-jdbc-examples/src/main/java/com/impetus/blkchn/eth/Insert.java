@@ -31,16 +31,16 @@ import com.impetus.eth.jdbc.EthStatement;
 public class Insert {
     public static void main(String[] args) throws ClassNotFoundException, IOException, CipherException,
             InterruptedException, ExecutionException, Exception {
-        String url = "jdbc:blkchn:ethereum://172.25.41.52:8545";
+        String url = "jdbc:blkchn:ethereum://localhost:8545";
         String driverClass = "com.impetus.eth.jdbc.EthDriver";
 
-        String query = "insert into transaction (toAddress, value, unit, async) values ('0xa76cd046cf6089fe2adcf1680fcede500e44bacd', 1.11, 'ether', true)";
+        String query = "insert into transaction (toAddress, value, unit, async) values ('<to address>', 1.11, 'ether', true)";
         try {
             Class.forName(driverClass);
             Properties prop = new Properties();
             prop.put(DriverConstants.KEYSTORE_PATH,
-                    "/home/impadmin/keystore/UTC--2017-09-11T04-53-29.614189140Z--8144c67b144a408abc989728e32965edf37adaa1");
-            prop.put(DriverConstants.KEYSTORE_PASSWORD, "impetus123");
+                    "/local/path/to/ethereum/keystore/UTC--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+            prop.put(DriverConstants.KEYSTORE_PASSWORD, "<password>");
             Connection conn = DriverManager.getConnection(url, prop);
             Statement stmt = conn.createStatement();
             ResultSet ret = ((EthStatement) stmt).executeAndReturn(query);
