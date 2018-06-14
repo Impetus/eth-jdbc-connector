@@ -1,4 +1,4 @@
-fabric-jdbc-connector(""Product"") is Copyright of Impetus Technologies, a California corporation, 
+eth-jdbc-connector(""Product"") is Copyright of Impetus Technologies, a California corporation, 
 with a principal place of business at 720 University Avenue,Suite 130 Los Gatos, CA 95032, USA.
 
 Product includes Other 3rd party software as indicated below.
