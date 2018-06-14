@@ -26,7 +26,7 @@ The contributor needs to incorporate code changes (_if any_).
 
 ### 4. Wiki:
 
-The contributor needs to write wiki page(s) talking about usage. Check [wiki](http://git-impetus.impetus.co.in/RND-LABS/eth-jdbc-connector/wikis).
+The contributor needs to write wiki page(s) talking about usage. Check [wiki](http://git-impetus.impetus.co.in/RND-LABS/eth-jdbc-connector/wikis/home).
 
 
 _**At any point feel free to contact.**_
