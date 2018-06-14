@@ -7,9 +7,13 @@
 		<version>1.0.0</version>
 	</parent>
 	<artifactId>eth-jdbc-examples</artifactId>
+	<name>Ethereum Jdbc Examples</name>
+	
+	
 	<properties>
 		<maven.deploy.skip>true</maven.deploy.skip>
 	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>com.impetus.eth</groupId>
@@ -17,4 +21,5 @@
 			<version>1.0.0</version>
 		</dependency>
 	</dependencies>
+
 </project>

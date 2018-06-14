@@ -7,6 +7,8 @@
 		<version>1.0.0</version>
 	</parent>
 	<artifactId>eth-jdbc-driver</artifactId>
+	<name>Ethereum Jdbc Driver</name>
+	
 	<dependencies>
 		<dependency>
 			<groupId>com.impetus</groupId>
