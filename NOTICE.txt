@@ -1,0 +1,73 @@
+fabric-jdbc-connector(""Product"") is Copyright of Impetus Technologies, a California corporation, 
+with a principal place of business at 720 University Avenue,Suite 130 Los Gatos, CA 95032, USA.
+
+Product includes Other 3rd party software as indicated below.
+
+=========================================================================
+==                          3rd Party Software                         ==
+=========================================================================
+1.      Name                    :junit
+        Source                  :http://central.maven.org/maven2/junit/junit/4.12/junit-4.12.jar
+        Licence                 :EPL 1.0
+        Licence Source          :https://www.eclipse.org/legal/epl-v10.html
+        Linking                 :Static
+        Modified by Impetus     :No
+        Version                 :4.12
+        
+2.      Name                    :mockito-all
+        Source                  :http://central.maven.org/maven2/org/mockito/mockito-all/1.10.19/mockito-all-1.10.19.jar
+        Licence                 :MIT License
+        Licence Source          :http://www.linfo.org/mitlicense.html
+        Linking                 :Static
+        Modified by Impetus     :No
+        Version                 :1.10.19
+        
+3.      Name                    :powermock-api-mockito
+        Source                  :http://central.maven.org/maven2/org/powermock/powermock-api-mockito/1.7.3/powermock-api-mockito-1.7.3.jar
+        Licence                 :Apache Software License 2.0
+        Licence Source          :http://www.apache.org/licenses/LICENSE-2.0.html
+        Linking                 :Static
+        Modified by Impetus     :No
+        Version                 :1.7.3
+        
+4.      Name                    :powermock-module-junit4
+        Source                  :http://central.maven.org/maven2/org/powermock/powermock-module-junit4/1.7.3/powermock-module-junit4-1.7.3.jar
+        Licence                 :Apache Software License 2.0
+        Licence Source          :http://www.apache.org/licenses/LICENSE-2.0.html
+        Linking                 :Static
+        Modified by Impetus     :No
+        Version                 :1.7.3
+        
+5.      Name                    :web3j
+        Source                  :http://central.maven.org/maven2/org/web3j/core/2.3.0/core-2.3.0.jar
+        Licence                 :Apache Software License 2.0
+        Licence Source          :http://www.apache.org/licenses/LICENSE-2.0.html
+        Linking                 :Static
+        Modified by Impetus     :No
+        Version                 :2.3.0
+        
+6.      Name                    :blkchn-sql-interfaces
+        Source                  :
+        Licence                 :Apache Software License 2.0
+        Licence Source          :http://www.apache.org/licenses/LICENSE-2.0.html
+        Linking                 :Static
+        Modified by Impetus     :Yes
+        Version                 :1.0.0
+        
+7.      Name                    :logback-classic
+        Source                  :http://central.maven.org/maven2/ch/qos/logback/logback-classic/1.0.1/logback-classic-1.0.1.jar
+        Licence                 :Eclipse Public License - v 1.0 & GNU Lesser General Public License
+        Licence Source          :http://www.eclipse.org/legal/epl-v10.html
+                                :http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+        Linking                 :Static
+        Modified by Impetus     :No
+        Version                 :1.0.1
+        
+8.      Name                    :slf4j
+        Source                  :http://central.maven.org/maven2/org/slf4j/slf4j-api/1.7.22/slf4j-api-1.7.22.jar
+        Licence                 :MIT License
+        Licence Source          :http://www.opensource.org/licenses/mit-license.php
+        Linking                 :Static
+        Modified by Impetus     :No
+        Version                 :1.7.22
