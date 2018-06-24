@@ -9,6 +9,55 @@
 	<description>Ethereum JDBC driver implements a pure java, type 4 JDBC driver that executes SQL queries on Ethereum blockchain</description>
 	<url>https://github.com/Impetus/eth-jdbc-connector</url>
 
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<id>ashishkshukla</id>
+			<name>Ashish K Shukla</name>
+			<email>ashishk.shukla@impetus.co.in</email>
+		</developer>
+		<developer>
+			<id>narahari92</id>
+			<name>Hosur Narhari</name>
+			<email>hosur.narhari@impetus.co.in</email>
+		</developer>
+		<developer>
+			<id>karthikprasad13</id>
+			<name>Karthik Prasad Manchala</name>
+			<email>karthikp.manchala@impetus.co.in</email>
+		</developer>
+		<developer>
+			<id>JeetenJaiswal</id>
+			<name>Jeetendra Jaiswal</name>
+			<email>jeetendra.jaiswal@impetus.co.in</email>
+		</developer>
+		<developer>
+			<id>ajay-shriwastava</id>
+			<name>Ajay Shriwastava</name>
+			<email>ajay.shriwastava@impetus.co.in</email>
+		</developer>
+	</developers>
+	<scm>
+		<connection>scm:git:git://github.com/Impetus/eth-jdbc-connector.git</connection>
+		<developerConnection>scm:git:ssh://github.com/Impetus/eth-jdbc-connector.git</developerConnection>
+		<url>http://github.com/Impetus/eth-jdbc-connector/tree/master</url>
+	</scm>
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
 	<properties>
 		<java.version>1.8</java.version>
 		<web3j.version>2.3.0</web3j.version>
