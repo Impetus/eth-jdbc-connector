@@ -5,6 +5,13 @@ Ethereum JDBC driver implements a pure java, type 4 JDBC driver that executes SQ
 
 It uses [blkchn-sql-driver](https://github.com/Impetus/blkchn-sql-driver) to parse the query and create corresponding logical plan. This logical plan is then converted into an optimized physical plan. The driver extends and implements the physical plan using corresponding [web3j](https://github.com/web3j/web3j) calls to connect to Ethereum. The driver then converts the returned objects to a JDBC compliant result set and return it to the user.
 
+# Tested with
+| Dependency | Version |
+|---|---|
+| maven | 3.3.3 |
+|java | 1.8 |
+|web3j | 2.3.0 |
+
 # Getting Started
 
 - [Download](https://github.com/Impetus/eth-jdbc-connector/archive/master.zip) sourcecode or use `git clone https://github.com/Impetus/eth-jdbc-connector.git`
