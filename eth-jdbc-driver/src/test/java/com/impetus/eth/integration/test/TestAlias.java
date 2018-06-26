@@ -45,15 +45,15 @@ public class TestAlias
             System.out.println();
            
             ResultSet rs = stmt
-                    .executeQuery("select gas as gp from transactions where blocknumber=1652339 or blocknumber=1652340");
-            for (int i = 0; i < rs.getMetaData().getColumnCount(); i++)
+                    .executeQuery("select gas as gp from transaction where blocknumber=1652339 or blocknumber=1652340");
+            for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++)
             {
                 System.out.print(rs.getMetaData().getColumnName(i) + " | ");
             }
             System.out.println();
             while (rs.next())
             {
-                for (int i = 0; i < rs.getMetaData().getColumnCount(); i++)
+                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++)
                  System.out.print(rs.getObject(i) + " | ");
                
                 System.out.println();
@@ -61,28 +61,19 @@ public class TestAlias
             System.out.println();
             System.out.println("*****************SELECT group By Order By Alias***************");
             System.out.println();
-            
-            Object[][] data= new Object[7][2];
-            String[] columns= new String[2];
+           
             rs = stmt
-                    .executeQuery("select gas as gp,count(gas) as count from transactions where blocknumber=1652339 or blocknumber=1652340 group by gas order by count desc limit 4");
-            for (int i = 0; i < rs.getMetaData().getColumnCount(); i++){
-                columns[i]=rs.getMetaData().getColumnLabel(i);
+                    .executeQuery("select gas as gp,count(gas) as count from transaction where blocknumber=1652339 or blocknumber=1652340 group by gas order by count desc limit 4");
+            for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++){
                 System.out.print(rs.getMetaData().getColumnLabel(i) + " | ");
             }
             System.out.println();
-            int j=0;
             while (rs.next())
             {
-                for (int i = 0; i < rs.getMetaData().getColumnCount(); i++)
+                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++)
                 {
-                    data[j][i]=rs.getObject(i);
-                    if (i == 1)
-                        System.out.print(rs.getInt("count") + " | ");
-                    else
-                        System.out.print(rs.getLong("gas") + " | ");
+                        System.out.print(rs.getObject(i) + " | ");
                 }
-                j++;
                 System.out.println();
             }
          
@@ -90,17 +81,17 @@ public class TestAlias
             System.out.println("*****************SELECT group By Having Alias***************");
             System.out.println();
             rs = stmt
-                    .executeQuery("select gas as gp,count(gas) as count from transactions where blocknumber=1652339 or blocknumber=1652340 group by gas having count >1 order by count desc");
-            for (int i = 0; i < rs.getMetaData().getColumnCount(); i++)
+                    .executeQuery("select gas as gp,count(gas) as count from transaction where blocknumber=1652339 or blocknumber=1652340 group by gas order by count desc");
+            for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++)
                 System.out.print(rs.getMetaData().getColumnLabel(i) + " | ");
             System.out.println();
             while (rs.next())
             {
-                for (int i = 0; i < rs.getMetaData().getColumnCount(); i++)
-                    if (i == 1)
+                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++)
+                    if (i == 2)
                         System.out.print(rs.getInt("count") + " | ");
                     else
-                        System.out.print(rs.getLong("gas") + " | ");
+                        System.out.print(rs.getString("gas") + " | ");
                 System.out.println();
             }
 

@@ -47,36 +47,31 @@ public class EthDriverTestBlocks
             Class.forName(driverClass);
             Connection conn = DriverManager.getConnection(url, null);
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("select transactions as ts, count(transactions) from blocks where blocknumber=1652339 or blocknumber=1652340 ");
+            ResultSet rs = stmt.executeQuery("select count(blocknumber) from block where blocknumber=1652339 or blocknumber=1652340 group by blocknumber");
             while (rs.next())
             {
-               
-                List<TransactionObject> lt = (List<TransactionObject>) rs.getObject("transactions");
-                System.out.println("transation "+lt);
-                System.out.print("blockNumber : " + lt.get(0).getBlockNumber().longValueExact());
-                System.out.print("blockNumber : " + lt.get(0).getValue().toString());
                 System.out.println("count "+rs.getInt(1));
             }
             
             
-            rs = stmt.executeQuery("select count(blocknumber), blocknumber from blocks where blocknumber=1652339 or blocknumber=1652340 or blocknumber=2120613 group by blocknumber ");
+            rs = stmt.executeQuery("select count(blocknumber), blocknumber from block where blocknumber=1652339 or blocknumber=1652340 or blocknumber=2120613 group by blocknumber ");
             while (rs.next())
             {
-               System.out.print("count : "+rs.getInt(0));
-               System.out.println(" block number "+rs.getLong(1));
+               System.out.print("count : "+rs.getInt(1));
+               System.out.println(" block number "+rs.getObject(2));
                 
             }
             
 
             System.out.println("*****************SELECT * TEST***************");
             System.out.println();
-             rs=stmt.executeQuery("select * from blocks where blocknumber=1652339 or blocknumber=1652340");
-            for (int i=0;i<rs.getMetaData().getColumnCount();i++)
+             rs=stmt.executeQuery("select * from block where blocknumber=1652339 or blocknumber=1652340");
+            for (int i=1;i<=rs.getMetaData().getColumnCount();i++)
                 System.out.print(rs.getMetaData().getColumnLabel(i)+" | ");
             System.out.println();
             while (rs.next())
             {
-              for(int i=0;i<rs.getMetaData().getColumnCount();i++)
+              for(int i=1;i<=rs.getMetaData().getColumnCount();i++)
                  
                   System.out.print(rs.getObject(i)+" | ");
                   System.out.println();

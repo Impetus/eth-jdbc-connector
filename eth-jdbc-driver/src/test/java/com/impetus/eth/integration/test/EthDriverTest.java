@@ -49,36 +49,30 @@ public class EthDriverTest {
             Connection conn = DriverManager.getConnection(url, null);
             Statement stmt = conn.createStatement();
 
-            System.out.println("*****************SELECT * FROM A BLOCK ***************");
+            System.out.println("*****************SELECT * FROM A Transaction ***************");
             System.out.println();
 
-            ResultSet rs = stmt.executeQuery("select * from transactions where blocknumber=1652339");
-            for (int i = 0; i < rs.getMetaData().getColumnCount(); i++)
+            ResultSet rs = stmt.executeQuery("select * from transaction where blocknumber=1652339");
+            for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++)
                 System.out.print(rs.getMetaData().getColumnLabel(i) + " | ");
             System.out.println();
             while (rs.next()) {
-                for (int i = 0; i < rs.getMetaData().getColumnCount(); i++)
-                    if (i == 15)
-                        System.out.print(rs.getInt(i) + " | ");
-                    else
+                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++)
                         System.out.print(rs.getObject(i) + " | ");
-                System.out.println();
+                     System.out.println();
             }
 
             System.out.println();
             System.out.println("************SELECT MULTIPLE COLUMNS WITH MULTIPLE BLOCKS *************   ");
             System.out.println();
             rs = stmt.executeQuery(
-                    "select blocknumber, blockhash,to,value,gasprice from transactions where blocknumber=1652339 or blocknumber=1652340");
-            for (int i = 0; i < rs.getMetaData().getColumnCount(); i++)
+                    "select blocknumber, blockhash,to,value,gasprice from transaction where blocknumber=1652339 or blocknumber=1652340");
+            for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++)
                 System.out.print(rs.getMetaData().getColumnLabel(i) + " | ");
             System.out.println();
 
             while (rs.next()) {
-                for (int i = 0; i < rs.getMetaData().getColumnCount(); i++)
-                    if (i == 15)
-                        System.out.print(rs.getInt(i) + " | ");
-                    else
+                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++)
                         System.out.print(rs.getObject(i) + " | ");
                 System.out.println();
             }
@@ -87,16 +81,13 @@ public class EthDriverTest {
             System.out.println("************SELECT ORDER BY COLUMNS*************   ");
             System.out.println();
             rs = stmt.executeQuery(
-                    "select blocknumber, blockhash,to,value,gasprice from transactions where blocknumber=1652339 or blocknumber=1652340 order by gasprice desc");
-            for (int i = 0; i < rs.getMetaData().getColumnCount(); i++)
+                    "select blocknumber, blockhash,to,value,gasprice from transaction where blocknumber=1652339 or blocknumber=1652340 order by gasprice desc");
+            for (int i = 1; i <=rs.getMetaData().getColumnCount(); i++)
                 System.out.print(rs.getMetaData().getColumnLabel(i) + " | ");
             System.out.println();
 
             while (rs.next()) {
-                for (int i = 0; i < rs.getMetaData().getColumnCount(); i++)
-                    if (i == 15)
-                        System.out.print(rs.getInt(i) + " | ");
-                    else
+                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++)
                         System.out.print(rs.getObject(i) + " | ");
                 System.out.println();
             }
@@ -105,14 +96,14 @@ public class EthDriverTest {
             System.out.println("********************SELECT GROUP BY COLUMNS ************");
             System.out.println();
             rs = stmt.executeQuery(
-                    "select count(to) as count, to from transactions where blocknumber=1652339 or blocknumber=1652340 group by to");
+                    "select count(to) as count, to from transaction where blocknumber=1652339 or blocknumber=1652340 group by to");
             ResultSetMetaData rsMetaData = rs.getMetaData();
-            for (int i = 0; i < rsMetaData.getColumnCount(); i++)
+            for (int i = 1; i <= rsMetaData.getColumnCount(); i++)
                 System.out.print(rsMetaData.getColumnLabel(i) + " | ");
             System.out.println();
             while (rs.next()) {
-                System.out.print(rs.getInt(0));
-                System.out.print(" | " + rs.getString(1));
+                System.out.print(rs.getInt(1));
+                System.out.print(" | " + rs.getString(2));
                 System.out.println();
             }
 
