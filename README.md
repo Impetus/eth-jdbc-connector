@@ -23,7 +23,7 @@ To use Ethereum JDBC connector in a maven project, add the following maven depen
   
   ```
   <dependency>
-    <groupId>com.impetus</groupId>
+    <groupId>com.impetus.eth</groupId>
     <artifactId>eth-jdbc-driver</artifactId>
     <version>${ethjdbcdriver.version}</version>
   </dependency>
