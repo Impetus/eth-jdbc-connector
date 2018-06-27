@@ -14,90 +14,78 @@
 * * limitations under the License.
 ******************************************************************************/
 package com.impetus.eth.integration.test;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.impetus.eth.test.util.ConnectionUtil;
 import com.impetus.test.catagory.IntegrationTest;
 
 @Category(IntegrationTest.class)
-public class TestAlias
-{
+public class TestAlias {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestAlias.class);
+
     @Test
-    public void testAlias()
-    {
-     
+    public void testAlias() {
+
         String url = ConnectionUtil.getEthUrl();
         String driverClass = "com.impetus.eth.jdbc.EthDriver";
-        try
-        {
+        try {
             Class.forName(driverClass);
-           
+
             Connection conn = DriverManager.getConnection(url, null);
             Statement stmt = conn.createStatement();
 
-            System.out.println("*****************SELECT * TEST***************");
-            System.out.println();
-           
+            LOGGER.info("*****************SELECT * TEST***************");
+
             ResultSet rs = stmt
                     .executeQuery("select gas as gp from transaction where blocknumber=1652339 or blocknumber=1652340");
-            for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++)
-            {
-                System.out.print(rs.getMetaData().getColumnName(i) + " | ");
-            }
-            System.out.println();
-            while (rs.next())
-            {
-                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++)
-                 System.out.print(rs.getObject(i) + " | ");
-               
-                System.out.println();
-            }
-            System.out.println();
-            System.out.println("*****************SELECT group By Order By Alias***************");
-            System.out.println();
-           
-            rs = stmt
-                    .executeQuery("select gas as gp,count(gas) as count from transaction where blocknumber=1652339 or blocknumber=1652340 group by gas order by count desc limit 4");
-            for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++){
-                System.out.print(rs.getMetaData().getColumnLabel(i) + " | ");
-            }
-            System.out.println();
-            while (rs.next())
-            {
-                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++)
-                {
-                        System.out.print(rs.getObject(i) + " | ");
-                }
-                System.out.println();
-            }
-         
-            System.out.println();
-            System.out.println("*****************SELECT group By Having Alias***************");
-            System.out.println();
-            rs = stmt
-                    .executeQuery("select gas as gp,count(gas) as count from transaction where blocknumber=1652339 or blocknumber=1652340 group by gas order by count desc");
-            for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++)
-                System.out.print(rs.getMetaData().getColumnLabel(i) + " | ");
-            System.out.println();
-            while (rs.next())
-            {
-                for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++)
-                    if (i == 2)
-                        System.out.print(rs.getInt("count") + " | ");
-                    else
-                        System.out.print(rs.getString("gas") + " | ");
-                System.out.println();
+            ResultSetMetaData rsmd = rs.getMetaData();
+            for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                LOGGER.info(rsmd.getColumnName(i) + " | ");
             }
 
-        }
-        catch (Exception e)
-        {
+            while (rs.next()) {
+                for (int i = 1; i <= rsmd.getColumnCount(); i++)
+                    LOGGER.info(rs.getObject(i) + " | ");
+            }
+
+            LOGGER.info("*****************SELECT group By Order By Alias***************");
+            rs = stmt.executeQuery(
+                    "select gas as gp,count(gas) as count from transaction where blocknumber=1652339 or blocknumber=1652340 group by gas order by count desc limit 4");
+            rsmd = rs.getMetaData();
+            for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                LOGGER.info(rsmd.getColumnLabel(i) + " | ");
+            }
+            while (rs.next()) {
+                for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                    LOGGER.info(rs.getObject(i) + " | ");
+                }
+            }
+
+            LOGGER.info("*****************SELECT group By Having Alias***************");
+            rs = stmt.executeQuery(
+                    "select gas as gp,count(gas) as count from transaction where blocknumber=1652339 or blocknumber=1652340 group by gas order by count desc");
+            rsmd = rs.getMetaData();
+            for (int i = 1; i <= rsmd.getColumnCount(); i++)
+                LOGGER.info(rsmd.getColumnLabel(i) + " | ");
+            while (rs.next()) {
+                for (int i = 1; i <= rsmd.getColumnCount(); i++)
+                    if (i == 2)
+                        LOGGER.info(rs.getInt("count") + " | ");
+                    else
+                        LOGGER.info(rs.getString("gas") + " | ");
+            }
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
