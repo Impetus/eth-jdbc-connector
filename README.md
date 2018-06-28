@@ -1,5 +1,7 @@
 # Introduction 
 
+[![Join the chat at https://gitter.im/Impetus/eth-jdbc-connector](https://badges.gitter.im/Impetus/eth-jdbc-connector.svg)](https://gitter.im/Impetus/eth-jdbc-connector?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 
 Ethereum JDBC driver implements a pure java, type 4 JDBC driver that executes SQL queries on Ethereum blockchain. It facilitates getting the data in and out of ethereum in JDBC compliant manner. The Ethereum JDBC driver can be used to  perform ETL, BI reporting and analytics using the familiar SQL language.
 
