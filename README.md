@@ -1,9 +1,18 @@
 # Introduction 
 
+[![Join the chat at https://gitter.im/Impetus/eth-jdbc-connector](https://badges.gitter.im/Impetus/eth-jdbc-connector.svg)](https://gitter.im/Impetus/eth-jdbc-connector?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 
 Ethereum JDBC driver implements a pure java, type 4 JDBC driver that executes SQL queries on Ethereum blockchain. It facilitates getting the data in and out of ethereum in JDBC compliant manner. The Ethereum JDBC driver can be used to  perform ETL, BI reporting and analytics using the familiar SQL language.
 
 It uses [blkchn-sql-driver](https://github.com/Impetus/blkchn-sql-driver) to parse the query and create corresponding logical plan. This logical plan is then converted into an optimized physical plan. The driver extends and implements the physical plan using corresponding [web3j](https://github.com/web3j/web3j) calls to connect to Ethereum. The driver then converts the returned objects to a JDBC compliant result set and return it to the user.
+
+# Tested with
+| Dependency | Version |
+|---|---|
+| maven | 3.3.3 |
+|java | 1.8 |
+|web3j | 2.3.0 |
 
 # Getting Started
 
@@ -16,7 +25,7 @@ To use Ethereum JDBC connector in a maven project, add the following maven depen
   
   ```
   <dependency>
-    <groupId>com.impetus</groupId>
+    <groupId>com.impetus.eth</groupId>
     <artifactId>eth-jdbc-driver</artifactId>
     <version>${ethjdbcdriver.version}</version>
   </dependency>
