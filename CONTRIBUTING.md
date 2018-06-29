@@ -6,7 +6,7 @@ Use `git clone https://github.com/Impetus/eth-jdbc-connector.git`
 
 ### 2. Discuss with eth-jdbc-connector Team:
 
-Share your thoughts with us at Gitter [chat](<add gitter link>) or mail us at ILABS-BLR-RD@impetus.co.in
+Share your thoughts with us at [Gitter chat](https://gitter.im/Impetus/eth-jdbc-connector?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) or mail us at dev-eth-driver@impetus.co.in
 
 After discussion, Raise a new issue on [github](https://github.com/Impetus/eth-jdbc-connector/issues)
 
