@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.impetus.eth</groupId>
 		<artifactId>eth-jdbc-connector</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>eth-jdbc-examples</artifactId>
 	<name>Ethereum Jdbc Examples</name>
@@ -18,7 +18,7 @@
 		<dependency>
 			<groupId>com.impetus.eth</groupId>
 			<artifactId>eth-jdbc-driver</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
