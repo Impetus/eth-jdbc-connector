@@ -14,9 +14,14 @@ It uses [blkchn-sql-driver](https://github.com/Impetus/blkchn-sql-driver) to par
 |java | 1.8 |
 |web3j | 2.3.0 |
 
-# Getting Started
-
+Building ethereum-jdbc-connector
+==========================
+- [Download](https://github.com/Impetus/blkchn-sql-driver/archive/master.zip) or clone <b>blkchn-sql-driver</b> project `git clone https://github.com/Impetus/blkchn-sql-driver.git`
+- build blkchn-sql-driver using `mvn clean install -Pgen-sources`
 - [Download](https://github.com/Impetus/eth-jdbc-connector/archive/master.zip) sourcecode or use `git clone https://github.com/Impetus/eth-jdbc-connector.git`
+- build it using `mvn clean install` 
+
+# Getting Started
 - Navigate to [examples](https://github.com/Impetus/eth-jdbc-connector/tree/master/eth-jdbc-examples) folder
 - Run [`Query.java`](https://github.com/Impetus/eth-jdbc-connector/blob/master/eth-jdbc-examples/src/main/java/com/impetus/blkchn/eth/Query.java) and [`Insert.java`](https://github.com/Impetus/eth-jdbc-connector/blob/master/eth-jdbc-examples/src/main/java/com/impetus/blkchn/eth/Insert.java) for quick start
 
