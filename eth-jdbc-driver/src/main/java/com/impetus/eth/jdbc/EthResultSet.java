@@ -22,6 +22,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 
+import com.impetus.blkch.BlkchnException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +42,9 @@ public class EthResultSet extends AbstractResultSet {
     protected static final int BEFORE_FIRST_ROW = 0;
 
     protected static final int AFTER_LAST_ROW = -1;
+
+    /** Has this ResultSet been closed?*/
+    protected boolean isClosed = false;
 
     protected int currentRowCursor;
 
@@ -75,18 +79,57 @@ public class EthResultSet extends AbstractResultSet {
     }
 
 
-    public EthResultSet(Object data) {
+    public EthResultSet(Object data, int resultSetType, int rSetConcurrency) {
         LOGGER.info("Instantiating new Result Set ");
         this.rowData = new ArrayList<>();
         this.rowData.add(Arrays.asList(data));
         this.columnNamesMap = new HashMap<>();
-        this.columnNamesMap.put("transactionReciept",1);
+        this.columnNamesMap.put("Receipt",1);
+        this.resultSetType = resultSetType;
+        this.rSetConcurrency = rSetConcurrency;
+        this.tableName = "TransactionReceipt";
         currentRowCursor = BEFORE_FIRST_ROW;
         totalRowCount = rowData.size();
     }
 
     @Override
+    public void close() throws SQLException {
+        realClose();
+    }
+
+    @Override
+    public boolean isClosed() throws SQLException {
+        return this.isClosed;
+    }
+
+
+    private void realClose() throws SQLException {
+        if(isClosed)
+            return;
+        try{
+            this.isClosed = true;
+            this.currentRowCursor = 0;
+            this.totalRowCount = 0;
+            this.rowData = null;
+            this.currentRow = null;
+            this.columnNamesMap = null;
+            this.resultSetType = 0;
+            this.rSetConcurrency = 0;
+            this.tableName = null;
+            this.aliasMapping = null;
+        }catch (Exception e){
+            throw new BlkchnException("Error while closing ResultSet",e);
+        }
+    }
+    protected final void checkClosed() throws SQLException {
+        if (this.isClosed) {
+            throw new BlkchnException("ResultSet is already closed.");
+        }
+    }
+
+    @Override
     public boolean first() throws SQLException {
+        checkClosed();
         LOGGER.info("Moving the cursor to the first row of ResultSet Object");
         checkRSForward();
         if (totalRowCount > 0) {
@@ -99,6 +142,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public boolean last() throws SQLException {
+        checkClosed();
         LOGGER.info("Moving the cursor to the last row of ResultSet Object");
         checkRSForward();
         if (totalRowCount > 0) {
@@ -111,6 +155,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public boolean next() throws SQLException {
+        checkClosed();
         LOGGER.info("Moving the cursor to the next row of ResultSet Object");
         if (currentRowCursor != AFTER_LAST_ROW && currentRowCursor < totalRowCount) {
             currentRowCursor++;
@@ -124,6 +169,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public boolean previous() throws SQLException {
+        checkClosed();
         LOGGER.info("Moving the cursor to the previous row of ResultSet Object");
         checkRSForward();
         if (currentRowCursor > 1) {
@@ -138,6 +184,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public void afterLast() throws SQLException {
+        checkClosed();
         LOGGER.info("Moving the cursor to thee end of ResultSet Object");
         checkRSForward();
         currentRowCursor = AFTER_LAST_ROW;
@@ -145,6 +192,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public void beforeFirst() throws SQLException {
+        checkClosed();
         LOGGER.info("Moving the cursor to the front of ResultSet Object");
         checkRSForward();
         currentRowCursor = BEFORE_FIRST_ROW;
@@ -152,6 +200,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public boolean isFirst() throws SQLException {
+        checkClosed();
         LOGGER.info("Checking if cursor is on the first row of result set object");
         if (currentRowCursor == 1)
             return true;
@@ -161,6 +210,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public boolean isLast() throws SQLException {
+        checkClosed();
         LOGGER.info("Checking if cursor is on the last row of result set object");
         if (currentRowCursor == totalRowCount)
             return true;
@@ -192,12 +242,14 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public int getFetchSize() throws SQLException {
+        checkClosed();
         LOGGER.info("Calculating Result set fetch size");
         return totalRowCount;
     }
 
     @Override
     public String getString(String columnLabel) throws SQLException {
+        checkClosed();
         int idx = getColumnIndex(columnLabel);
         if(currentRow[idx] instanceof BigInteger){
             return ((BigInteger) currentRow[idx]).toString();
@@ -207,6 +259,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public String getString(int columnIndex) throws SQLException {
+        checkClosed();
         if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -218,11 +271,13 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public Object getObject(String columnLabel) throws SQLException {
+        checkClosed();
         return currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public Object getObject(int columnIndex) throws SQLException {
+        checkClosed();
         if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -231,6 +286,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public int getInt(int columnIndex) throws SQLException {
+        checkClosed();
         if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -239,11 +295,13 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public int getInt(String columnLabel) throws SQLException {
+        checkClosed();
         return (int) currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public long getLong(int columnIndex) throws SQLException {
+        checkClosed();
         if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -252,11 +310,13 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public long getLong(String columnLabel) throws SQLException {
+        checkClosed();
         return (long) currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public BigDecimal getBigDecimal(int columnIndex) throws SQLException {
+        checkClosed();
         if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -265,11 +325,13 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public BigDecimal getBigDecimal(String columnLabel) throws SQLException {
+        checkClosed();
         return (BigDecimal) currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public boolean getBoolean(int columnIndex) throws SQLException {
+        checkClosed();
         if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -278,11 +340,13 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public boolean getBoolean(String columnLabel) throws SQLException {
+        checkClosed();
         return (boolean) currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public byte getByte(int columnIndex) throws SQLException {
+        checkClosed();
         if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -291,11 +355,13 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public byte getByte(String columnLabel) throws SQLException {
+        checkClosed();
         return (byte) currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public byte[] getBytes(int columnIndex) throws SQLException {
+        checkClosed();
         if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -309,6 +375,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public double getDouble(int columnIndex) throws SQLException {
+        checkClosed();
         if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -317,11 +384,13 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public double getDouble(String columnLabel) throws SQLException {
+        checkClosed();
         return (double) currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public short getShort(int columnIndex) throws SQLException {
+        checkClosed();
         if(columnIndex < 1 || columnIndex > currentRow.length){
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -330,30 +399,36 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public short getShort(String columnLabel) throws SQLException {
+        checkClosed();
         return (short) currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public int getRow() throws SQLException {
+        checkClosed();
         return currentRowCursor;
     }
 
     @Override
     public int getType() throws SQLException {
+        checkClosed();
         return resultSetType;
     }
 
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
+        checkClosed();
         return new EthResultSetMetaData(tableName, columnNamesMap, aliasMapping);
     }
 
     @Override
     public int findColumn(String columnLabel) throws SQLException {
+        checkClosed();
         return columnNamesMap.get(columnLabel);
     }
 
     protected void checkRSForward() throws SQLException {
+        checkClosed();
         LOGGER.info("checking result set type ");
         if (resultSetType == ResultSet.TYPE_FORWARD_ONLY) {
             LOGGER.error("Result Set is Type Forward only. Exiting...");

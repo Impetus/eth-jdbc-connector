@@ -216,4 +216,27 @@ public class TestEthResultSet extends TestCase {
         assertEquals(3,columnCount );
     }
 
+    @Test
+    public void testEthResultSetCloseBefore(){
+        boolean closed = true;
+        try {
+            closed = ethResultSet.isClosed();
+        }catch (SQLException e) {
+
+        }
+        assertEquals(false, closed);
+    }
+
+    @Test
+    public void testEthResultSetCloseAfter(){
+        boolean closed = false;
+        try {
+            ethResultSet.close();
+            closed = ethResultSet.isClosed();
+        }catch (SQLException e) {
+
+        }
+        assertEquals(true, closed);
+    }
+
 }

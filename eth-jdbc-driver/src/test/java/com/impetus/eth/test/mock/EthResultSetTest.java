@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 
+import com.impetus.eth.test.util.ConnectionUtil;
 import junit.framework.TestCase;
 
 import org.junit.Test;
@@ -35,7 +36,7 @@ import com.impetus.eth.jdbc.EthStatement;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(DriverManager.class)
 public class EthResultSetTest extends TestCase {
-    String url = "jdbc:blkchn:ethereum://172.25.41.52:8545";
+    String url = ConnectionUtil.getEthUrl();
    
     @Override
     protected void setUp() throws Exception {
@@ -149,8 +150,10 @@ public class EthResultSetTest extends TestCase {
                 System.out.print(" | " + rs.getString(1));
                 System.out.println();
             }
-
-           
+            conn.close();
+            assertEquals(true,conn.isClosed());
+            assertEquals(true,rs.isClosed());
+            assertEquals(true,stmt.isClosed());
         } catch (Exception e) {
 
             e.printStackTrace();
