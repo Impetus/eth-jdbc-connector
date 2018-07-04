@@ -29,7 +29,6 @@ public class Query {
         String driverClass = "com.impetus.eth.jdbc.EthDriver";
         try {
             Class.forName(driverClass);
-
             Connection conn = DriverManager.getConnection(url, null);
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(
@@ -46,6 +45,12 @@ public class Query {
             System.out.println("column label name : " + rsMetaData.getColumnLabel(1));
             System.out.println("column Name : " + rsMetaData.getColumnName(1));
             System.out.println("tableName : " + rsMetaData.getTableName(1));
+
+            conn.close();
+            System.out.println("Connection closed "+conn.isClosed());
+            System.out.println("ResultSet closed "+rs.isClosed());
+            System.out.println("Statement closed "+stmt.isClosed());
+
         } catch (SQLException e1) {
             e1.printStackTrace();
         }

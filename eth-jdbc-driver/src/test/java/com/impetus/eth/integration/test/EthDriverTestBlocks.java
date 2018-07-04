@@ -75,6 +75,11 @@ public class EthDriverTestBlocks {
 
                     LOGGER.info(rs.getObject(i) + " | ");
             }
+
+            conn.close();
+            LOGGER.info("Connection should be closed "+conn.isClosed());
+            LOGGER.info("ResultSet should be closed "+rs.isClosed());
+            LOGGER.info("Statement should be closed "+stmt.isClosed());
         } catch (Exception e1) {
             e1.printStackTrace();
         }

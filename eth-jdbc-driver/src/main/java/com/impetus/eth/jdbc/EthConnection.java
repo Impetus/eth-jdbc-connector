@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
+import com.impetus.blkch.BlkchnException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.protocol.Web3j;
@@ -62,6 +63,9 @@ public class EthConnection implements BlkchnConnection {
 
     private ArrayList statementList = new ArrayList();
 
+    /** Has this connection been closed?*/
+    protected boolean isClosed = false;
+
     public Web3j getWeb3jClient() {
         return web3jClient;
     }
@@ -71,7 +75,6 @@ public class EthConnection implements BlkchnConnection {
     }
 
     public void addNewStatement(EthStatement statement) {
-
         synchronized (statementList) {
             for (int i = 0; i < statementList.size(); i++) {
                 WeakReference wr = (WeakReference) statementList.get(i);
@@ -80,17 +83,14 @@ public class EthConnection implements BlkchnConnection {
                     return;
                 }
             }
-
             statementList.add(new WeakReference(statement));
         }
-
     }
 
     public EthConnection(String url, Properties props) throws SQLException {
         super();
         this.url = url;
         this.props = props;
-
         if (props.getProperty(DriverConstants.IPC) != null) {
             String path = props.getProperty(DriverConstants.IPC);
             if (props.getProperty(DriverConstants.IPC_OS) != null) {
@@ -115,6 +115,8 @@ public class EthConnection implements BlkchnConnection {
     }
 
     public void setUrl(String url) {
+        if(isClosed)
+            throw new BlkchnException("No operations allowed after statement closed.");
         this.url = url;
     }
 
@@ -148,9 +150,32 @@ public class EthConnection implements BlkchnConnection {
 
     @Override
     public void close() throws SQLException {
-        // throw new UnsupportedOperationException();
-
+        realClose();
     }
+
+    private void realClose() throws SQLException {
+        if (this.isClosed) {
+            return;
+        }
+        try{
+            this.url = null;
+            this.props = null;
+            this.web3jClient = null;
+            this.isClosed = true;
+            closeAllOpenStatements();
+            this.statementList = new ArrayList();
+        }catch(Exception e){
+
+        }
+    }
+
+    private void closeAllOpenStatements() throws SQLException {
+        for(Object stm : statementList) {
+            if(stm != null &&  ((WeakReference)stm).get() != null)
+                ((EthStatement) ((WeakReference)stm).get()).close();
+        }
+    }
+
 
     @Override
     public void commit() throws SQLException {
@@ -190,6 +215,8 @@ public class EthConnection implements BlkchnConnection {
 
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
+        if(isClosed)
+            throw new BlkchnException("No operations allowed after connection closed.");
         EthStatement eStatement = new EthStatement(this, resultSetType, resultSetConcurrency);
         addNewStatement(eStatement);
         LOGGER.info("Statement Created");
@@ -264,7 +291,7 @@ public class EthConnection implements BlkchnConnection {
 
     @Override
     public boolean isClosed() throws SQLException {
-        throw new UnsupportedOperationException();
+        return this.isClosed;
     }
 
     @Override

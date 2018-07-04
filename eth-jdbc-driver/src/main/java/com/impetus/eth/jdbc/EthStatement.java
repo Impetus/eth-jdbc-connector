@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.List;
 
+import com.impetus.blkch.BlkchnException;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +64,9 @@ public class EthStatement implements BlkchnStatement {
     protected int rSetConcurrency;
 
     private ResultSet queryResultSet = null;
+
+    /** Has this statement been closed?*/
+    protected boolean isClosed = false;
 
     public int getrSetType() {
         return rSetType;
@@ -123,7 +127,23 @@ public class EthStatement implements BlkchnStatement {
 
     @Override
     public void close() throws SQLException {
-        throw new UnsupportedOperationException();
+       realClose();
+    }
+
+    private void realClose() throws SQLException {
+    if(isClosed)
+            return;
+        try{
+            this.connection = null;
+            this.isClosed = true;
+            if(queryResultSet != null)
+                queryResultSet.close();
+            this.queryResultSet = null;
+            this.rSetType = 0;
+            this.rSetConcurrency = 0;
+        }catch (Exception e){
+            throw new BlkchnException("Error while closing statement",e);
+        }
     }
 
     @Override
@@ -171,6 +191,12 @@ public class EthStatement implements BlkchnStatement {
 
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {
+        if(isClosed)
+            throw new BlkchnException("No operations allowed after statement closed.");
+        if(queryResultSet != null){
+            LOGGER.info("Query is already performed returning result set");
+            return queryResultSet;
+        }
         LOGGER.info("Entering into executeQuery Block");
         LogicalPlan logicalPlan = getLogicalPlan(sql);
         Object result = null;
@@ -179,7 +205,7 @@ public class EthStatement implements BlkchnStatement {
                 result = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
                         .executeAndReturn();
                 LOGGER.info("Exiting from execute Block with result: " + result);
-                queryResultSet = new EthResultSet(result);
+                queryResultSet = new EthResultSet(result, rSetType, rSetConcurrency);
                 LOGGER.info("Exiting from executeQuery Block");
                 return queryResultSet;
             default:
@@ -215,7 +241,6 @@ public class EthStatement implements BlkchnStatement {
 
     @Override
     public Connection getConnection() throws SQLException {
-
         return connection;
     }
 
@@ -298,7 +323,7 @@ public class EthStatement implements BlkchnStatement {
 
     @Override
     public boolean isClosed() throws SQLException {
-        throw new UnsupportedOperationException();
+        return this.isClosed;
     }
 
     @Override
