@@ -33,25 +33,26 @@ import junit.framework.TestCase;
  * 
  */
 @Category(UnitTest.class)
-public class TestEthDriver extends TestCase
-{
-    
-    
+public class TestEthDriver extends TestCase {
+
     @Test
-    public void testMajorVersion()
-    {
+    public void testMajorVersion() {
         EthDriver dc = new EthDriver();
-        int x=dc.getMajorVersion();
+        int x = dc.getMajorVersion();
         assertEquals(1, x);
     }
-    
-    
+
     @Test
-    public void testPropMap()
-    {
-       String url = "jdbc:blkchn:ethereum://Host:9";
-        EthDriver dc = new EthDriver();
-        Properties prop=dc.getPropMap(url);
+    public void testPropMap() {
+        String url = "jdbc:blkchn:ethereum://Host:9";
+        Properties prop = EthDriver.getPropMap(url);
         assertEquals("Host", prop.get(DriverConstants.HOSTNAME));
+    }
+
+    @Test
+    public void testInfuraPropMap() {
+        String url = "jdbc:blkchn:ethereum://ropsten.infura.io/1234";
+        Properties prop = EthDriver.getPropMap(url);
+        assertEquals("ropsten.infura.io/1234", prop.get(DriverConstants.INFURAURL));
     }
 }

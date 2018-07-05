@@ -6,8 +6,7 @@
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<layout class="ch.qos.logback.classic.PatternLayout">
 			<Pattern>
-				%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} -
-				[%F:%L] - %msg%n
+				%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - [%F:%L] - %msg%n
 			</Pattern>
 		</layout>
 	</appender>
@@ -17,8 +16,7 @@
 		<file>${DEV_HOME}/eth.log</file>
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
 			<Pattern>
-				%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} -
-				[%F:%L] - %msg%n
+				%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - [%F:%L] - %msg%n
 			</Pattern>
 		</encoder>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -32,12 +30,11 @@
 		</rollingPolicy>
 
 	</appender>
-
 	<!-- Send logs to both console and file audit -->
 
-	<logger name="com.impetus.eth" level="ALL" additivity="false">
+	<logger name="com.impetus.blkchn.eth" level="ALL" additivity="false">
 		<appender-ref ref="ETH-LOG" />
-		<appender-ref ref="STDOUT" /> 
+		 <appender-ref ref="STDOUT" />
 	</logger>
 	<root level="TRACE">
 		<appender-ref ref="ETH-LOG" />
