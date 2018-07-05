@@ -42,6 +42,7 @@ import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.ipc.UnixIpcService;
 import org.web3j.protocol.ipc.WindowsIpcService;
 
+import com.impetus.blkch.BlkchnException;
 import com.impetus.blkch.jdbc.BlkchnConnection;
 
 /**
@@ -100,6 +101,10 @@ public class EthConnection implements BlkchnConnection {
                 LOGGER.info("Connecting to ethereum with ipc file on unix location : " + path);
                 web3jClient = Web3j.build(new UnixIpcService(path));
             }
+        } else if (props.containsKey(DriverConstants.INFURAURL)) {
+            String httpsUrl = DriverConstants.HTTPPSREFIX + props.getProperty(DriverConstants.INFURAURL);
+            web3jClient = Web3j.build(new HttpService(httpsUrl));
+
         } else {
             String httpUrl = DriverConstants.HTTPPREFIX + props.getProperty(DriverConstants.HOSTNAME)
                     + DriverConstants.COLON + props.getProperty(DriverConstants.PORTNUMBER);
@@ -413,8 +418,7 @@ public class EthConnection implements BlkchnConnection {
             web3jClient.web3ClientVersion().send().getWeb3ClientVersion();
         } catch (Exception e) {
             LOGGER.error("Couldn't connect with ethereum. please check the rpcurl");
-            throw new SQLException("Couldn't connect with ethereum");
-
+            throw new SQLException("Couldn't connect with ethereum. please validate the connection url");
         }
     }
 

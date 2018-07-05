@@ -43,9 +43,20 @@ public class TestDriverConstants extends TestCase
     @Test
     public void testConstants()
     {
-        DriverConstants dc = new DriverConstants();
+        assertEquals(":", DriverConstants.COLON);
+        assertEquals("HOSTNAME", DriverConstants.HOSTNAME);
+        assertEquals("https://", DriverConstants.HTTPPSREFIX);
+        assertEquals("http://", DriverConstants.HTTPPREFIX);
+        assertEquals("PORTNUMBER", DriverConstants.PORTNUMBER);
+        assertEquals("INFURAURL", DriverConstants.INFURAURL);
+        assertEquals("IPC", DriverConstants.IPC);
+        assertEquals("IPC_OS", DriverConstants.IPC_OS);
+        assertEquals("KEYSTORE_PATH", DriverConstants.KEYSTORE_PATH);
+        assertEquals("KEYSTORE_PATH", DriverConstants.KEYSTORE_PATH);
+        assertEquals(1,DriverConstants.MAJOR_VERSION);
+        assertEquals(0, DriverConstants.MINOR_VERSION);
+        assertEquals("jdbc:blkchn:", DriverConstants.DRIVERPREFIX);
 
-        assertEquals(":", dc.COLON);
     }
 
 }

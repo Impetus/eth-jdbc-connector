@@ -32,6 +32,10 @@ public class DriverConstants {
     public static final String DRIVERPREFIX = "jdbc:blkchn:";
 
     public static final String HTTPPREFIX = "http://";
+    
+    public static final String HTTPPSREFIX = "https://";
+    
+    public static final String INFURAURL = "INFURAURL";
 
     public static final String COLON = ":";
 

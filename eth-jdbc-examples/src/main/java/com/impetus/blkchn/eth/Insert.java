@@ -21,14 +21,17 @@ import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-
 
 import com.impetus.eth.jdbc.DriverConstants;
 import com.impetus.eth.jdbc.EthStatement;
 
 public class Insert {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Insert.class);
+
     public static void main(String[] args) throws ClassNotFoundException, IOException, CipherException,
             InterruptedException, ExecutionException, Exception {
         String url = "jdbc:blkchn:ethereum://localhost:8545";
@@ -45,8 +48,9 @@ public class Insert {
             Statement stmt = conn.createStatement();
             ResultSet ret = ((EthStatement) stmt).executeAndReturn(query);
             while (ret.next()) {
-               System.out.println(((TransactionReceipt) (((CompletableFuture) ret.getObject(1)).get())).getTransactionHash());
-          }
+                LOGGER.info(
+                        ((TransactionReceipt) (((CompletableFuture) ret.getObject(1)).get())).getTransactionHash());
+            }
         } catch (SQLException | ClassNotFoundException e1) {
             e1.printStackTrace();
         }

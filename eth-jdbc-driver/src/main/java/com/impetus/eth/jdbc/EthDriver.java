@@ -56,17 +56,12 @@ public class EthDriver implements BlkchnDriver {
         if (url == null || !url.toLowerCase().startsWith(DriverConstants.DRIVERPREFIX)) {
             return null;
         }
-        
+
         Properties props = getPropMap(url);
-        if (info != null && props != null)
-        {
+        if (info != null && props != null) {
             props.putAll(info);
         }
-        try {
-            return new EthConnection(url, props);
-        } catch (Exception e) {
-            return null;
-        }
+        return new EthConnection(url, props);
     }
 
     @Override
@@ -117,7 +112,6 @@ public class EthDriver implements BlkchnDriver {
         if (!"ethereum".equalsIgnoreCase(token.toString())) {
             return null;
         }
-        // connecting with ipc file
         if (url.contains(".ipc")) {
             String path = url.substring(23);
             props.setProperty(DriverConstants.IPC, path);
@@ -125,6 +119,10 @@ public class EthDriver implements BlkchnDriver {
                 props.setProperty(DriverConstants.IPC_OS, "windows");
             }
 
+            return props;
+        } else if (url.contains("infura")) {
+            String infuraUrl = url.substring(23);
+            props.setProperty(DriverConstants.INFURAURL, infuraUrl);
             return props;
         }
 
