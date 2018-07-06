@@ -76,7 +76,6 @@
 			<id>integration-test</id>
 			<properties>
 				<skip.integration.tests>false</skip.integration.tests>
-				<skip.unit.tests>true</skip.unit.tests>
 			</properties>
 		</profile>
 		<profile>
@@ -220,7 +219,6 @@
 				<version>2.13</version>
 				<configuration>
 					<groups>com.impetus.test.catagory.UnitTest</groups>
-					<skipTests>${skip.unit.tests}</skipTests>
 				</configuration>
 			</plugin>
 			<plugin>
