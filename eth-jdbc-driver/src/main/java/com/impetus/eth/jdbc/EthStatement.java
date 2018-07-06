@@ -204,7 +204,18 @@ public class EthStatement implements BlkchnStatement {
             case INSERT:
                 result = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
                         .executeAndReturn();
-                LOGGER.info("Exiting from execute Block with result: " + result);
+                queryResultSet = new EthResultSet(result, rSetType, rSetConcurrency);
+                LOGGER.info("Exiting from executeQuery Block");
+                return queryResultSet;
+            case DEPLOY_SMARTCONTRACT:
+                result = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
+                        .executeDeploy();
+                queryResultSet = new EthResultSet(result, rSetType, rSetConcurrency);
+                LOGGER.info("Exiting from executeQuery Block");
+                return queryResultSet;
+            case CALL_FUNCTION:
+                result = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
+                        .executeFunction();
                 queryResultSet = new EthResultSet(result, rSetType, rSetConcurrency);
                 LOGGER.info("Exiting from executeQuery Block");
                 return queryResultSet;

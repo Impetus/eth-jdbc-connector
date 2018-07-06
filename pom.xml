@@ -56,7 +56,7 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-		<web3j.version>2.3.0</web3j.version>
+		<web3j.version>3.4.0</web3j.version>
 		<junit.version>4.12</junit.version>
 		<mockito.version>1.10.19</mockito.version>
 		<slf4j.version>1.7.22</slf4j.version>
