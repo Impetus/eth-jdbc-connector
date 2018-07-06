@@ -51,9 +51,10 @@ public class Query {
             LOGGER.info("tableName : " + rsMetaData.getTableName(1));
 
             conn.close();
-            Logger.info("Connection closed "+conn.isClosed());
-            Logger.info("ResultSet closed "+rs.isClosed());
-            Logger.info("Statement closed "+stmt.isClosed());
+            LOGGER.info("Connection closed "+conn.isClosed());
+            LOGGER.info("ResultSet closed "+rs.isClosed());
+            LOGGER.info("Statement closed "+stmt.isClosed());
+
 
         } catch (SQLException e1) {
             e1.printStackTrace();

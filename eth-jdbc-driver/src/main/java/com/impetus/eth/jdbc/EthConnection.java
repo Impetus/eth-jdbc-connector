@@ -170,17 +170,16 @@ public class EthConnection implements BlkchnConnection {
             closeAllOpenStatements();
             this.statementList = new ArrayList();
         }catch(Exception e){
-
+            throw new BlkchnException("Error while closing connection",e);
         }
     }
 
     private void closeAllOpenStatements() throws SQLException {
-        for(Object stm : statementList) {
-            if(stm != null &&  ((WeakReference)stm).get() != null)
-                ((EthStatement) ((WeakReference)stm).get()).close();
+        for (Object stm : statementList) {
+            if (stm != null && ((WeakReference) stm).get() != null)
+                ((EthStatement) ((WeakReference) stm).get()).close();
         }
     }
-
 
     @Override
     public void commit() throws SQLException {
