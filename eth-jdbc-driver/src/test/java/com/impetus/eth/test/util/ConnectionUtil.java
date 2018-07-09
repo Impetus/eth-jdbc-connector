@@ -1,5 +1,6 @@
 package com.impetus.eth.test.util;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,5 +48,12 @@ public class ConnectionUtil
     public static String getEthUrl()
     {
         return prop.getProperty("eth_url");
+    }
+    public static String getKeyStorePath(){
+        File file = new File("src/test/resources/UTC--2017-09-11T04-53-29.614189140Z--8144c67b144a408abc989728e32965edf37adaa1");
+        return file.getPath();
+    }
+    public static String getKeyStorePassword(){
+        return "impetus123";
     }
 }

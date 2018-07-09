@@ -193,10 +193,6 @@ public class EthStatement implements BlkchnStatement {
     public ResultSet executeQuery(String sql) throws SQLException {
         if(isClosed)
             throw new BlkchnException("No operations allowed after statement closed.");
-        if(queryResultSet != null){
-            LOGGER.info("Query is already performed returning result set");
-            return queryResultSet;
-        }
         LOGGER.info("Entering into executeQuery Block");
         LogicalPlan logicalPlan = getLogicalPlan(sql);
         Object result = null;
