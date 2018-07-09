@@ -69,7 +69,7 @@ public class FunctionUtil {
             List<String> lst = nodeLst.stream().map(e -> Utilities.unquote(e.getValue())).collect(Collectors.toList());
             argsType.add(List.class);
             args.add(lst);
-        }else if((lstType.equalsIgnoreCase("NUMBER") || lstType.equalsIgnoreCase("INT") ||
+        }else if((lstType.equalsIgnoreCase("NUMBER") || lstType.equalsIgnoreCase("INTEGER") ||
                 lstType.equalsIgnoreCase("BIGINTEGER"))){
             List<BigInteger> lst = nodeLst.stream().map(e -> new BigInteger(e.getValue())).collect(Collectors.toList());
             argsType.add(List.class);
@@ -79,7 +79,7 @@ public class FunctionUtil {
             argsType.add(List.class);
             args.add(lst);
         }else{
-            throw new BlkchnException("Data Type Not supported for list :: "+ lstType);
+            throw new BlkchnException("Data Type Not supported for list :: "+ lstType+", only ['BIGINTEGER','INTEGER','BOOLEAN','STRING','BYTES'] allowed");
         }
     }
 

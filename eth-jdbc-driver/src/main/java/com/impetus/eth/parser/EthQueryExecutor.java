@@ -790,7 +790,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             return WalletUtils.loadCredentials(properties.getProperty(DriverConstants.KEYSTORE_PASSWORD),
                     properties.getProperty(DriverConstants.KEYSTORE_PATH));
         } catch (Exception e) {
-            throw new BlkchnException("Check Your KEYSTORE credentials ", e);
+            throw new BlkchnException("Check your KEYSTORE credentials ", e);
         }
     }
     private void getParametersTypeValue(Parameters params,List<Object> args,List<Class> argsType){
@@ -820,7 +820,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             Method checkValidMethod = smartContractClass.getMethod("isValid");
             Boolean valid = (Boolean) checkValidMethod.invoke(classObject);
             if (!valid)
-                throw new BlkchnException("Smartcontract is not valid");
+                throw new BlkchnException("SmartContract is not valid");
             smartCrtClassObjectMap.put(smartContractClass,classObject);
             return classObject;
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
