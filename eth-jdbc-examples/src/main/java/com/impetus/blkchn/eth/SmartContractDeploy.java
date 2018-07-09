@@ -9,9 +9,11 @@ import java.sql.Statement;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class SmartContractDeploy {
-
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmartContractDeploy.class);
 
     public static void main(String[] args) throws
             InterruptedException,ExecutionException {
@@ -31,11 +33,11 @@ public class SmartContractDeploy {
                 ResultSet ret = stmt.getResultSet();
                 ret.next();
                 String return_value = (String) ret.getObject(1);
-                System.out.println("Smart contract has deployed at address :: "+return_value);
+                LOGGER.info("Smart contract has deployed at address :: "+return_value);
             }
-            System.out.println("done");
+            LOGGER.info("done");
         }catch (Exception e){
-                System.out.println(e);
+                LOGGER.info(e.getMessage());
         }
     }
 }

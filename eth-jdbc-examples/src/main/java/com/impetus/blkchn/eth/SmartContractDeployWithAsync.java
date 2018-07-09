@@ -1,6 +1,8 @@
 package com.impetus.blkchn.eth;
 
 import com.impetus.eth.jdbc.DriverConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,8 +13,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class SmartContractDeployWithAsync {
-
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmartContractDeployWithAsync.class);
 
     public static void main(String[] args) throws
             InterruptedException,ExecutionException {
@@ -33,16 +34,16 @@ public class SmartContractDeployWithAsync {
                 ret.next();
                 CompletableFuture return_value = (CompletableFuture) ret.getObject(1);
                 while (true) if (return_value.isDone()) {
-                    System.out.println(return_value.get());
+                    LOGGER.info("completed :: "+return_value.get());
                     break;
                 } else {
-                    System.out.println("Waiting future to complete");
+                    LOGGER.info("Waiting future to complete");
                     Thread.sleep(1000);
                 }
             }
-            System.out.println("done");
+            LOGGER.info("done");
         }catch (Exception e){
-                System.out.println(e);
+                LOGGER.info(e.getMessage());
         }
     }
 }
