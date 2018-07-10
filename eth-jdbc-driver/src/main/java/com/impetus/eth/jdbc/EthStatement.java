@@ -17,11 +17,8 @@ package com.impetus.eth.jdbc;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.util.List;
+import java.sql.*;
+import java.util.*;
 
 import com.impetus.blkch.BlkchnException;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -59,6 +56,11 @@ public class EthStatement implements BlkchnStatement {
 
     protected EthConnection connection;
 
+    /** Holds batched commands */
+    protected List<Object> batchedArgs;
+
+    private boolean continueBatchOnError = false;
+
     protected int rSetType;
 
     protected int rSetConcurrency;
@@ -67,6 +69,7 @@ public class EthStatement implements BlkchnStatement {
 
     /** Has this statement been closed? */
     protected boolean isClosed = false;
+
 
     public int getrSetType() {
         return rSetType;
@@ -107,7 +110,12 @@ public class EthStatement implements BlkchnStatement {
 
     @Override
     public void addBatch(String sql) throws SQLException {
-        throw new UnsupportedOperationException();
+        if (this.batchedArgs == null) {
+            this.batchedArgs = new ArrayList<Object>();
+        }
+        if (sql != null) {
+            this.batchedArgs.add(sql);
+        }
     }
 
     @Override
@@ -117,7 +125,13 @@ public class EthStatement implements BlkchnStatement {
 
     @Override
     public void clearBatch() throws SQLException {
-        throw new UnsupportedOperationException();
+        if (this.batchedArgs != null) {
+            this.batchedArgs.clear();
+        }
+    }
+
+    public List<Object> getBatchedArgs() {
+        return this.batchedArgs == null ? null : Collections.unmodifiableList(this.batchedArgs);
     }
 
     @Override
@@ -186,7 +200,77 @@ public class EthStatement implements BlkchnStatement {
 
     @Override
     public int[] executeBatch() throws SQLException {
-        throw new UnsupportedOperationException();
+        return truncateAndConvertToInt(executeBatchInternal());
+    }
+
+    public boolean isContinueBatchOnError() {
+        return continueBatchOnError;
+    }
+
+    public void setContinueBatchOnError(boolean continueBatchOnError) {
+        this.continueBatchOnError = continueBatchOnError;
+    }
+
+    protected long[] executeBatchInternal() throws SQLException {
+        if(isClosed)
+            throw new BlkchnException("No operations allowed after statement closed.");
+        connection.verifyConnection();
+        if (this.batchedArgs == null || this.batchedArgs.size() == 0) {
+            return new long[0];
+        }
+        try {
+            long[] updateCounts = null;
+            Map exceptionMap = new HashMap<Integer,Exception>();
+
+            if (this.batchedArgs != null) {
+                int nbrCommands = this.batchedArgs.size();
+                updateCounts = new long[nbrCommands];
+                for (int i = 0; i < nbrCommands; i++) {
+                    updateCounts[i] = -3;
+                }
+                SQLException sqlEx = null;
+                for (int commandIndex = 0; commandIndex < nbrCommands; commandIndex++)
+                    try {
+                        String sql = (String) this.batchedArgs.get(commandIndex);
+                        updateCounts[commandIndex] = execute(sql) ? 1 : 0;
+                    }catch(SQLException ex){
+                        updateCounts[commandIndex] = EXECUTE_FAILED;
+                        if(this.continueBatchOnError){
+                            sqlEx = ex;
+                            exceptionMap.put(commandIndex,ex);
+                        }else{
+                            long[] newUpdateCounts = new long[commandIndex];
+                            for (int i = 0; i < newUpdateCounts.length; i++) newUpdateCounts[i] = updateCounts[i];
+                            SQLException newEx = new BatchUpdateException(ex.getMessage(), truncateAndConvertToInt(newUpdateCounts));
+                            newEx.initCause(ex);
+                            throw newEx;
+                        }
+                    }
+                if(sqlEx != null){
+                    //StringBuilder exceptionMessage = new StringBuilder();
+                    for(Object stmNum : exceptionMap.keySet()){
+                        //exceptionMessage.append("Statement : "+ batchedArgs.get((int)stmNum) +" : throw exception "+exceptionMap.get(stmNum)+"\n");
+                        LOGGER.error("Statement : "+ batchedArgs.get((int)stmNum) +" : throw exception "+exceptionMap.get(stmNum)+"\n");
+                    }
+                    SQLException newEx = new BatchUpdateException("Some of the queries throw exception check error log for detail "
+                            +sqlEx.getMessage(), truncateAndConvertToInt(updateCounts));
+                    newEx.initCause(sqlEx);
+                    throw newEx;
+                }
+            }
+            return (updateCounts != null) ? updateCounts : new long[0];
+        }finally {
+            clearBatch();
+        }
+    }
+
+    public static int[] truncateAndConvertToInt(long[] longArray) {
+        int[] intArray = new int[longArray.length];
+
+        for (int i = 0; i < longArray.length; i++) {
+            intArray[i] = longArray[i] > Integer.MAX_VALUE ? Integer.MAX_VALUE : longArray[i] < Integer.MIN_VALUE ? Integer.MIN_VALUE : (int) longArray[i];
+        }
+        return intArray;
     }
 
     @Override
