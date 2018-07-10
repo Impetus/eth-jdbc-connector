@@ -155,8 +155,9 @@ public class EthStatement implements BlkchnStatement {
             this.queryResultSet = null;
             this.rSetType = 0;
             this.rSetConcurrency = 0;
-        } catch (Exception e) {
-            throw new BlkchnException("Error while closing statement", e);
+            clearBatch();
+        }catch (Exception e){
+            throw new BlkchnException("Error while closing statement",e);
         }
     }
 
@@ -228,12 +229,14 @@ public class EthStatement implements BlkchnStatement {
                 for (int i = 0; i < nbrCommands; i++) {
                     updateCounts[i] = -3;
                 }
-                SQLException sqlEx = null;
+                Exception sqlEx = null;
                 for (int commandIndex = 0; commandIndex < nbrCommands; commandIndex++)
                     try {
                         String sql = (String) this.batchedArgs.get(commandIndex);
+                        System.out.println(isContinueBatchOnError()+"started ::"+sql);
                         updateCounts[commandIndex] = execute(sql) ? 1 : 0;
-                    }catch(SQLException ex){
+                        System.out.println("got value "+updateCounts[commandIndex]);
+                    }catch(SQLException | BlkchnException ex){
                         updateCounts[commandIndex] = EXECUTE_FAILED;
                         if(this.continueBatchOnError){
                             sqlEx = ex;
@@ -252,7 +255,7 @@ public class EthStatement implements BlkchnStatement {
                         //exceptionMessage.append("Statement : "+ batchedArgs.get((int)stmNum) +" : throw exception "+exceptionMap.get(stmNum)+"\n");
                         LOGGER.error("Statement : "+ batchedArgs.get((int)stmNum) +" : throw exception "+exceptionMap.get(stmNum)+"\n");
                     }
-                    SQLException newEx = new BatchUpdateException("Some of the queries throw exception check error log for detail "
+                    SQLException newEx = new BatchUpdateException("Some of the queries throw exception check error log for detail "//exceptionMessage
                             +sqlEx.getMessage(), truncateAndConvertToInt(updateCounts));
                     newEx.initCause(sqlEx);
                     throw newEx;
