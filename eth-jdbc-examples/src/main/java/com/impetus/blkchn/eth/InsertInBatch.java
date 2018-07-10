@@ -49,8 +49,8 @@ public class InsertInBatch {
             Class.forName(driverClass);
             Properties prop = new Properties();
             prop.put(DriverConstants.KEYSTORE_PATH,
-                    "/home/impadmin/keystore/UTC--2017-09-11T04-53-29.614189140Z--8144c67b144a408abc989728e32965edf37adaa1");
-            prop.put(DriverConstants.KEYSTORE_PASSWORD, "impetus123");
+                    "/local/path/to/ethereum/keystore/UTC--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+            prop.put(DriverConstants.KEYSTORE_PASSWORD, "<password>");
             Connection conn = DriverManager.getConnection(url, prop);
             Statement stmt = conn.createStatement();
             ((EthStatement)stmt).setContinueBatchOnError(true);
