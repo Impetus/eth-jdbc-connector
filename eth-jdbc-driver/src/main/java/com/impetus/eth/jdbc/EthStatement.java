@@ -233,9 +233,7 @@ public class EthStatement implements BlkchnStatement {
                 for (int commandIndex = 0; commandIndex < nbrCommands; commandIndex++)
                     try {
                         String sql = (String) this.batchedArgs.get(commandIndex);
-                        System.out.println(isContinueBatchOnError()+"started ::"+sql);
                         updateCounts[commandIndex] = execute(sql) ? 1 : 0;
-                        System.out.println("got value "+updateCounts[commandIndex]);
                     }catch(SQLException | BlkchnException ex){
                         updateCounts[commandIndex] = EXECUTE_FAILED;
                         if(this.continueBatchOnError){
