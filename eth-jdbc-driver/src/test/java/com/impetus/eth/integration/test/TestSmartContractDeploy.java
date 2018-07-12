@@ -50,7 +50,7 @@ public class TestSmartContractDeploy {
             }
             LOGGER.info("done");
         } catch (Exception e) {
-            LOGGER.info(e.getMessage());
+            e.printStackTrace();
         }
     }
 }

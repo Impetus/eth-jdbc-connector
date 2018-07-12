@@ -50,7 +50,7 @@ public class SmartContractDeploy {
             }
             LOGGER.info("done");
         } catch (Exception e) {
-            LOGGER.info(e.getMessage());
+            LOGGER.error(e.getMessage());
         }
     }
 }

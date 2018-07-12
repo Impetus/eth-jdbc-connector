@@ -57,7 +57,7 @@ public class SmartContractDeployWithAsync {
             }
             LOGGER.info("done");
         } catch (Exception e) {
-            LOGGER.info(e.getMessage());
+            LOGGER.error(e.getMessage());
         }
     }
 }
