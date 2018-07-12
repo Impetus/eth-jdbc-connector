@@ -1,18 +1,18 @@
 /******************************************************************************* 
- * * Copyright 2018 Impetus Infotech.
- * *
- * * Licensed under the Apache License, Version 2.0 (the "License");
- * * you may not use this file except in compliance with the License.
- * * You may obtain a copy of the License at
- * *
- * * http://www.apache.org/licenses/LICENSE-2.0
- * *
- * * Unless required by applicable law or agreed to in writing, software
- * * distributed under the License is distributed on an "AS IS" BASIS,
- * * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * * See the License for the specific language governing permissions and
- * * limitations under the License.
- ******************************************************************************/
+* * Copyright 2018 Impetus Infotech.
+* *
+* * Licensed under the Apache License, Version 2.0 (the "License");
+* * you may not use this file except in compliance with the License.
+* * You may obtain a copy of the License at
+* *
+* * http://www.apache.org/licenses/LICENSE-2.0
+* *
+* * Unless required by applicable law or agreed to in writing, software
+* * distributed under the License is distributed on an "AS IS" BASIS,
+* * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* * See the License for the specific language governing permissions and
+* * limitations under the License.
+******************************************************************************/
 package com.impetus.eth.parser;
 
 import java.io.IOException;
@@ -30,14 +30,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import com.impetus.blkch.sql.function.ClassName;
-import com.impetus.blkch.sql.function.Parameters;
-import com.impetus.blkch.sql.query.*;
-import com.impetus.blkch.sql.smartcontract.SmartCnrtAddressOption;
-import com.impetus.blkch.sql.smartcontract.SmartCnrtAsyncOption;
-import com.impetus.blkch.sql.smartcontract.SmartCnrtClassOption;
-import com.impetus.blkch.sql.smartcontract.SmartContractFunction;
-import com.impetus.blkch.util.Utilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
@@ -59,15 +51,38 @@ import org.web3j.utils.Convert;
 import com.impetus.blkch.BlkchnException;
 import com.impetus.blkch.sql.DataFrame;
 import com.impetus.blkch.sql.GroupedDataFrame;
+import com.impetus.blkch.sql.function.ClassName;
+import com.impetus.blkch.sql.function.Parameters;
 import com.impetus.blkch.sql.insert.ColumnName;
 import com.impetus.blkch.sql.insert.ColumnValue;
 import com.impetus.blkch.sql.insert.Insert;
 import com.impetus.blkch.sql.parser.AbstractQueryExecutor;
 import com.impetus.blkch.sql.parser.LogicalPlan;
 import com.impetus.blkch.sql.parser.TreeNode;
+import com.impetus.blkch.sql.query.BytesArgs;
+import com.impetus.blkch.sql.query.Column;
+import com.impetus.blkch.sql.query.Comparator;
+import com.impetus.blkch.sql.query.DataNode;
+import com.impetus.blkch.sql.query.DirectAPINode;
+import com.impetus.blkch.sql.query.FromItem;
+import com.impetus.blkch.sql.query.GroupByClause;
+import com.impetus.blkch.sql.query.HavingClause;
+import com.impetus.blkch.sql.query.IdentifierNode;
+import com.impetus.blkch.sql.query.LimitClause;
+import com.impetus.blkch.sql.query.ListAgrs;
+import com.impetus.blkch.sql.query.LogicalOperation;
 import com.impetus.blkch.sql.query.LogicalOperation.Operator;
+import com.impetus.blkch.sql.query.OrderByClause;
+import com.impetus.blkch.sql.query.OrderItem;
+import com.impetus.blkch.sql.query.RangeNode;
+import com.impetus.blkch.sql.query.Table;
+import com.impetus.blkch.sql.smartcontract.SmartCnrtAddressOption;
+import com.impetus.blkch.sql.smartcontract.SmartCnrtAsyncOption;
+import com.impetus.blkch.sql.smartcontract.SmartCnrtClassOption;
+import com.impetus.blkch.sql.smartcontract.SmartContractFunction;
 import com.impetus.blkch.util.Range;
 import com.impetus.blkch.util.RangeOperations;
+import com.impetus.blkch.util.Utilities;
 import com.impetus.eth.jdbc.DriverConstants;
 import com.impetus.eth.query.EthColumns;
 import com.impetus.eth.query.EthTables;
@@ -79,16 +94,22 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     private static final String UNIT = "unit";
 
     private static final String ASYNC = "async";
-
-    Object classObjectSmartCrt = null;
-    static Map<Class,Object> smartCrtClassObjectMap = new HashMap();
+    
+    private BigInteger GAS = DefaultGasProvider.GAS_LIMIT;
+    
+	private BigInteger GAS_PRICE = DefaultGasProvider.GAS_PRICE;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EthQueryExecutor.class);
-    protected Map<String, List<String>> blkTxnHashMap = new HashMap<>();
+    
+    Object classObjectSmartCrt = null;
+	
+    static Map<Class, Object> smartCrtClassObjectMap = new HashMap();
+
     private Web3j web3jClient;
-    private BigInteger GAS = DefaultGasProvider.GAS_LIMIT;
-    private BigInteger GAS_PRICE = DefaultGasProvider.GAS_PRICE;
+
     private Properties properties;
+
+    protected Map<String, List<String>> blkTxnHashMap = new HashMap<>();
 
     public EthQueryExecutor(LogicalPlan logicalPlan, Web3j web3jClient, Properties properties) {
         this.logicalPlan = logicalPlan;
@@ -181,7 +202,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
 
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     protected DataNode<?> getDataNode(String table, String column, String value) {
         if (dataMap.containsKey(value)) {
@@ -241,7 +262,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     String.format("There is no direct API for table %s and column %s combination", table, column));
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     protected <T extends Number & Comparable<T>> DataNode<?> executeRangeNode(RangeNode<T> rangeNode) {
         if (rangeNode.getRangeList().getRanges().isEmpty()) {
             return new DataNode<T>(rangeNode.getTable(), new ArrayList<>());
@@ -307,12 +328,12 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         }
         return (DataNode<String>) finalDataNode;
     }
-
-
+    
+    
     @Override
     @SuppressWarnings("unchecked")
     protected <T extends Number & Comparable<T>> TreeNode combineRangeAndDataNodes(RangeNode<T> rangeNode,
-                                                                                   DataNode<?> dataNode, LogicalOperation oper) {
+            DataNode<?> dataNode, LogicalOperation oper) {
         String tableName = dataNode.getTable();
         List<String> keys = dataNode.getKeys().stream().map(x -> x.toString()).collect(Collectors.toList());
         String rangeCol = rangeNode.getColumn();
@@ -332,7 +353,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     node.getRangeList().addRange(new Range<T>(blockNo, blockNo));
                     return node;
                 }).collect(Collectors.toList());
-                if (dataRanges.isEmpty()) {
+                if(dataRanges.isEmpty()){
                     return rangeNode;
                 }
                 RangeNode<T> dataRangeNodes = dataRanges.get(0);
@@ -347,8 +368,8 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     return rangeOps.rangeNodeOr(dataRangeNodes, rangeNode);
                 }
             }
-        } else if (EthColumns.BLOCKNUMBER.equals(rangeCol)) {
-            if (oper.isOr()) {
+        } else if(EthColumns.BLOCKNUMBER.equals(rangeCol)) {
+            if(oper.isOr()) {
                 LogicalOperation newOper = new LogicalOperation(Operator.OR);
                 newOper.addChildNode(dataNode);
                 newOper.addChildNode(rangeNode);
@@ -401,7 +422,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     }
                     break;
             }
-        } else if (obj instanceof Transaction) {
+        } else if(obj instanceof Transaction){
 
             Transaction txnInfo = (Transaction) obj;
             switch (fieldName) {
@@ -427,7 +448,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     }
                     break;
             }
-
+        
         }
         return retValue;
     }
@@ -445,7 +466,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     }
                 }
                 return include;
-            } else if (EthTables.TRANSACTION.equals(dataNode.getTable()) && EthColumns.BLOCKNUMBER.equals(rangeNode.getColumn())) {
+            } else if(EthTables.TRANSACTION.equals(dataNode.getTable()) && EthColumns.BLOCKNUMBER.equals(rangeNode.getColumn())) {
                 boolean include = false;
                 Transaction transaction = (Transaction) dataMap.get(key);
                 BigInteger blockNo = transaction.getBlockNumber();
@@ -507,7 +528,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
 
     private Object insertTransaction(String toAddress, String value, String unit, boolean syncRequest)
             throws IOException, CipherException, InterruptedException, TransactionException, ExecutionException {
-        if (toAddress == null || value == null || unit == null) {
+        if(toAddress == null || value == null || unit == null){
             LOGGER.error("Check if [toAddress, value, unit] are correctly used in insert query columns");
             throw new BlkchnException("Check if [toAddress, value, unit] are correctly used in insert query columns");
         }
@@ -525,22 +546,22 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             LOGGER.error("Exception while parsing value", e);
             throw new RuntimeException("Exception while parsing value", e);
         }
-
-        if (properties == null || !properties.containsKey(DriverConstants.KEYSTORE_PASSWORD)
-                || !properties.containsKey(DriverConstants.KEYSTORE_PATH)) {
+        
+        if(properties == null || !properties.containsKey(DriverConstants.KEYSTORE_PASSWORD) 
+                || !properties.containsKey(DriverConstants.KEYSTORE_PATH)){
             throw new BlkchnException("Insert query needs keystore path and password, passed as Properties while creating connection");
         }
-
+        
         Credentials credentials = WalletUtils.loadCredentials(properties.getProperty(DriverConstants.KEYSTORE_PASSWORD),
                 properties.getProperty(DriverConstants.KEYSTORE_PATH));
-        Object transactionReceipt = null;
+        Object transactionReceipt;
         if (syncRequest) {
             try {
-                transactionReceipt = Transfer.sendFunds(web3jClient, credentials, toAddress,
-                        BigDecimal.valueOf((val instanceof Long) ? (Long) val : (Double) val), Convert.Unit.valueOf(unit)).send();
-            } catch (Exception e) {
-                throw new BlkchnException("Exception while making the remote send call", e);
-            }
+				transactionReceipt = Transfer.sendFunds(web3jClient, credentials, toAddress,
+				        BigDecimal.valueOf((val instanceof Long) ? (Long) val : (Double) val), Convert.Unit.valueOf(unit)).send();
+			} catch (Exception e) {
+				throw new BlkchnException("Exception while making the remote send call", e);
+			}
         } else {
             transactionReceipt = Transfer.sendFunds(web3jClient, credentials, toAddress,
                     BigDecimal.valueOf((val instanceof Long) ? (Long) val : (Double) val), Convert.Unit.valueOf(unit)).sendAsync();
@@ -556,9 +577,9 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         DataFrame df = null;
         List<List<Object>> data = new ArrayList<>();
         if (dataMap.get(dataNode.getKeys().get(0).toString()) instanceof Block) {
-            String[] columns = {EthColumns.BLOCKNUMBER, EthColumns.HASH, EthColumns.PARENTHASH, EthColumns.NONCE, EthColumns.SHA3UNCLES, EthColumns.LOGSBLOOM,
+            String[] columns = { EthColumns.BLOCKNUMBER, EthColumns.HASH, EthColumns.PARENTHASH, EthColumns.NONCE, EthColumns.SHA3UNCLES, EthColumns.LOGSBLOOM,
                     EthColumns.TRANSACTIONSROOT, EthColumns.STATEROOT, EthColumns.RECEIPTSROOT, EthColumns.AUTHOR, EthColumns.MINER, EthColumns.MIXHASH, EthColumns.TOTALDIFFICULTY,
-                    EthColumns.EXTRADATA, EthColumns.SIZE, EthColumns.GASLIMIT, EthColumns.GASUSED, EthColumns.TIMESTAMP, EthColumns.TRANSACTIONS, EthColumns.UNCLES, EthColumns.SEALFIELDS};
+                    EthColumns.EXTRADATA, EthColumns.SIZE, EthColumns.GASLIMIT, EthColumns.GASUSED, EthColumns.TIMESTAMP, EthColumns.TRANSACTIONS, EthColumns.UNCLES, EthColumns.SEALFIELDS };
 
             for (Object key : dataNode.getKeys()) {
                 Block blockInfo = (Block) dataMap.get(key.toString());
@@ -591,8 +612,8 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             df.setRawData(dataMap.values());
             return df;
         } else if (dataMap.get(dataNode.getKeys().get(0).toString()) instanceof Transaction) {
-            String columns[] = {EthColumns.BLOCKHASH, EthColumns.BLOCKNUMBER, EthColumns.CREATES, EthColumns.FROM, EthColumns.GAS, EthColumns.GASPRICE, EthColumns.HASH, EthColumns.INPUT,
-                    EthColumns.NONCE, EthColumns.PUBLICKEY, EthColumns.R, EthColumns.RAW, EthColumns.S, EthColumns.TO, EthColumns.TRANSACTIONINDEX, EthColumns.V, EthColumns.VALUE};
+            String columns[] = { EthColumns.BLOCKHASH, EthColumns.BLOCKNUMBER, EthColumns.CREATES, EthColumns.FROM, EthColumns.GAS, EthColumns.GASPRICE, EthColumns.HASH, EthColumns.INPUT,
+                    EthColumns.NONCE, EthColumns.PUBLICKEY, EthColumns.R, EthColumns.RAW, EthColumns.S, EthColumns.TO, EthColumns.TRANSACTIONINDEX, EthColumns.V, EthColumns.VALUE };
             for (Object key : dataNode.getKeys()) {
                 Transaction txnInfo = (Transaction) dataMap.get(key.toString());
                 String blockhash = txnInfo.getBlockHash();
@@ -663,168 +684,177 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         }
         return result;
     }
+    
+	public Object executeFunction() {
+		TreeNode callFunc = logicalPlan.getCallFunction();
+		List<Object> args = new ArrayList<>();
+		List<Class> argsType = new ArrayList<>();
+		String className;
+		String smartContractAdd;
+		boolean async = false;
+		Object result;
+		String functionName = callFunc.getChildType(IdentifierNode.class, 0).getValue();
+		if (callFunc.hasChildType(SmartContractFunction.class)) {
+			Parameters params = callFunc.getChildType(Parameters.class, 0);
+			if (params != null)
+				getParametersTypeValue(params, args, argsType);
+			SmartContractFunction smf = callFunc.getChildType(SmartContractFunction.class, 0);
+			if (smf.hasChildType(SmartCnrtClassOption.class) && smf.hasChildType(SmartCnrtAddressOption.class)) {
+				className = Utilities.unquote(
+						((ClassName) smf.getChildType(SmartCnrtClassOption.class, 0).getChildType(ClassName.class, 0))
+								.getName());
+				smartContractAdd = Utilities
+						.unquote(smf.getChildType(SmartCnrtAddressOption.class, 0).getAddressOption());
+			} else {
+				throw new BlkchnException("Query is incomplete needs CLASS and ADDRESS");
+			}
+			if (smf.hasChildType(SmartCnrtAsyncOption.class)) {
+				async = smf.getChildType(SmartCnrtAsyncOption.class, 0).getAsyncOption().equalsIgnoreCase("TRUE");
+			}
+		} else {
+			throw new BlkchnException("Query is incomplete needs CLASS and ADDRESS");
+		}
 
-    public Object executeFunction() {
-        TreeNode callFunc = logicalPlan.getCallFunction();
-        List<Object> args = new ArrayList<>();
-        List<Class> argsType = new ArrayList<>();
-        String className;
-        String smartContractAdd;
-        boolean async = false;
-        Object result;
-        String functionName = callFunc.getChildType(IdentifierNode.class, 0).getValue();
-        if (callFunc.hasChildType(SmartContractFunction.class)) {
-            Parameters params = callFunc.getChildType(Parameters.class, 0);
-            if (params != null)
-                getParametersTypeValue(params,args,argsType);
-            SmartContractFunction smf = callFunc.getChildType(SmartContractFunction.class, 0);
-            if (smf.hasChildType(SmartCnrtClassOption.class) && smf.hasChildType(SmartCnrtAddressOption.class)) {
-                className = Utilities.unquote((
-                        (ClassName) smf.getChildType(SmartCnrtClassOption.class, 0).
-                                getChildType(ClassName.class, 0)).getName());
-                smartContractAdd = Utilities.unquote(
-                        smf.getChildType(SmartCnrtAddressOption.class, 0).
-                                getAddressOption());
-            } else {
-                throw new BlkchnException("Query is incomplete needs CLASS and ADDRESS");
-            }
-            if (smf.hasChildType(SmartCnrtAsyncOption.class)) {
-                async = smf.getChildType(SmartCnrtAsyncOption.class, 0).
-                        getAsyncOption().equalsIgnoreCase("TRUE");
-            }
-        } else {
-            throw new BlkchnException("Query is incomplete needs CLASS and ADDRESS");
-        }
+		try {
+			result = functionTransaction(functionName, args.toArray(), argsType.toArray(new Class[0]), className,
+					smartContractAdd, async);
+		} catch (Exception e) {
+			throw new BlkchnException("Error while executing query", e);
+		}
+		return result;
+	}
 
-        try {
-            result = functionTransaction(functionName, args.toArray(), argsType.toArray(new Class[0]), className, smartContractAdd, async);
-        } catch (Exception e) {
-            throw new BlkchnException("Error while executing query", e);
-        }
-        return result;
-    }
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Object functionTransaction(String functionName, Object[] argument, Class[] argClass, String className,
+			String address, boolean async) {
+		try {
+			Class smartContractClass = Class.forName(className);
+			if (smartCrtClassObjectMap.containsKey(smartContractClass)
+					&& smartCrtClassObjectMap.get(smartContractClass) != null)
+				classObjectSmartCrt = smartCrtClassObjectMap.get(smartContractClass);
+			else
+				classObjectSmartCrt = getLoadClass(smartContractClass, address);
+			Method functionToInvoke = smartContractClass.getDeclaredMethod(functionName, argClass);
+			Object value = functionToInvoke.invoke(classObjectSmartCrt, argument);
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private Object functionTransaction(String functionName, Object[] argument, Class[] argClass, String className, String address, boolean async) {
-        try {
-            Class smartContractClass = Class.forName(className);
-            if(smartCrtClassObjectMap.containsKey(smartContractClass) && smartCrtClassObjectMap.get(smartContractClass) != null)
-                classObjectSmartCrt = smartCrtClassObjectMap.get(smartContractClass);
-            else
-                classObjectSmartCrt = getLoadClass(smartContractClass,address);
-            Method functionToInvoke = smartContractClass.getDeclaredMethod(functionName, argClass);
-            Object value = functionToInvoke.invoke(classObjectSmartCrt, argument);
+			if (functionToInvoke.getReturnType().equals(RemoteCall.class)) {
+				RemoteCall<?> transactionR = (RemoteCall) value;
+				if (async)
+					return transactionR.sendAsync();
+				else
+					return transactionR.send();
+			} else {
+				return value;
+			}
+		} catch (Exception e) {
+			throw new BlkchnException("Error while running function transaction", e);
+		}
+	}
 
-            if (functionToInvoke.getReturnType().equals(RemoteCall.class)) {
-                RemoteCall<?> transactionR = (RemoteCall) value;
-                if (async)
-                    return transactionR.sendAsync();
-                else
-                    return transactionR.send();
-            } else {
-                return value;
-            }
-        } catch (Exception e) {
-            throw new BlkchnException("Error while running function transaction", e);
-        }
-    }
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Object executeDeploy() {
+		TreeNode smartCnrt = logicalPlan.getSmartCnrtDeploy();
+		boolean async = false;
+		List<Object> args = new ArrayList<>();
+		List<Class> argsType = new ArrayList<>();
+		if (smartCnrt.hasChildType(ClassName.class)) {
+			String className = Utilities.unquote(((ClassName) smartCnrt.getChildType(ClassName.class, 0)).getName());
+			Credentials credentials = getCredential();
+			try {
+				Class smartContractClass = Class.forName(className);
+				argsType.add(Web3j.class);
+				args.add(web3jClient);
+				argsType.add(Credentials.class);
+				args.add(credentials);
+				argsType.add(BigInteger.class);
+				args.add(GAS_PRICE);
+				argsType.add(BigInteger.class);
+				args.add(GAS);
+				Parameters params = smartCnrt.getChildType(Parameters.class, 0);
+				if (params != null)
+					getParametersTypeValue(params, args, argsType);
+				Method loadMethod = smartContractClass.getDeclaredMethod("deploy", argsType.toArray(new Class[0]));
+				RemoteCall objSmartCntr = (RemoteCall) loadMethod.invoke(smartContractClass, args.toArray());
+				Method getContractAddress = smartContractClass.getMethod("getContractAddress");
+				if (smartCnrt.hasChildType(SmartCnrtAsyncOption.class)) {
+					async = smartCnrt.getChildType(SmartCnrtAsyncOption.class, 0).getAsyncOption()
+							.equalsIgnoreCase("TRUE");
+				}
+				if (async) {
+					return CompletableFuture.supplyAsync(() -> {
+						try {
+							CompletableFuture classFuture = objSmartCntr.sendAsync();
+							while (true)
+								if (classFuture.isDone()) {
+									return getContractAddress.invoke(classFuture.get());
+								}
+						} catch (Exception e) {
+							throw new BlkchnException(e);
+						}
+					});
+				} else {
+					return getContractAddress.invoke(objSmartCntr.send());
+				}
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+				throw new BlkchnException("Smart Contract Class not found ", e);
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new BlkchnException("Error while deploying smart contract " + e.getMessage(), e);
+			}
+		} else {
+			throw new BlkchnException("Should give classpath for deploying Smart Contract");
+		}
+	}
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public Object executeDeploy(){
-        TreeNode smartCnrt = logicalPlan.getSmartCnrtDeploy();
-        boolean async = false;
-        List<Object> args = new ArrayList<>();
-        List<Class> argsType = new ArrayList<>();
-        if (smartCnrt.hasChildType(ClassName.class)) {
-            String className = Utilities.unquote((
-                    (ClassName) smartCnrt.getChildType(ClassName.class, 0)).getName());
-            Credentials credentials = getCredential();
-            try {
-                Class smartContractClass = Class.forName(className);
-                argsType.add(Web3j.class);args.add(web3jClient);
-                argsType.add(Credentials.class);args.add(credentials);
-                argsType.add(BigInteger.class);args.add(GAS_PRICE);
-                argsType.add(BigInteger.class);args.add(GAS);
-                Parameters params = smartCnrt.getChildType(Parameters.class, 0);
-                if (params != null)
-                    getParametersTypeValue(params,args,argsType);
-                Method loadMethod = smartContractClass.getDeclaredMethod("deploy", argsType.toArray(new Class[0]));
-                RemoteCall objSmartCntr = (RemoteCall) loadMethod.invoke(smartContractClass,  args.toArray());
-                Method getContractAddress = smartContractClass.getMethod("getContractAddress");
-                if (smartCnrt.hasChildType(SmartCnrtAsyncOption.class)) {
-                    async = smartCnrt.getChildType(SmartCnrtAsyncOption.class, 0).
-                            getAsyncOption().equalsIgnoreCase("TRUE");
-                }
-                if(async) {
-                    return CompletableFuture.supplyAsync(() -> {
-                        try {
-                            CompletableFuture classFuture = objSmartCntr.sendAsync();
-                            while (true) if (classFuture.isDone()) {
-                                return getContractAddress.invoke(classFuture.get());
-                            }
-                        } catch (Exception e) {
-                            throw new BlkchnException(e);
-                        }
-                    });
-                }else{
-                    return  getContractAddress.invoke(objSmartCntr.send());
-                }
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-                throw new BlkchnException("Smart Contract Class not found ", e);
-            }catch (Exception e) {
-                e.printStackTrace();
-                throw new BlkchnException("Error while deploying smart contract "+e.getMessage(), e);
-            }
-        }else{
-            throw new BlkchnException("Should give classpath for deploying Smart Contract");
-        }
-    }
+	private Credentials getCredential() {
+		if (properties == null || !properties.containsKey(DriverConstants.KEYSTORE_PASSWORD)
+				|| !properties.containsKey(DriverConstants.KEYSTORE_PATH)) {
+			throw new BlkchnException(
+					"Query needs keystore path and password, passed as Properties while creating connection");
+		}
+		try {
+			return WalletUtils.loadCredentials(properties.getProperty(DriverConstants.KEYSTORE_PASSWORD),
+					properties.getProperty(DriverConstants.KEYSTORE_PATH));
+		} catch (Exception e) {
+			throw new BlkchnException("Check your KEYSTORE credentials ", e);
+		}
+	}
 
-    private Credentials getCredential(){
-        if (properties == null || !properties.containsKey(DriverConstants.KEYSTORE_PASSWORD)
-                || !properties.containsKey(DriverConstants.KEYSTORE_PATH)) {
-            throw new BlkchnException("Query needs keystore path and password, passed as Properties while creating connection");
-        }
-        try {
-            return WalletUtils.loadCredentials(properties.getProperty(DriverConstants.KEYSTORE_PASSWORD),
-                    properties.getProperty(DriverConstants.KEYSTORE_PATH));
-        } catch (Exception e) {
-            throw new BlkchnException("Check your KEYSTORE credentials ", e);
-        }
-    }
-    private void getParametersTypeValue(Parameters params,List<Object> args,List<Class> argsType){
-        for (int i = 0; i < params.getChildNodes().size(); i++) {
-            if (params.getChildNode(i) instanceof IdentifierNode) {
-                IdentifierNode ident = (IdentifierNode) params.getChildNode(i);
-                FunctionUtil.handleIdent(ident, args, argsType);
-            } else if (params.getChildNode(i) instanceof ListAgrs) {
-                ListAgrs lstArgs = (ListAgrs) params.getChildNode(i);
-                FunctionUtil.handleList(lstArgs, args, argsType);
-            } else if (params.getChildNode(i) instanceof BytesArgs) {
-                String hexValue = ((BytesArgs) params.getChildNode(i)).getValue();
-                FunctionUtil.handleHex(hexValue, args, argsType);
-            } else {
-                throw new BlkchnException("Cannot create method call from unknown Data type");
-            }
-        }
-    }
+	private void getParametersTypeValue(Parameters params, List<Object> args, List<Class> argsType) {
+		for (int i = 0; i < params.getChildNodes().size(); i++) {
+			if (params.getChildNode(i) instanceof IdentifierNode) {
+				IdentifierNode ident = (IdentifierNode) params.getChildNode(i);
+				FunctionUtil.handleIdent(ident, args, argsType);
+			} else if (params.getChildNode(i) instanceof ListAgrs) {
+				ListAgrs lstArgs = (ListAgrs) params.getChildNode(i);
+				FunctionUtil.handleList(lstArgs, args, argsType);
+			} else if (params.getChildNode(i) instanceof BytesArgs) {
+				String hexValue = ((BytesArgs) params.getChildNode(i)).getValue();
+				FunctionUtil.handleHex(hexValue, args, argsType);
+			} else {
+				throw new BlkchnException("Cannot create method call from unknown Data type");
+			}
+		}
+	}
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private Object getLoadClass(Class smartContractClass,String address){
-        try {
-            Class params[] = {String.class, Web3j.class, Credentials.class, BigInteger.class, BigInteger.class};
-            Credentials credentials = getCredential();
-            Method loadMethod = smartContractClass.getDeclaredMethod("load", params);
-            Object classObject = loadMethod.invoke(smartContractClass, address, web3jClient, credentials, GAS_PRICE, GAS);
-            Method checkValidMethod = smartContractClass.getMethod("isValid");
-            Boolean valid = (Boolean) checkValidMethod.invoke(classObject);
-            if (!valid)
-                throw new BlkchnException("SmartContract is not valid");
-            smartCrtClassObjectMap.put(smartContractClass,classObject);
-            return classObject;
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new BlkchnException(e);
-        }
-    }
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Object getLoadClass(Class smartContractClass, String address) {
+		try {
+			Class params[] = { String.class, Web3j.class, Credentials.class, BigInteger.class, BigInteger.class };
+			Credentials credentials = getCredential();
+			Method loadMethod = smartContractClass.getDeclaredMethod("load", params);
+			Object classObject = loadMethod.invoke(smartContractClass, address, web3jClient, credentials, GAS_PRICE,
+					GAS);
+			Method checkValidMethod = smartContractClass.getMethod("isValid");
+			Boolean valid = (Boolean) checkValidMethod.invoke(classObject);
+			if (!valid)
+				throw new BlkchnException("SmartContract is not valid");
+			smartCrtClassObjectMap.put(smartContractClass, classObject);
+			return classObject;
+		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+			throw new BlkchnException(e);
+		}
+	}
+
 }
