@@ -26,43 +26,43 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class SmartContractFunction {
-	private static final Logger LOGGER = LoggerFactory.getLogger(SmartContractFunction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmartContractFunction.class);
 
-	public static void main(String[] args) throws InterruptedException, ExecutionException {
-		String url = "jdbc:blkchn:ethereum://127.0.0.1:8545";
-		String driverClass = "com.impetus.eth.jdbc.EthDriver";
-		String query = "CALL getName ('STRING',HEX('0x123'),<'Bytes'>[],<'STRING'>[]) USE SMARTCONTRACT "
-				+ "'com.impetus.blkchn.eth.FirstSmartContract' WITH ADDRESS '<address>' AND WITHASYNC true";
-		// String query = "CALL getName (HEX('0x123')) USE SMARTCONTRACT
-		// 'com.impetus.blkchn.eth.FirstSmartContract' WITH ADDRESS '<address>' AND
-		// WITHASYNC true";
-		// String query = "CALL setName ('NewContractName') USE SMARTCONTRACT
-		// 'com.impetus.blkchn.eth.FirstSmartContract' WITH ADDRESS '<address>' AND
-		// WITHASYNC true";
-		try {
-			Class.forName(driverClass);
-			Properties prop = new Properties();
-			prop.put(DriverConstants.KEYSTORE_PATH, "/home/<path>");
-			prop.put(DriverConstants.KEYSTORE_PASSWORD, "<password>");
-			Connection conn = DriverManager.getConnection(url, prop);
-			Statement stmt = conn.createStatement();
-			boolean retBool = stmt.execute(query);
-			if (retBool) {
-				ResultSet ret = stmt.getResultSet();
-				ret.next();
-				CompletableFuture return_value = (CompletableFuture) ret.getObject(1);
-				while (true)
-					if (return_value.isDone()) {
-						LOGGER.info("Return Value :: " + return_value.get());
-						break;
-					} else {
-						LOGGER.info("Waiting future to complete");
-						Thread.sleep(1000);
-					}
-			}
-		} catch (SQLException | ClassNotFoundException e1) {
-			throw new BlkchnException("Error while running function transaction", e1);
-		}
-	}
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
+        String url = "jdbc:blkchn:ethereum://127.0.0.1:8545";
+        String driverClass = "com.impetus.eth.jdbc.EthDriver";
+        String query = "CALL getName ('STRING',HEX('0x123'),<'Bytes'>[],<'STRING'>[]) USE SMARTCONTRACT "
+            + "'com.impetus.blkchn.eth.FirstSmartContract' WITH ADDRESS '<address>' AND WITHASYNC true";
+        // String query = "CALL getName (HEX('0x123')) USE SMARTCONTRACT
+        // 'com.impetus.blkchn.eth.FirstSmartContract' WITH ADDRESS '<address>' AND
+        // WITHASYNC true";
+        // String query = "CALL setName ('NewContractName') USE SMARTCONTRACT
+        // 'com.impetus.blkchn.eth.FirstSmartContract' WITH ADDRESS '<address>' AND
+        // WITHASYNC true";
+        try {
+            Class.forName(driverClass);
+            Properties prop = new Properties();
+            prop.put(DriverConstants.KEYSTORE_PATH, "/home/<path>");
+            prop.put(DriverConstants.KEYSTORE_PASSWORD, "<password>");
+            Connection conn = DriverManager.getConnection(url, prop);
+            Statement stmt = conn.createStatement();
+            boolean retBool = stmt.execute(query);
+            if (retBool) {
+                ResultSet ret = stmt.getResultSet();
+                ret.next();
+                CompletableFuture return_value = (CompletableFuture) ret.getObject(1);
+                while (true)
+                    if (return_value.isDone()) {
+                        LOGGER.info("Return Value :: " + return_value.get());
+                        break;
+                    } else {
+                        LOGGER.info("Waiting future to complete");
+                        Thread.sleep(1000);
+                    }
+            }
+        } catch (SQLException | ClassNotFoundException e1) {
+            throw new BlkchnException("Error while running function transaction", e1);
+        }
+    }
 
 }

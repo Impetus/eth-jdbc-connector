@@ -43,7 +43,7 @@ public class EthResultSet extends AbstractResultSet {
 
     protected static final int AFTER_LAST_ROW = -1;
 
-    /** Has this ResultSet been closed?*/
+    /** Has this ResultSet been closed? */
     protected boolean isClosed = false;
 
     protected int currentRowCursor;
@@ -63,7 +63,7 @@ public class EthResultSet extends AbstractResultSet {
     protected String tableName;
 
     protected Map<String, String> aliasMapping;
-    
+
     private static final String EXCEPTION_MSG = "Result set doesn't contain index %d";
 
     public EthResultSet(DataFrame dataframe, int resultSetType, int rSetConcurrency, String tableName) {
@@ -78,13 +78,12 @@ public class EthResultSet extends AbstractResultSet {
         totalRowCount = rowData.size();
     }
 
-
     public EthResultSet(Object data, int resultSetType, int rSetConcurrency) {
         LOGGER.info("Instantiating new Result Set ");
         this.rowData = new ArrayList<>();
         this.rowData.add(Arrays.asList(data));
         this.columnNamesMap = new HashMap<>();
-        this.columnNamesMap.put("Receipt",1);
+        this.columnNamesMap.put("Receipt", 1);
         this.resultSetType = resultSetType;
         this.rSetConcurrency = rSetConcurrency;
         this.tableName = "TransactionReceipt";
@@ -102,11 +101,10 @@ public class EthResultSet extends AbstractResultSet {
         return this.isClosed;
     }
 
-
     private void realClose() throws SQLException {
-        if(isClosed)
+        if (isClosed)
             return;
-        try{
+        try {
             this.isClosed = true;
             this.currentRowCursor = 0;
             this.totalRowCount = 0;
@@ -117,10 +115,11 @@ public class EthResultSet extends AbstractResultSet {
             this.rSetConcurrency = 0;
             this.tableName = null;
             this.aliasMapping = null;
-        }catch (Exception e){
-            throw new BlkchnException("Error while closing ResultSet",e);
+        } catch (Exception e) {
+            throw new BlkchnException("Error while closing ResultSet", e);
         }
     }
+
     protected final void checkClosed() throws SQLException {
         if (this.isClosed) {
             throw new BlkchnException("ResultSet is already closed.");
@@ -251,7 +250,7 @@ public class EthResultSet extends AbstractResultSet {
     public String getString(String columnLabel) throws SQLException {
         checkClosed();
         int idx = getColumnIndex(columnLabel);
-        if(currentRow[idx] instanceof BigInteger){
+        if (currentRow[idx] instanceof BigInteger) {
             return ((BigInteger) currentRow[idx]).toString();
         }
         return (String) currentRow[idx];
@@ -260,10 +259,10 @@ public class EthResultSet extends AbstractResultSet {
     @Override
     public String getString(int columnIndex) throws SQLException {
         checkClosed();
-        if(columnIndex < 1 || columnIndex > currentRow.length){
+        if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
-        if(currentRow[columnIndex - 1] instanceof BigInteger){
+        if (currentRow[columnIndex - 1] instanceof BigInteger) {
             return ((BigInteger) currentRow[columnIndex - 1]).toString();
         }
         return (String) currentRow[columnIndex - 1];
@@ -278,7 +277,7 @@ public class EthResultSet extends AbstractResultSet {
     @Override
     public Object getObject(int columnIndex) throws SQLException {
         checkClosed();
-        if(columnIndex < 1 || columnIndex > currentRow.length){
+        if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         return currentRow[columnIndex - 1];
@@ -287,7 +286,7 @@ public class EthResultSet extends AbstractResultSet {
     @Override
     public int getInt(int columnIndex) throws SQLException {
         checkClosed();
-        if(columnIndex < 1 || columnIndex > currentRow.length){
+        if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         return (int) currentRow[columnIndex - 1];
@@ -302,7 +301,7 @@ public class EthResultSet extends AbstractResultSet {
     @Override
     public long getLong(int columnIndex) throws SQLException {
         checkClosed();
-        if(columnIndex < 1 || columnIndex > currentRow.length){
+        if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         return (long) currentRow[columnIndex - 1];
@@ -317,7 +316,7 @@ public class EthResultSet extends AbstractResultSet {
     @Override
     public BigDecimal getBigDecimal(int columnIndex) throws SQLException {
         checkClosed();
-        if(columnIndex < 1 || columnIndex > currentRow.length){
+        if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         return (BigDecimal) currentRow[columnIndex - 1];
@@ -332,7 +331,7 @@ public class EthResultSet extends AbstractResultSet {
     @Override
     public boolean getBoolean(int columnIndex) throws SQLException {
         checkClosed();
-        if(columnIndex < 1 || columnIndex > currentRow.length){
+        if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         return (boolean) currentRow[columnIndex - 1];
@@ -347,7 +346,7 @@ public class EthResultSet extends AbstractResultSet {
     @Override
     public byte getByte(int columnIndex) throws SQLException {
         checkClosed();
-        if(columnIndex < 1 || columnIndex > currentRow.length){
+        if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         return (byte) currentRow[columnIndex - 1];
@@ -362,7 +361,7 @@ public class EthResultSet extends AbstractResultSet {
     @Override
     public byte[] getBytes(int columnIndex) throws SQLException {
         checkClosed();
-        if(columnIndex < 1 || columnIndex > currentRow.length){
+        if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         return (byte[]) currentRow[columnIndex - 1];
@@ -376,7 +375,7 @@ public class EthResultSet extends AbstractResultSet {
     @Override
     public double getDouble(int columnIndex) throws SQLException {
         checkClosed();
-        if(columnIndex < 1 || columnIndex > currentRow.length){
+        if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         return (double) currentRow[columnIndex - 1];
@@ -391,7 +390,7 @@ public class EthResultSet extends AbstractResultSet {
     @Override
     public short getShort(int columnIndex) throws SQLException {
         checkClosed();
-        if(columnIndex < 1 || columnIndex > currentRow.length){
+        if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         return (short) currentRow[columnIndex - 1];
@@ -441,7 +440,7 @@ public class EthResultSet extends AbstractResultSet {
         if (!aliasMapping.isEmpty() && aliasMapping.containsKey(columnLabel)) {
             return columnNamesMap.get(aliasMapping.get(columnLabel));
         } else {
-            if(columnNamesMap.get(columnLabel) == null){
+            if (columnNamesMap.get(columnLabel) == null) {
                 LOGGER.error("Column: " + columnLabel + " is not a part of query");
                 throw new RuntimeException("Column: " + columnLabel + " is not a part of query");
             }
@@ -450,4 +449,3 @@ public class EthResultSet extends AbstractResultSet {
     }
 
 }
-

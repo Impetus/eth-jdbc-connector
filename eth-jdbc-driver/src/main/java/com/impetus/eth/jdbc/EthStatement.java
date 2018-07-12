@@ -65,7 +65,7 @@ public class EthStatement implements BlkchnStatement {
 
     private ResultSet queryResultSet = null;
 
-    /** Has this statement been closed?*/
+    /** Has this statement been closed? */
     protected boolean isClosed = false;
 
     public int getrSetType() {
@@ -127,22 +127,22 @@ public class EthStatement implements BlkchnStatement {
 
     @Override
     public void close() throws SQLException {
-       realClose();
+        realClose();
     }
 
     private void realClose() throws SQLException {
-    if(isClosed)
+        if (isClosed)
             return;
-        try{
+        try {
             this.connection = null;
             this.isClosed = true;
-            if(queryResultSet != null)
+            if (queryResultSet != null)
                 queryResultSet.close();
             this.queryResultSet = null;
             this.rSetType = 0;
             this.rSetConcurrency = 0;
-        }catch (Exception e){
-            throw new BlkchnException("Error while closing statement",e);
+        } catch (Exception e) {
+            throw new BlkchnException("Error while closing statement", e);
         }
     }
 
@@ -156,12 +156,12 @@ public class EthStatement implements BlkchnStatement {
         LOGGER.info("Entering into execute Block");
         ResultSet resultSet = executeQuery(sql);
         boolean result = false;
-        if(resultSet != null)
+        if (resultSet != null)
             result = true;
         LOGGER.info("Exiting from execute Block with result: " + result);
         return result;
     }
-    
+
     public ResultSet executeAndReturn(String sql) throws SQLException {
         LOGGER.info("Entering into execute Block");
         ResultSet result = executeQuery(sql);
@@ -191,7 +191,7 @@ public class EthStatement implements BlkchnStatement {
 
     @Override
     public ResultSet executeQuery(String sql) throws SQLException {
-        if(isClosed)
+        if (isClosed)
             throw new BlkchnException("No operations allowed after statement closed.");
         LOGGER.info("Entering into executeQuery Block");
         LogicalPlan logicalPlan = getLogicalPlan(sql);
@@ -199,27 +199,27 @@ public class EthStatement implements BlkchnStatement {
         switch (logicalPlan.getType()) {
             case INSERT:
                 result = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
-                        .executeAndReturn();
+                    .executeAndReturn();
                 queryResultSet = new EthResultSet(result, rSetType, rSetConcurrency);
                 LOGGER.info("Exiting from executeQuery Block");
                 return queryResultSet;
             case DEPLOY_SMARTCONTRACT:
                 result = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
-                        .executeDeploy();
+                    .executeDeploy();
                 queryResultSet = new EthResultSet(result, rSetType, rSetConcurrency);
                 LOGGER.info("Exiting from executeQuery Block");
                 return queryResultSet;
             case CALL_FUNCTION:
                 result = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
-                        .executeFunction();
+                    .executeFunction();
                 queryResultSet = new EthResultSet(result, rSetType, rSetConcurrency);
                 LOGGER.info("Exiting from executeQuery Block");
                 return queryResultSet;
             default:
                 Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
                 String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
-                DataFrame dataframe = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
-                            .executeQuery();
+                DataFrame dataframe =
+                    new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo()).executeQuery();
                 queryResultSet = new EthResultSet(dataframe, rSetType, rSetConcurrency, tableName);
                 LOGGER.info("Exiting from executeQuery Block");
                 return queryResultSet;
@@ -294,7 +294,7 @@ public class EthStatement implements BlkchnStatement {
     @Override
     public ResultSet getResultSet() throws SQLException {
         return queryResultSet;
-        //throw new UnsupportedOperationException();
+        // throw new UnsupportedOperationException();
     }
 
     @Override
@@ -381,7 +381,7 @@ public class EthStatement implements BlkchnStatement {
     private List<TransactionResult> getTransactions(String blockNumber) throws IOException {
         LOGGER.info("Getting details of transactions stored in block - " + blockNumber);
         EthBlock block = connection.getWeb3jClient()
-                .ethGetBlockByNumber(DefaultBlockParameter.valueOf(new BigInteger(blockNumber)), true).send();
+            .ethGetBlockByNumber(DefaultBlockParameter.valueOf(new BigInteger(blockNumber)), true).send();
 
         return block.getBlock().getTransactions();
     }
@@ -389,7 +389,7 @@ public class EthStatement implements BlkchnStatement {
     private Block getBlock(String blockNumber) throws IOException {
         LOGGER.info("Getting block - " + blockNumber + " Information ");
         EthBlock block = connection.getWeb3jClient()
-                .ethGetBlockByNumber(DefaultBlockParameter.valueOf(new BigInteger(blockNumber)), true).send();
+            .ethGetBlockByNumber(DefaultBlockParameter.valueOf(new BigInteger(blockNumber)), true).send();
         return block.getBlock();
     }
 
@@ -402,18 +402,18 @@ public class EthStatement implements BlkchnStatement {
     private Transaction getTransactionByHash(String transactionHash) throws IOException {
         LOGGER.info("Getting information of Transaction by hash - " + transactionHash);
 
-        Transaction transaction = connection.getWeb3jClient().ethGetTransactionByHash(transactionHash).send()
-                .getResult();
+        Transaction transaction =
+            connection.getWeb3jClient().ethGetTransactionByHash(transactionHash).send().getResult();
         return transaction;
     }
 
     private Transaction getTransactionByBlockHashAndIndex(String blockHash, BigInteger transactionIndex)
-            throws IOException {
+        throws IOException {
         LOGGER.info("Getting information of Transaction by blockhash - " + blockHash + " and transactionIndex"
-                + transactionIndex);
+            + transactionIndex);
 
         Transaction transaction = connection.getWeb3jClient()
-                .ethGetTransactionByBlockHashAndIndex(blockHash, transactionIndex).send().getResult();
+            .ethGetTransactionByBlockHashAndIndex(blockHash, transactionIndex).send().getResult();
         return transaction;
     }
 
@@ -436,4 +436,3 @@ public class EthStatement implements BlkchnStatement {
         return parser;
     }
 }
-
