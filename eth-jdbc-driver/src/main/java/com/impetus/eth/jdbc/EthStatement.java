@@ -70,7 +70,6 @@ public class EthStatement implements BlkchnStatement {
     /** Has this statement been closed? */
     protected boolean isClosed = false;
 
-
     public int getrSetType() {
         return rSetType;
     }
@@ -156,8 +155,8 @@ public class EthStatement implements BlkchnStatement {
             this.rSetType = 0;
             this.rSetConcurrency = 0;
             clearBatch();
-        }catch (Exception e){
-            throw new BlkchnException("Error while closing statement",e);
+        } catch (Exception e) {
+            throw new BlkchnException("Error while closing statement", e);
         }
     }
 
@@ -213,7 +212,7 @@ public class EthStatement implements BlkchnStatement {
     }
 
     protected long[] executeBatchInternal() throws SQLException {
-        if(isClosed)
+        if (isClosed)
             throw new BlkchnException("No operations allowed after statement closed.");
         connection.verifyConnection();
         if (this.batchedArgs == null || this.batchedArgs.size() == 0) {
@@ -221,7 +220,7 @@ public class EthStatement implements BlkchnStatement {
         }
         try {
             long[] updateCounts = null;
-            Map exceptionMap = new HashMap<Integer,Exception>();
+            Map exceptionMap = new HashMap<Integer, Exception>();
 
             if (this.batchedArgs != null) {
                 int nbrCommands = this.batchedArgs.size();
@@ -234,33 +233,38 @@ public class EthStatement implements BlkchnStatement {
                     try {
                         String sql = (String) this.batchedArgs.get(commandIndex);
                         updateCounts[commandIndex] = execute(sql) ? 1 : 0;
-                    }catch(SQLException | BlkchnException ex){
+                    } catch (SQLException | BlkchnException ex) {
                         updateCounts[commandIndex] = EXECUTE_FAILED;
-                        if(this.continueBatchOnError){
+                        if (this.continueBatchOnError) {
                             sqlEx = ex;
-                            exceptionMap.put(commandIndex,ex);
-                        }else{
+                            exceptionMap.put(commandIndex, ex);
+                        } else {
                             long[] newUpdateCounts = new long[commandIndex];
-                            for (int i = 0; i < newUpdateCounts.length; i++) newUpdateCounts[i] = updateCounts[i];
-                            SQLException newEx = new BatchUpdateException(ex.getMessage(), truncateAndConvertToInt(newUpdateCounts));
+                            for (int i = 0; i < newUpdateCounts.length; i++)
+                                newUpdateCounts[i] = updateCounts[i];
+                            SQLException newEx =
+                                new BatchUpdateException(ex.getMessage(), truncateAndConvertToInt(newUpdateCounts));
                             newEx.initCause(ex);
                             throw newEx;
                         }
                     }
-                if(sqlEx != null){
-                    //StringBuilder exceptionMessage = new StringBuilder();
-                    for(Object stmNum : exceptionMap.keySet()){
-                        //exceptionMessage.append("Statement : "+ batchedArgs.get((int)stmNum) +" : throw exception "+exceptionMap.get(stmNum)+"\n");
-                        LOGGER.error("Statement : "+ batchedArgs.get((int)stmNum) +" : throw exception "+exceptionMap.get(stmNum)+"\n");
+                if (sqlEx != null) {
+                    // StringBuilder exceptionMessage = new StringBuilder();
+                    for (Object stmNum : exceptionMap.keySet()) {
+                        // exceptionMessage.append("Statement : "+ batchedArgs.get((int)stmNum) +" : throw exception
+                        // "+exceptionMap.get(stmNum)+"\n");
+                        LOGGER.error("Statement : " + batchedArgs.get((int) stmNum) + " : throw exception "
+                            + exceptionMap.get(stmNum) + "\n");
                     }
-                    SQLException newEx = new BatchUpdateException("Some of the queries throw exception check error log for detail "//exceptionMessage
-                            +sqlEx.getMessage(), truncateAndConvertToInt(updateCounts));
+                    SQLException newEx =
+                        new BatchUpdateException("Some of the queries throw exception check error log for detail "// exceptionMessage
+                            + sqlEx.getMessage(), truncateAndConvertToInt(updateCounts));
                     newEx.initCause(sqlEx);
                     throw newEx;
                 }
             }
             return (updateCounts != null) ? updateCounts : new long[0];
-        }finally {
+        } finally {
             clearBatch();
         }
     }
@@ -269,7 +273,8 @@ public class EthStatement implements BlkchnStatement {
         int[] intArray = new int[longArray.length];
 
         for (int i = 0; i < longArray.length; i++) {
-            intArray[i] = longArray[i] > Integer.MAX_VALUE ? Integer.MAX_VALUE : longArray[i] < Integer.MIN_VALUE ? Integer.MIN_VALUE : (int) longArray[i];
+            intArray[i] = longArray[i] > Integer.MAX_VALUE ? Integer.MAX_VALUE
+                : longArray[i] < Integer.MIN_VALUE ? Integer.MIN_VALUE : (int) longArray[i];
         }
         return intArray;
     }

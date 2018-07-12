@@ -1,3 +1,18 @@
+/******************************************************************************* 
+ * * Copyright 2018 Impetus Infotech.
+ * *
+ * * Licensed under the Apache License, Version 2.0 (the "License");
+ * * you may not use this file except in compliance with the License.
+ * * You may obtain a copy of the License at
+ * *
+ * * http://www.apache.org/licenses/LICENSE-2.0
+ * *
+ * * Unless required by applicable law or agreed to in writing, software
+ * * distributed under the License is distributed on an "AS IS" BASIS,
+ * * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * * See the License for the specific language governing permissions and
+ * * limitations under the License.
+ ******************************************************************************/
 package com.impetus.eth.test;
 
 import com.impetus.eth.jdbc.DriverConstants;
@@ -13,18 +28,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Category(UnitTest.class)
-public class TestEthStatement extends TestCase
-{
+public class TestEthStatement extends TestCase {
     EthStatement statement = null;
 
     @Override
     protected void setUp() {
-    statement = new EthStatement(null,0,0);
+        statement = new EthStatement(null, 0, 0);
     }
 
     @Test
-    public void testCreateBatch()
-    {
+    public void testCreateBatch() {
         try {
             statement.addBatch("select * from blocks where blocknumber = 123");
             statement.addBatch("select * from blocks where blocknumber = 124");
@@ -38,7 +51,7 @@ public class TestEthStatement extends TestCase
         expected.add("select * from blocks where blocknumber = 124");
         expected.add("select * from blocks where blocknumber = 125");
         expected.add("select * from blocks where blocknumber = 126");
-        assertEquals(statement.getBatchedArgs(),expected);
+        assertEquals(statement.getBatchedArgs(), expected);
     }
 
     @Test
@@ -52,17 +65,17 @@ public class TestEthStatement extends TestCase
     }
 
     @Test
-    public void testContinueBatchOnError(){
-        assertEquals(statement.isContinueBatchOnError(),false);
+    public void testContinueBatchOnError() {
+        assertEquals(statement.isContinueBatchOnError(), false);
         statement.setContinueBatchOnError(true);
-        assertEquals(statement.isContinueBatchOnError(),true);
+        assertEquals(statement.isContinueBatchOnError(), true);
     }
 
     @Test
-    public void testTruncateAndConvertToInt(){
-        long[] longArray = {1L,2L,3L,4L};
-        int[] expectedArray = {1,2,3,4};
+    public void testTruncateAndConvertToInt() {
+        long[] longArray = { 1L, 2L, 3L, 4L };
+        int[] expectedArray = { 1, 2, 3, 4 };
         int[] gotArray = statement.truncateAndConvertToInt(longArray);
-        Assert.assertArrayEquals(expectedArray,gotArray);
+        Assert.assertArrayEquals(expectedArray, gotArray);
     }
 }

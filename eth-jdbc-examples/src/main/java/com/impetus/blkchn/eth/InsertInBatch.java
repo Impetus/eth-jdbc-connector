@@ -33,27 +33,35 @@ public class InsertInBatch {
     private static final Logger LOGGER = LoggerFactory.getLogger(InsertInBatch.class);
 
     public static void main(String[] args) throws ClassNotFoundException, IOException, CipherException,
-            InterruptedException, ExecutionException, Exception {
+        InterruptedException, ExecutionException, Exception {
         String url = "jdbc:blkchn:ethereum://ropsten.infura.io/1234";
         String driverClass = "com.impetus.eth.jdbc.EthDriver";
 
-        String query1 = "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)";
-        String query2 = "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)";
-        String query3 = "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)";
-        String query4 = "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)";
-        String query5 = "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)";
-        String query6 = "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)";
-        String query7 = "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)";
-        String query8 = "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)";
+        String query1 =
+            "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)";
+        String query2 =
+            "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)";
+        String query3 =
+            "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)";
+        String query4 =
+            "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)";
+        String query5 =
+            "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)";
+        String query6 =
+            "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)";
+        String query7 =
+            "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)";
+        String query8 =
+            "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)";
         try {
             Class.forName(driverClass);
             Properties prop = new Properties();
             prop.put(DriverConstants.KEYSTORE_PATH,
-                    "/local/path/to/ethereum/keystore/UTC--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+                "/local/path/to/ethereum/keystore/UTC--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
             prop.put(DriverConstants.KEYSTORE_PASSWORD, "<password>");
             Connection conn = DriverManager.getConnection(url, prop);
             Statement stmt = conn.createStatement();
-            ((EthStatement)stmt).setContinueBatchOnError(true);
+            ((EthStatement) stmt).setContinueBatchOnError(true);
             stmt.addBatch(query1);
             stmt.addBatch(query2);
             stmt.addBatch(query3);
