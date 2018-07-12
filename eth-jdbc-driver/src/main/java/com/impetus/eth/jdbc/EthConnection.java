@@ -64,7 +64,7 @@ public class EthConnection implements BlkchnConnection {
 
     private ArrayList statementList = new ArrayList();
 
-    /** Has this connection been closed?*/
+    /** Has this connection been closed? */
     protected boolean isClosed = false;
 
     public Web3j getWeb3jClient() {
@@ -120,7 +120,7 @@ public class EthConnection implements BlkchnConnection {
     }
 
     public void setUrl(String url) {
-        if(isClosed)
+        if (isClosed)
             throw new BlkchnException("No operations allowed after statement closed.");
         this.url = url;
     }
@@ -162,15 +162,15 @@ public class EthConnection implements BlkchnConnection {
         if (this.isClosed) {
             return;
         }
-        try{
+        try {
             this.url = null;
             this.props = null;
             this.web3jClient = null;
             this.isClosed = true;
             closeAllOpenStatements();
             this.statementList = new ArrayList();
-        }catch(Exception e){
-            throw new BlkchnException("Error while closing connection",e);
+        } catch (Exception e) {
+            throw new BlkchnException("Error while closing connection", e);
         }
     }
 
@@ -219,7 +219,7 @@ public class EthConnection implements BlkchnConnection {
 
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException {
-        if(isClosed)
+        if (isClosed)
             throw new BlkchnException("No operations allowed after connection closed.");
         EthStatement eStatement = new EthStatement(this, resultSetType, resultSetConcurrency);
         addNewStatement(eStatement);
@@ -332,8 +332,7 @@ public class EthConnection implements BlkchnConnection {
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
         System.out.println("Sql : " + sql);
-        prepareStatement(sql, java.sql.ResultSet.FETCH_FORWARD, java.sql.ResultSet.CONCUR_READ_ONLY);
-        throw new UnsupportedOperationException();
+        return prepareStatement(sql, java.sql.ResultSet.FETCH_FORWARD, java.sql.ResultSet.CONCUR_READ_ONLY);
     }
 
     @Override
@@ -354,7 +353,7 @@ public class EthConnection implements BlkchnConnection {
     @Override
     public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
             throws SQLException {
-        throw new UnsupportedOperationException();
+        return new EthPreparedStatement(this, sql, resultSetType, resultSetConcurrency);
     }
 
     @Override
