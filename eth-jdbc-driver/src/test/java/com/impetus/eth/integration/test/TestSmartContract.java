@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @Category(IntegrationTest.class)
 public class TestSmartContract {
@@ -36,14 +37,7 @@ public class TestSmartContract {
                 ResultSet ret = stmt.getResultSet();
                 ret.next();
                 CompletableFuture return_value = (CompletableFuture) ret.getObject(1);
-                while (true)
-                    if (return_value.isDone()) {
-                        LOGGER.info("Return Value :: " + return_value.get());
-                        break;
-                    } else {
-                        LOGGER.info("Waiting future to complete");
-                        Thread.sleep(1000);
-                    }
+                LOGGER.info("completed :: " + return_value.get(30,TimeUnit.SECONDS));
             }
         } catch (Exception e) {
             e.printStackTrace();

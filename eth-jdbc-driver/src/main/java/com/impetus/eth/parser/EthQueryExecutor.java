@@ -30,6 +30,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import com.impetus.blkch.sql.smartcontract.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
@@ -76,10 +77,6 @@ import com.impetus.blkch.sql.query.OrderByClause;
 import com.impetus.blkch.sql.query.OrderItem;
 import com.impetus.blkch.sql.query.RangeNode;
 import com.impetus.blkch.sql.query.Table;
-import com.impetus.blkch.sql.smartcontract.SmartCnrtAddressOption;
-import com.impetus.blkch.sql.smartcontract.SmartCnrtAsyncOption;
-import com.impetus.blkch.sql.smartcontract.SmartCnrtClassOption;
-import com.impetus.blkch.sql.smartcontract.SmartContractFunction;
 import com.impetus.blkch.util.Range;
 import com.impetus.blkch.util.RangeOperations;
 import com.impetus.blkch.util.Utilities;
@@ -702,6 +699,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         List<Class> argsType = new ArrayList<>();
         String className;
         String smartContractAdd;
+        boolean isValid = false;
         boolean async = false;
         Object result;
         String functionName = callFunc.getChildType(IdentifierNode.class, 0).getValue();
@@ -719,6 +717,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             } else {
                 throw new BlkchnException("Query is incomplete needs CLASS and ADDRESS");
             }
+            isValid = smf.hasChildType(SmartCnrtIsValidFlag.class);
             if (smf.hasChildType(SmartCnrtAsyncOption.class)) {
                 async = smf.getChildType(SmartCnrtAsyncOption.class, 0).getAsyncOption().equalsIgnoreCase("TRUE");
             }
@@ -728,7 +727,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
 
         try {
             result = functionTransaction(functionName, args.toArray(), argsType.toArray(new Class[0]), className,
-                smartContractAdd, async);
+                smartContractAdd, async, isValid);
         } catch (Exception e) {
             throw new BlkchnException("Error while executing query", e);
         }
@@ -737,14 +736,14 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private Object functionTransaction(String functionName, Object[] argument, Class[] argClass, String className,
-        String address, boolean async) {
+        String address, boolean async, boolean isValid) {
         try {
             Class smartContractClass = Class.forName(className);
             if (smartCrtClassObjectMap.containsKey(smartContractClass)
                 && smartCrtClassObjectMap.get(smartContractClass) != null)
                 classObjectSmartCrt = smartCrtClassObjectMap.get(smartContractClass);
             else
-                classObjectSmartCrt = getLoadClass(smartContractClass, address);
+                classObjectSmartCrt = getLoadClass(smartContractClass, address, isValid);
             Method functionToInvoke = smartContractClass.getDeclaredMethod(functionName, argClass);
             Object value = functionToInvoke.invoke(classObjectSmartCrt, argument);
 
@@ -794,11 +793,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 if (async) {
                     return CompletableFuture.supplyAsync(() -> {
                         try {
-                            CompletableFuture classFuture = objSmartCntr.sendAsync();
-                            while (true)
-                                if (classFuture.isDone()) {
-                                    return getContractAddress.invoke(classFuture.get());
-                                }
+                            return getContractAddress.invoke(objSmartCntr.send());
                         } catch (Exception e) {
                             throw new BlkchnException(e);
                         }
@@ -850,17 +845,19 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private Object getLoadClass(Class smartContractClass, String address) {
+    private Object getLoadClass(Class smartContractClass, String address, boolean isValid) {
         try {
             Class params[] = { String.class, Web3j.class, Credentials.class, BigInteger.class, BigInteger.class };
             Credentials credentials = getCredential();
             Method loadMethod = smartContractClass.getDeclaredMethod("load", params);
             Object classObject =
                 loadMethod.invoke(smartContractClass, address, web3jClient, credentials, GAS_PRICE, GAS);
-            Method checkValidMethod = smartContractClass.getMethod("isValid");
-            Boolean valid = (Boolean) checkValidMethod.invoke(classObject);
-            if (!valid)
-                throw new BlkchnException("SmartContract is not valid");
+            if(isValid) {
+                Method checkValidMethod = smartContractClass.getMethod("isValid");
+                Boolean valid = (Boolean) checkValidMethod.invoke(classObject);
+                if (!valid)
+                    throw new BlkchnException("SmartContract is not valid");
+            }
             smartCrtClassObjectMap.put(smartContractClass, classObject);
             return classObject;
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {

@@ -241,14 +241,12 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public int getFetchSize() throws SQLException {
-        checkClosed();
         LOGGER.info("Calculating Result set fetch size");
         return totalRowCount;
     }
 
     @Override
     public String getString(String columnLabel) throws SQLException {
-        checkClosed();
         int idx = getColumnIndex(columnLabel);
         if (currentRow[idx] instanceof BigInteger) {
             return ((BigInteger) currentRow[idx]).toString();
@@ -258,7 +256,6 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public String getString(int columnIndex) throws SQLException {
-        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -270,13 +267,11 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public Object getObject(String columnLabel) throws SQLException {
-        checkClosed();
         return currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public Object getObject(int columnIndex) throws SQLException {
-        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -285,7 +280,6 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public int getInt(int columnIndex) throws SQLException {
-        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -294,13 +288,11 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public int getInt(String columnLabel) throws SQLException {
-        checkClosed();
         return (int) currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public long getLong(int columnIndex) throws SQLException {
-        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -309,13 +301,11 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public long getLong(String columnLabel) throws SQLException {
-        checkClosed();
         return (long) currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public BigDecimal getBigDecimal(int columnIndex) throws SQLException {
-        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -324,13 +314,11 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public BigDecimal getBigDecimal(String columnLabel) throws SQLException {
-        checkClosed();
         return (BigDecimal) currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public boolean getBoolean(int columnIndex) throws SQLException {
-        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -339,13 +327,11 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public boolean getBoolean(String columnLabel) throws SQLException {
-        checkClosed();
         return (boolean) currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public byte getByte(int columnIndex) throws SQLException {
-        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -354,13 +340,11 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public byte getByte(String columnLabel) throws SQLException {
-        checkClosed();
         return (byte) currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public byte[] getBytes(int columnIndex) throws SQLException {
-        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -374,7 +358,6 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public double getDouble(int columnIndex) throws SQLException {
-        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -383,13 +366,11 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public double getDouble(String columnLabel) throws SQLException {
-        checkClosed();
         return (double) currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public short getShort(int columnIndex) throws SQLException {
-        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -398,19 +379,16 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public short getShort(String columnLabel) throws SQLException {
-        checkClosed();
         return (short) currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public int getRow() throws SQLException {
-        checkClosed();
         return currentRowCursor;
     }
 
     @Override
     public int getType() throws SQLException {
-        checkClosed();
         return resultSetType;
     }
 
@@ -422,7 +400,6 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public int findColumn(String columnLabel) throws SQLException {
-        checkClosed();
         return columnNamesMap.get(columnLabel);
     }
 

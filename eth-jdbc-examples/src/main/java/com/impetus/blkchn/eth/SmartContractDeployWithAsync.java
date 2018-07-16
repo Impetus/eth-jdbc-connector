@@ -26,12 +26,13 @@ import java.sql.Statement;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class SmartContractDeployWithAsync {
     private static final Logger LOGGER = LoggerFactory.getLogger(SmartContractDeployWithAsync.class);
 
     public static void main(String[] args) throws InterruptedException, ExecutionException {
-        String url = "jdbc:blkchn:ethereum://127.0.0.1:8545";
+        String url = "jdbc:blkchn:ethereum://ropsten.infura.io/1234";
         String driverClass = "com.impetus.eth.jdbc.EthDriver";
         String query = "DEPLOY smartcontract 'com.impetus.blkchn.eth.FirstSmartContract'() AND withasync true";
         try {
@@ -46,14 +47,7 @@ public class SmartContractDeployWithAsync {
                 ResultSet ret = stmt.getResultSet();
                 ret.next();
                 CompletableFuture return_value = (CompletableFuture) ret.getObject(1);
-                while (true)
-                    if (return_value.isDone()) {
-                        LOGGER.info("completed :: " + return_value.get());
-                        break;
-                    } else {
-                        LOGGER.info("Waiting future to complete");
-                        Thread.sleep(1000);
-                    }
+                LOGGER.info("Smart Contract Deployed at :: " + return_value.get(10,TimeUnit.SECONDS));
             }
             LOGGER.info("done");
         } catch (Exception e) {
