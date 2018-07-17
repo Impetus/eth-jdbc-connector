@@ -9,9 +9,11 @@ import com.impetus.blkch.BlkchnException;
 import com.impetus.blkch.jdbc.AbstractPreparedStatement;
 import com.impetus.blkch.sql.DataFrame;
 import com.impetus.blkch.sql.parser.LogicalPlan;
+import com.impetus.blkch.sql.parser.LogicalPlan.SQLType;
 import com.impetus.blkch.sql.query.FromItem;
 import com.impetus.blkch.sql.query.IdentifierNode;
 import com.impetus.blkch.sql.query.Table;
+import com.impetus.blkch.util.placeholder.InsertPlaceholderHandler;
 import com.impetus.blkch.util.placeholder.PlaceholderHandler;
 import com.impetus.blkch.util.placeholder.QueryPlaceholderHandler;
 import com.impetus.eth.parser.EthQueryExecutor;
@@ -46,12 +48,14 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
         this.sql = sql;
         this.logicalPlan = getLogicalPlan(sql);
 
-        switch (logicalPlan.getType()) {
-            case INSERT:
-                System.out.println("hello");
-            default:
-                placeholderHandler = new QueryPlaceholderHandler(logicalPlan);
+        if (logicalPlan.getType() == SQLType.INSERT) {
+            placeholderHandler = new InsertPlaceholderHandler(logicalPlan);
+        } else if (logicalPlan.getType() == SQLType.QUERY) {
+            placeholderHandler = new QueryPlaceholderHandler(logicalPlan);
+        } else {
+            throw new BlkchnException("ERROR : Unknown Query Type ");
         }
+
         placeholderHandler.setPlaceholderIndex();
         if (!placeholderHandler.isIndexListEmpty())
             this.placeholderValues = new Object[placeholderHandler.getIndexListCount()];
@@ -66,24 +70,45 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
         if (!placeholderHandler.isIndexListEmpty())
             placeholderHandler.alterLogicalPlan(placeholderValues);
 
-        Object result = null;
+        switch (logicalPlan.getType()) {
+            case QUERY:
+                Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
+                String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
+                DataFrame dataframe = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
+                            .executeQuery();
+                queryResultSet = new EthResultSet(dataframe, rSetType, rSetConcurrency, tableName);
+                LOGGER.info("Exiting from executeQuery Block");
+                return queryResultSet;
+            default:
+                throw new BlkchnException("ERROR : Only SELECT Query is supported in this method");
+        }
+    }
 
+    @Override
+    public boolean execute() throws SQLException {
+       throw new BlkchnException("ERROR : Method not supported");
+    }
+
+    @Override
+    public int executeUpdate() throws SQLException {
+        LOGGER.info("Entering into executeUpdate Block");
+        if (isClosed)
+            throw new BlkchnException("No operations allowed after statement closed.");
+
+        if (!placeholderHandler.isIndexListEmpty())
+            placeholderHandler.alterLogicalPlan(placeholderValues);
+
+        Object result = null;
         switch (logicalPlan.getType()) {
             case INSERT:
                 result = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
                         .executeAndReturn();
                 LOGGER.info("Exiting from execute Block with result: " + result);
                 queryResultSet = new EthResultSet(result, rSetType, rSetConcurrency);
-                LOGGER.info("Exiting from executeQuery Block");
-                return queryResultSet;
+                LOGGER.info("Exiting from executeUpdate Block");
+                return 0;
             default:
-                Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
-                String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
-                DataFrame dataframe = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(),
-                        connection.getInfo()).executeQuery();
-                queryResultSet = new EthResultSet(dataframe, rSetType, rSetConcurrency, tableName);
-                LOGGER.info("Exiting from executeQuery Block");
-                return queryResultSet;
+                throw new BlkchnException("ERROR : Only INSERT Query is supported in this method");
         }
     }
 
@@ -107,7 +132,6 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
     }
 
     private void realClose() throws SQLException {
-        System.out.println("hello");
         if (isClosed)
             return;
         try {
