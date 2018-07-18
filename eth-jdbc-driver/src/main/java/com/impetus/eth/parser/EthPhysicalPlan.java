@@ -15,16 +15,17 @@
 ******************************************************************************/
 package com.impetus.eth.parser;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.math.BigInteger;
+import java.sql.Types;
+import java.util.*;
 
 import com.impetus.blkch.sql.parser.LogicalPlan;
 import com.impetus.blkch.sql.parser.PhysicalPlan;
+import com.impetus.blkch.sql.query.*;
 import com.impetus.blkch.util.BigIntegerRangeOperations;
 import com.impetus.blkch.util.RangeOperations;
 import com.impetus.blkch.util.Tuple2;
+import com.impetus.blkch.util.Utilities;
 import com.impetus.eth.query.EthColumns;
 import com.impetus.eth.query.EthTables;
 
@@ -42,6 +43,12 @@ public class EthPhysicalPlan extends PhysicalPlan {
 
     private static Map<Tuple2<String, String>, RangeOperations<?>> rangeOpMap = new HashMap<>();
 
+    private static Map ethTableTypeMap = new HashMap<String, Map>();
+
+    private static Map ethCoulumnTypeBlckMap = new HashMap<String, Class>();
+
+    private static Map ethCoulumnTypeTransactionMap = new HashMap<String, Class>();
+
     static {
         rangeColMap.put(EthTables.BLOCK, Arrays.asList(EthColumns.BLOCKNUMBER));
         rangeColMap.put(EthTables.TRANSACTION, Arrays.asList(EthColumns.BLOCKNUMBER));
@@ -53,18 +60,61 @@ public class EthPhysicalPlan extends PhysicalPlan {
         rangeOpMap.put(new Tuple2<>(EthTables.TRANSACTION, EthColumns.BLOCKNUMBER), new BigIntegerRangeOperations());
 
         ethTableColumnMap.put(EthTables.BLOCK,
-                Arrays.asList(EthColumns.BLOCKNUMBER, EthColumns.HASH, EthColumns.PARENTHASH, EthColumns.NONCE,
-                        EthColumns.SHA3UNCLES, EthColumns.LOGSBLOOM, EthColumns.TRANSACTIONSROOT, EthColumns.STATEROOT,
-                        EthColumns.RECEIPTSROOT, EthColumns.AUTHOR, EthColumns.MINER, EthColumns.MIXHASH,
-                        EthColumns.TOTALDIFFICULTY, EthColumns.EXTRADATA, EthColumns.SIZE, EthColumns.GASLIMIT,
-                        EthColumns.GASUSED, EthColumns.TIMESTAMP, EthColumns.TRANSACTIONS, EthColumns.UNCLES,
-                        EthColumns.SEALFIELDS));
+            Arrays.asList(EthColumns.BLOCKNUMBER, EthColumns.HASH, EthColumns.PARENTHASH, EthColumns.NONCE,
+                EthColumns.SHA3UNCLES, EthColumns.LOGSBLOOM, EthColumns.TRANSACTIONSROOT, EthColumns.STATEROOT,
+                EthColumns.RECEIPTSROOT, EthColumns.AUTHOR, EthColumns.MINER, EthColumns.MIXHASH,
+                EthColumns.TOTALDIFFICULTY, EthColumns.EXTRADATA, EthColumns.SIZE, EthColumns.GASLIMIT,
+                EthColumns.GASUSED, EthColumns.TIMESTAMP, EthColumns.TRANSACTIONS, EthColumns.UNCLES,
+                EthColumns.SEALFIELDS));
 
         ethTableColumnMap.put(EthTables.TRANSACTION,
-                Arrays.asList(EthColumns.BLOCKHASH, EthColumns.BLOCKNUMBER, EthColumns.CREATES, EthColumns.FROM,
-                        EthColumns.GAS, EthColumns.GASPRICE, EthColumns.HASH, EthColumns.INPUT, EthColumns.NONCE,
-                        EthColumns.PUBLICKEY, EthColumns.R, EthColumns.RAW, EthColumns.S, EthColumns.TO,
-                        EthColumns.TRANSACTIONINDEX, EthColumns.V, EthColumns.VALUE));
+            Arrays.asList(EthColumns.BLOCKHASH, EthColumns.BLOCKNUMBER, EthColumns.CREATES, EthColumns.FROM,
+                EthColumns.GAS, EthColumns.GASPRICE, EthColumns.HASH, EthColumns.INPUT, EthColumns.NONCE,
+                EthColumns.PUBLICKEY, EthColumns.R, EthColumns.RAW, EthColumns.S, EthColumns.TO,
+                EthColumns.TRANSACTIONINDEX, EthColumns.V, EthColumns.VALUE));
+
+        ethCoulumnTypeBlckMap.put(EthColumns.BLOCKNUMBER, BigInteger.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.EXTRADATA, String.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.SIZE, BigInteger.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.GASLIMIT, BigInteger.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.GASUSED, BigInteger.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.TIMESTAMP, BigInteger.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.TRANSACTIONS, Object.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.SEALFIELDS, Object.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.UNCLES, Object.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.TOTALDIFFICULTY, BigInteger.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.MIXHASH, String.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.MINER, String.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.AUTHOR, String.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.RECEIPTSROOT, String.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.STATEROOT, String.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.TRANSACTIONSROOT, String.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.LOGSBLOOM, String.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.SHA3UNCLES, String.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.NONCE, BigInteger.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.PARENTHASH, String.class);
+        ethCoulumnTypeBlckMap.put(EthColumns.HASH, String.class);
+
+        ethCoulumnTypeTransactionMap.put(EthColumns.BLOCKHASH, String.class);
+        ethCoulumnTypeTransactionMap.put(EthColumns.BLOCKNUMBER, BigInteger.class);
+        ethCoulumnTypeTransactionMap.put(EthColumns.CREATES, String.class);
+        ethCoulumnTypeTransactionMap.put(EthColumns.FROM, String.class);
+        ethCoulumnTypeTransactionMap.put(EthColumns.GAS, String.class);
+        ethCoulumnTypeTransactionMap.put(EthColumns.GASPRICE, BigInteger.class);
+        ethCoulumnTypeTransactionMap.put(EthColumns.HASH, String.class);
+        ethCoulumnTypeTransactionMap.put(EthColumns.INPUT, String.class);
+        ethCoulumnTypeTransactionMap.put(EthColumns.NONCE, BigInteger.class);
+        ethCoulumnTypeTransactionMap.put(EthColumns.PUBLICKEY, String.class);
+        ethCoulumnTypeTransactionMap.put(EthColumns.R, String.class);
+        ethCoulumnTypeTransactionMap.put(EthColumns.RAW, String.class);
+        ethCoulumnTypeTransactionMap.put(EthColumns.S, String.class);
+        ethCoulumnTypeTransactionMap.put(EthColumns.TO, String.class);
+        ethCoulumnTypeTransactionMap.put(EthColumns.TRANSACTIONINDEX, BigInteger.class);
+        ethCoulumnTypeTransactionMap.put(EthColumns.V, String.class);
+        ethCoulumnTypeTransactionMap.put(EthColumns.VALUE, BigInteger.class);
+
+        ethTableTypeMap.put(EthTables.BLOCK, ethCoulumnTypeBlckMap);
+        ethTableTypeMap.put(EthTables.TRANSACTION, ethCoulumnTypeTransactionMap);
     }
 
     public EthPhysicalPlan(LogicalPlan logicalPlan) {
@@ -97,6 +147,63 @@ public class EthPhysicalPlan extends PhysicalPlan {
             return false;
         }
         return ethTableColumnMap.get(table).contains(column);
+    }
+
+    @Override
+    public Map<String, Integer> columnTypeMap(String s) {
+        Map<String, Integer> mapType = new HashMap<>();
+        List<SelectItem> cols = this.getSelectItems();
+        Iterator colItterator = cols.iterator();
+        Map lclcolumnTypeMap = (Map) ethTableTypeMap.get(s);
+
+        while (colItterator.hasNext()) {
+            SelectItem col = (SelectItem) colItterator.next();
+            if (col.hasChildType(StarNode.class)) {
+                mapType = Collections.unmodifiableMap(lclcolumnTypeMap);
+                break;
+            } else if (col.hasChildType(Column.class)) {
+                String colname = ((IdentifierNode) ((Column) col.getChildType(Column.class, 0))
+                    .getChildType(IdentifierNode.class, 0)).getValue();
+                if (lclcolumnTypeMap.containsKey(colname))
+                    mapType.put(colname, getSQLType((Class) lclcolumnTypeMap.get(colname)));
+                else
+                    mapType.put(colname, getSQLType(Object.class));
+            } else if (col.hasChildType(FunctionNode.class)) {
+                String func = ((IdentifierNode) ((FunctionNode) col.getChildType(FunctionNode.class, 0))
+                    .getChildType(IdentifierNode.class, 0)).getValue();
+                String functionString =
+                    Utilities.createFunctionColName((FunctionNode) col.getChildType(FunctionNode.class, 0));
+                switch (func.hashCode()) {
+                    case 114251:
+                        if (func.equals("sum")) {
+                            mapType.put(functionString, getSQLType(Long.class));
+                        }
+                        break;
+                    case 94851343:
+                        if (func.equals("count")) {
+                            mapType.put(functionString, getSQLType(Long.class));
+                        }
+                }
+            }
+        }
+        return mapType;
+    }
+
+    /* Map Class to SQL.Types */
+    public int getSQLType(Class className) {
+        if (className.equals(String.class)) {
+            return Types.VARCHAR;
+        } else if (className.equals(int.class)) {
+            return Types.INTEGER;
+        } else if (className.equals(BigInteger.class) || className.equals(Long.class)) {
+            return Types.BIGINT;
+        } else if (className.equals(Float.class)) {
+            return Types.FLOAT;
+        } else if (className.equals(Double.class)) {
+            return Types.DOUBLE;
+        }
+        // take object type
+        return 2000;
     }
 
     static Map<String, List<String>> getEthTableColumnMap() {

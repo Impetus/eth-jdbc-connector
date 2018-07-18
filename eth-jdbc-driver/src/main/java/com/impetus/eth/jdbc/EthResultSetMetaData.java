@@ -21,7 +21,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-
+import java.sql.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,15 +47,18 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
 
     private Map<String, String> aliasMapping;
 
-    public EthResultSetMetaData(String tableName, Map<String, Integer> columnNamesMap,
-            Map<String, String> aliasMapping) {
+    protected Map<String, Integer> colTypeMap;
+
+    public EthResultSetMetaData(String tableName, Map<String, Integer> columnNamesMap, Map<String, String> aliasMapping,
+        Map<String, Integer> colTypeMap) {
         super();
         LOGGER.info("Instatiating new EthResultSetMetaData Object ");
         this.tableName = tableName;
         this.columnNamesMap = columnNamesMap;
-        indexToColumnMap = columnNamesMap.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+        indexToColumnMap =
+            columnNamesMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
         this.aliasMapping = aliasMapping;
+        this.colTypeMap = colTypeMap;
         if (!aliasMapping.isEmpty())
             setIndexToAlias();
     }
@@ -105,12 +108,35 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
 
     @Override
     public int getColumnType(int column) throws SQLException {
+        String colName = indexToColumnMap.get(column - 1);
+        if (!colTypeMap.isEmpty()) {
+            if (colTypeMap.containsKey(colName))
+                return (int) colTypeMap.get(colName);
+            else
+                throw new SQLFeatureNotSupportedException();
+        }
         throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public String getColumnTypeName(int column) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        int sqlType = getColumnType(column);
+        switch (sqlType) {
+            case Types.INTEGER:
+                return "INTEGER";
+            case Types.BIGINT:
+                return "BIGINTEGER";
+            case Types.DOUBLE:
+                return "DOUBLE";
+            case Types.FLOAT:
+                return "FLOAT";
+            case Types.VARCHAR:
+                return "STRING";
+            case Types.JAVA_OBJECT:
+                return "OBJECT";
+            default:
+                return "OBJECT";
+        }
     }
 
     @Override

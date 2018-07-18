@@ -30,14 +30,14 @@ public class Query {
 
     public static void main(String[] args) throws ClassNotFoundException {
 
-        String url = "jdbc:blkchn:ethereum://localhost:8545";
+        String url = "jdbc:blkchn:ethereum://172.25.41.52:8545";
         String driverClass = "com.impetus.eth.jdbc.EthDriver";
         try {
             Class.forName(driverClass);
             Connection conn = DriverManager.getConnection(url, null);
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(
-                    "select count(*) as cnt, blocknumber from transaction where blocknumber > 1652349 and blocknumber < 1652354 group by blocknumber");
+                    "select count(*) as cnt, blocknumber from transaction where blocknumber > 1652349 and blocknumber < 1652351 group by blocknumber");
             while (rs.next()) {
                 LOGGER.info("" + rs.getInt(1));
                 LOGGER.info("" + rs.getString("blocknumber"));
@@ -48,6 +48,8 @@ public class Query {
             LOGGER.info("Total Columns : " + rsMetaData.getColumnCount());
             LOGGER.info("column label name : " + rsMetaData.getColumnLabel(1));
             LOGGER.info("column Name : " + rsMetaData.getColumnName(1));
+            LOGGER.info("column type : " + rsMetaData.getColumnType(1));
+            LOGGER.info("column type : " + rsMetaData.getColumnTypeName(1));
             LOGGER.info("tableName : " + rsMetaData.getTableName(1));
 
             conn.close();

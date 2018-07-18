@@ -20,17 +20,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-
 import com.impetus.blkch.sql.smartcontract.*;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+import com.impetus.blkch.sql.query.*;
+import com.impetus.blkch.sql.query.Comparator;
+import com.impetus.blkch.util.Tuple2;
+import com.impetus.blkch.util.Utilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.crypto.CipherException;
@@ -73,10 +73,6 @@ import com.impetus.blkch.sql.query.LimitClause;
 import com.impetus.blkch.sql.query.ListAgrs;
 import com.impetus.blkch.sql.query.LogicalOperation;
 import com.impetus.blkch.sql.query.LogicalOperation.Operator;
-import com.impetus.blkch.sql.query.OrderByClause;
-import com.impetus.blkch.sql.query.OrderItem;
-import com.impetus.blkch.sql.query.RangeNode;
-import com.impetus.blkch.sql.query.Table;
 import com.impetus.blkch.util.Range;
 import com.impetus.blkch.util.RangeOperations;
 import com.impetus.blkch.util.Utilities;
@@ -173,6 +169,12 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         return afterOrder.select(physicalPlan.getSelectItems());
     }
 
+    public Map<String, Integer> computeDataTypeColumnMap() {
+        Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
+        String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
+        return physicalPlan.columnTypeMap(tableName);
+    }
+
     private DataFrame getFromTable() {
         Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
         String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
@@ -184,7 +186,6 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 TreeNode optimizedTree = optimize(directAPIOptimizedTree);
                 finalData = execute(optimizedTree);
             } else if (physicalPlan.getWhereClause().hasChildType(DirectAPINode.class)) {
-                System.out.println("in direct API Block");
                 DirectAPINode node = physicalPlan.getWhereClause().getChildType(DirectAPINode.class, 0);
                 finalData = getDataNode(node.getTable(), node.getColumn(), node.getValue());
             } else {

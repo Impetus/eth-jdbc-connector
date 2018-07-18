@@ -21,6 +21,7 @@ import java.sql.*;
 import java.util.*;
 
 import com.impetus.blkch.BlkchnException;
+import com.impetus.eth.query.EthColumns;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -308,9 +309,11 @@ public class EthStatement implements BlkchnStatement {
             default:
                 Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
                 String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
-                DataFrame dataframe =
-                    new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo()).executeQuery();
-                queryResultSet = new EthResultSet(dataframe, rSetType, rSetConcurrency, tableName);
+                EthQueryExecutor executor =
+                    new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo());
+                DataFrame dataframe = executor.executeQuery();
+                Map<String, Integer> dataTypeColumnMap = executor.computeDataTypeColumnMap();
+                queryResultSet = new EthResultSet(dataframe, rSetType, rSetConcurrency, tableName, dataTypeColumnMap);
                 LOGGER.info("Exiting from executeQuery Block");
                 return queryResultSet;
         }

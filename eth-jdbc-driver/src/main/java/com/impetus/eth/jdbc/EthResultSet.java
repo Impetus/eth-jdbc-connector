@@ -64,6 +64,8 @@ public class EthResultSet extends AbstractResultSet {
 
     protected Map<String, String> aliasMapping;
 
+    protected Map<String, Integer> colTypeMap;
+
     private static final String EXCEPTION_MSG = "Result set doesn't contain index %d";
 
     public EthResultSet(DataFrame dataframe, int resultSetType, int rSetConcurrency, String tableName) {
@@ -74,6 +76,20 @@ public class EthResultSet extends AbstractResultSet {
         this.rSetConcurrency = rSetConcurrency;
         this.tableName = tableName;
         this.aliasMapping = dataframe.getAliasMapping();
+        currentRowCursor = BEFORE_FIRST_ROW;
+        totalRowCount = rowData.size();
+    }
+
+    public EthResultSet(DataFrame dataframe, int resultSetType, int rSetConcurrency, String tableName,
+        Map<String, Integer> colTypeMap) {
+        LOGGER.info("Instantiating new Result Set ");
+        this.rowData = dataframe.getData();
+        this.columnNamesMap = dataframe.getColumnNamesMap();
+        this.resultSetType = resultSetType;
+        this.rSetConcurrency = rSetConcurrency;
+        this.tableName = tableName;
+        this.aliasMapping = dataframe.getAliasMapping();
+        this.colTypeMap = colTypeMap;
         currentRowCursor = BEFORE_FIRST_ROW;
         totalRowCount = rowData.size();
     }
@@ -256,6 +272,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public String getString(int columnIndex) throws SQLException {
+        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -272,6 +289,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public Object getObject(int columnIndex) throws SQLException {
+        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -280,6 +298,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public int getInt(int columnIndex) throws SQLException {
+        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -293,6 +312,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public long getLong(int columnIndex) throws SQLException {
+        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -306,6 +326,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public BigDecimal getBigDecimal(int columnIndex) throws SQLException {
+        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -319,6 +340,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public boolean getBoolean(int columnIndex) throws SQLException {
+        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -332,6 +354,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public byte getByte(int columnIndex) throws SQLException {
+        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -345,6 +368,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public byte[] getBytes(int columnIndex) throws SQLException {
+        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -358,6 +382,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public double getDouble(int columnIndex) throws SQLException {
+        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -371,6 +396,7 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public short getShort(int columnIndex) throws SQLException {
+        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
@@ -395,7 +421,7 @@ public class EthResultSet extends AbstractResultSet {
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
         checkClosed();
-        return new EthResultSetMetaData(tableName, columnNamesMap, aliasMapping);
+        return new EthResultSetMetaData(tableName, columnNamesMap, aliasMapping, colTypeMap);
     }
 
     @Override
