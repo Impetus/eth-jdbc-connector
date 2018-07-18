@@ -1,3 +1,18 @@
+/******************************************************************************* 
+* * Copyright 2018 Impetus Infotech.
+* *
+* * Licensed under the Apache License, Version 2.0 (the "License");
+* * you may not use this file except in compliance with the License.
+* * You may obtain a copy of the License at
+* *
+* * http://www.apache.org/licenses/LICENSE-2.0
+* *
+* * Unless required by applicable law or agreed to in writing, software
+* * distributed under the License is distributed on an "AS IS" BASIS,
+* * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* * See the License for the specific language governing permissions and
+* * limitations under the License.
+******************************************************************************/
 package com.impetus.eth.jdbc;
 
 import java.sql.ResultSet;
@@ -40,6 +55,8 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
 
     protected PlaceholderHandler placeholderHandler;
 
+    protected int rowCount;
+
     public EthPreparedStatement(EthConnection connection, String sql, int rSetType, int rSetConcurrency) {
         super();
         this.connection = connection;
@@ -74,8 +91,8 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
             case QUERY:
                 Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
                 String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
-                DataFrame dataframe = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
-                            .executeQuery();
+                DataFrame dataframe = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(),
+                        connection.getInfo()).executeQuery();
                 queryResultSet = new EthResultSet(dataframe, rSetType, rSetConcurrency, tableName);
                 LOGGER.info("Exiting from executeQuery Block");
                 return queryResultSet;
@@ -86,7 +103,7 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
 
     @Override
     public boolean execute() throws SQLException {
-       throw new BlkchnException("ERROR : Method not supported");
+        throw new BlkchnException("ERROR : Method not supported");
     }
 
     @Override
@@ -94,6 +111,8 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
         LOGGER.info("Entering into executeUpdate Block");
         if (isClosed)
             throw new BlkchnException("No operations allowed after statement closed.");
+
+        rowCount = 0;
 
         if (!placeholderHandler.isIndexListEmpty())
             placeholderHandler.alterLogicalPlan(placeholderValues);
@@ -103,10 +122,10 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
             case INSERT:
                 result = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo())
                         .executeAndReturn();
+                rowCount++;
                 LOGGER.info("Exiting from execute Block with result: " + result);
-                queryResultSet = new EthResultSet(result, rSetType, rSetConcurrency);
                 LOGGER.info("Exiting from executeUpdate Block");
-                return 0;
+                return rowCount;
             default:
                 throw new BlkchnException("ERROR : Only INSERT Query is supported in this method");
         }
@@ -124,6 +143,17 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
             placeholderValues[parameterIndex - 1] = x;
         else
             throw new BlkchnException("Array index out of bound");
+    }
+
+    @Override
+    public void clearParameters() throws SQLException {
+        if (!placeholderHandler.isIndexListEmpty())
+            this.placeholderValues = new Object[placeholderHandler.getIndexListCount()];
+    }
+
+    @Override
+    public boolean isClosed() throws SQLException {
+        return this.isClosed;
     }
 
     @Override
