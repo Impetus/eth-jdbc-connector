@@ -102,6 +102,9 @@ public class EthResultSet extends AbstractResultSet {
         this.columnNamesMap.put("Receipt", 1);
         this.resultSetType = resultSetType;
         this.rSetConcurrency = rSetConcurrency;
+        this.colTypeMap = new HashMap<>();
+        //Receipt 2000 for SQL JDBC_OBJECT type
+        colTypeMap.put("Receipt",2000);
         this.tableName = "TransactionReceipt";
         currentRowCursor = BEFORE_FIRST_ROW;
         totalRowCount = rowData.size();
