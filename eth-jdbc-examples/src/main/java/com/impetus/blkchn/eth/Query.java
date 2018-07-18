@@ -30,7 +30,7 @@ public class Query {
 
     public static void main(String[] args) throws ClassNotFoundException {
 
-        String url = "jdbc:blkchn:ethereum://172.25.41.52:8545";
+        String url = "jdbc:blkchn:ethereum://127.0.0.1:8545";
         String driverClass = "com.impetus.eth.jdbc.EthDriver";
         try {
             Class.forName(driverClass);
