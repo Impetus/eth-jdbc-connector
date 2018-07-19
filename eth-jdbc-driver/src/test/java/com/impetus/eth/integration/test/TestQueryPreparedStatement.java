@@ -86,6 +86,7 @@ public class TestQueryPreparedStatement {
             LOGGER.info("Statement closed " + stmt.isClosed());
 
         } catch (Exception e) {
+            LOGGER.error(e.getMessage());
             throw new BlkchnException(e.getMessage());
         }
 
