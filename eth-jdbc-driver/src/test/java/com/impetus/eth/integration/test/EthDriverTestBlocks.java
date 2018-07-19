@@ -77,6 +77,9 @@ public class EthDriverTestBlocks {
             }
 
             conn.close();
+            assert(true == conn.isClosed());
+            assert(true == rs.isClosed());
+            assert(true == stmt.isClosed());
             LOGGER.info("Connection should be closed "+conn.isClosed());
             LOGGER.info("ResultSet should be closed "+rs.isClosed());
             LOGGER.info("Statement should be closed "+stmt.isClosed());

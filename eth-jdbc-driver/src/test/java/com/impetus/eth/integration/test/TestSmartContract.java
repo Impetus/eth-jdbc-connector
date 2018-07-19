@@ -37,7 +37,7 @@ public class TestSmartContract {
                 ResultSet ret = stmt.getResultSet();
                 ret.next();
                 CompletableFuture return_value = (CompletableFuture) ret.getObject(1);
-                LOGGER.info("completed :: " + return_value.get(30,TimeUnit.SECONDS));
+                LOGGER.info("completed :: " + return_value.get(ConnectionUtil.getTimeout(),TimeUnit.SECONDS));
             }
         } catch (Exception e) {
             e.printStackTrace();

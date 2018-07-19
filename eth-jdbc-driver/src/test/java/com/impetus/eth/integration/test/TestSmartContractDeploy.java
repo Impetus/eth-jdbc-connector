@@ -40,7 +40,7 @@ public class TestSmartContractDeploy {
                 ResultSet ret = stmt.getResultSet();
                 ret.next();
                 CompletableFuture return_value = (CompletableFuture) ret.getObject(1);
-                LOGGER.info("completed :: " + return_value.get(10,TimeUnit.SECONDS));
+                LOGGER.info("completed :: " + return_value.get(ConnectionUtil.getTimeout(),TimeUnit.SECONDS));
             }
             LOGGER.info("done");
         } catch (Exception e) {
