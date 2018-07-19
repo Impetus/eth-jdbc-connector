@@ -154,12 +154,16 @@ public class EthPhysicalPlan extends PhysicalPlan {
         Map<String, Integer> mapType = new HashMap<>();
         List<SelectItem> cols = this.getSelectItems();
         Iterator colItterator = cols.iterator();
-        Map lclcolumnTypeMap = (Map) ethTableTypeMap.get(s);
+        Map<String,Class> lclcolumnTypeMap = (Map) ethTableTypeMap.get(s);
 
         while (colItterator.hasNext()) {
             SelectItem col = (SelectItem) colItterator.next();
             if (col.hasChildType(StarNode.class)) {
-                mapType = Collections.unmodifiableMap(lclcolumnTypeMap);
+                for (Map.Entry<String, Class> entry : lclcolumnTypeMap.entrySet()) {
+                    if(entry.getValue() instanceof Class){
+                        mapType.put(entry.getKey(), getSQLType(entry.getValue()));
+                    }
+                }
                 break;
             } else if (col.hasChildType(Column.class)) {
                 String colname = ((IdentifierNode) ((Column) col.getChildType(Column.class, 0))
@@ -170,19 +174,15 @@ public class EthPhysicalPlan extends PhysicalPlan {
                     mapType.put(colname, getSQLType(Object.class));
             } else if (col.hasChildType(FunctionNode.class)) {
                 String func = ((IdentifierNode) ((FunctionNode) col.getChildType(FunctionNode.class, 0))
-                    .getChildType(IdentifierNode.class, 0)).getValue();
+                        .getChildType(IdentifierNode.class, 0)).getValue();
                 String functionString =
-                    Utilities.createFunctionColName((FunctionNode) col.getChildType(FunctionNode.class, 0));
-                switch (func.hashCode()) {
-                    case 114251:
-                        if (func.equals("sum")) {
-                            mapType.put(functionString, getSQLType(Long.class));
-                        }
+                        Utilities.createFunctionColName((FunctionNode) col.getChildType(FunctionNode.class, 0));
+                switch (func) {
+                    case "sum":
+                        mapType.put(functionString, getSQLType(Long.class));
                         break;
-                    case 94851343:
-                        if (func.equals("count")) {
-                            mapType.put(functionString, getSQLType(Long.class));
-                        }
+                    case "count":
+                        mapType.put(functionString, getSQLType(Long.class));
                 }
             }
         }
@@ -202,8 +202,8 @@ public class EthPhysicalPlan extends PhysicalPlan {
         } else if (className.equals(Double.class)) {
             return Types.DOUBLE;
         }
-        // take object type
-        return 2000;
+        // else take object type
+        return Types.JAVA_OBJECT;
     }
 
     static Map<String, List<String>> getEthTableColumnMap() {
