@@ -71,6 +71,7 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
         } else if (logicalPlan.getType() == SQLType.QUERY) {
             placeholderHandler = new QueryPlaceholderHandler(logicalPlan);
         } else {
+            LOGGER.error("ERROR : Unknown Query Type ");
             throw new BlkchnException("ERROR : Unknown Query Type ");
         }
 
@@ -98,12 +99,14 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
                 LOGGER.info("Exiting from executeQuery Block");
                 return queryResultSet;
             default:
+                LOGGER.error("ERROR : Only SELECT Query is supported in this method");
                 throw new BlkchnException("ERROR : Only SELECT Query is supported in this method");
         }
     }
 
     @Override
     public boolean execute() throws SQLException {
+        LOGGER.error("ERROR : Method not supported");
         throw new BlkchnException("ERROR : Method not supported");
     }
 
@@ -128,6 +131,7 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
                 LOGGER.info("Exiting from executeUpdate Block");
                 return rowCount;
             default:
+                LOGGER.error("ERROR : Only INSERT Query is supported in this method");
                 throw new BlkchnException("ERROR : Only INSERT Query is supported in this method");
         }
     }
@@ -142,58 +146,72 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
     public void setObject(int parameterIndex, Object x) throws SQLException {
         if (parameterIndex <= placeholderValues.length)
             placeholderValues[parameterIndex - 1] = x;
-        else
+        else {
+            LOGGER.error("ERROR : Array index out of bound");
             throw new BlkchnException("Array index out of bound");
+        }
     }
 
     @Override
     public void setDouble(int parameterIndex, double x) throws SQLException {
         if (parameterIndex <= placeholderValues.length)
             placeholderValues[parameterIndex - 1] = x;
-        else
+        else {
+            LOGGER.error("ERROR : Array index out of bound");
             throw new BlkchnException("Array index out of bound");
+        }
     }
 
     @Override
     public void setInt(int parameterIndex, int x) throws SQLException {
         if (parameterIndex <= placeholderValues.length)
             placeholderValues[parameterIndex - 1] = x;
-        else
+        else {
+            LOGGER.error("ERROR : Array index out of bound");
             throw new BlkchnException("Array index out of bound");
+        }
     }
 
     @Override
     public void setLong(int parameterIndex, long x) throws SQLException {
         if (parameterIndex <= placeholderValues.length)
             placeholderValues[parameterIndex - 1] = x;
-        else
+        else {
+            LOGGER.error("ERROR : Array index out of bound");
             throw new BlkchnException("Array index out of bound");
+        }
     }
 
     @Override
     public void setBoolean(int parameterIndex, boolean x) throws SQLException {
         if (parameterIndex <= placeholderValues.length)
             placeholderValues[parameterIndex - 1] = x;
-        else
+        else {
+            LOGGER.error("ERROR : Array index out of bound");
             throw new BlkchnException("Array index out of bound");
+        }
     }
 
     @Override
     public void setFloat(int parameterIndex, float x) throws SQLException {
         if (parameterIndex <= placeholderValues.length)
             placeholderValues[parameterIndex - 1] = x;
-        else
+        else {
+            LOGGER.error("ERROR : Array index out of bound");
             throw new BlkchnException("Array index out of bound");
+        }
     }
 
     @Override
     public void setBigDecimal(int parameterIndex, BigDecimal x) throws SQLException {
         if (parameterIndex <= placeholderValues.length)
             placeholderValues[parameterIndex - 1] = x;
-        else
+        else {
+            LOGGER.error("ERROR : Array index out of bound");
             throw new BlkchnException("Array index out of bound");
-    }    
-    
+        }
+    }
+
     @Override
     public void clearParameters() throws SQLException {
         if (!placeholderHandler.isIndexListEmpty())
@@ -222,6 +240,7 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
             this.rSetType = 0;
             this.rSetConcurrency = 0;
         } catch (Exception e) {
+            LOGGER.error("ERROR : Array index out of bound");
             throw new BlkchnException("Error while closing statement", e);
         }
     }
