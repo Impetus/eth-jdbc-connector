@@ -15,6 +15,7 @@
 ******************************************************************************/
 package com.impetus.eth.jdbc;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.slf4j.Logger;
@@ -145,6 +146,54 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
             throw new BlkchnException("Array index out of bound");
     }
 
+    @Override
+    public void setDouble(int parameterIndex, double x) throws SQLException {
+        if (parameterIndex <= placeholderValues.length)
+            placeholderValues[parameterIndex - 1] = x;
+        else
+            throw new BlkchnException("Array index out of bound");
+    }
+
+    @Override
+    public void setInt(int parameterIndex, int x) throws SQLException {
+        if (parameterIndex <= placeholderValues.length)
+            placeholderValues[parameterIndex - 1] = x;
+        else
+            throw new BlkchnException("Array index out of bound");
+    }
+
+    @Override
+    public void setLong(int parameterIndex, long x) throws SQLException {
+        if (parameterIndex <= placeholderValues.length)
+            placeholderValues[parameterIndex - 1] = x;
+        else
+            throw new BlkchnException("Array index out of bound");
+    }
+
+    @Override
+    public void setBoolean(int parameterIndex, boolean x) throws SQLException {
+        if (parameterIndex <= placeholderValues.length)
+            placeholderValues[parameterIndex - 1] = x;
+        else
+            throw new BlkchnException("Array index out of bound");
+    }
+
+    @Override
+    public void setFloat(int parameterIndex, float x) throws SQLException {
+        if (parameterIndex <= placeholderValues.length)
+            placeholderValues[parameterIndex - 1] = x;
+        else
+            throw new BlkchnException("Array index out of bound");
+    }
+
+    @Override
+    public void setBigDecimal(int parameterIndex, BigDecimal x) throws SQLException {
+        if (parameterIndex <= placeholderValues.length)
+            placeholderValues[parameterIndex - 1] = x;
+        else
+            throw new BlkchnException("Array index out of bound");
+    }    
+    
     @Override
     public void clearParameters() throws SQLException {
         if (!placeholderHandler.isIndexListEmpty())
