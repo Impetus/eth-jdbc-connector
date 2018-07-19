@@ -30,7 +30,7 @@ public class Query {
 
     public static void main(String[] args) throws ClassNotFoundException {
 
-        String url = "jdbc:blkchn:ethereum://172.25.41.52:8545";
+        String url = "jdbc:blkchn:ethereum://127.0.0.1:8545";
         String driverClass = "com.impetus.eth.jdbc.EthDriver";
         try {
             Class.forName(driverClass);
@@ -50,6 +50,9 @@ public class Query {
             LOGGER.info("column Name : " + rsMetaData.getColumnName(1));
             LOGGER.info("column type : " + rsMetaData.getColumnType(1));
             LOGGER.info("column type : " + rsMetaData.getColumnTypeName(1));
+            LOGGER.info("column Name : " + rsMetaData.getColumnName(2));
+            LOGGER.info("column type : " + rsMetaData.getColumnType(2));
+            LOGGER.info("column type : " + rsMetaData.getColumnTypeName(2));
             LOGGER.info("tableName : " + rsMetaData.getTableName(1));
 
             conn.close();
