@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.sql.Types;
+
+import com.impetus.eth.query.EthColumns;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +54,7 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
     public EthResultSetMetaData(String tableName, Map<String, Integer> columnNamesMap, Map<String, String> aliasMapping,
         Map<String, Integer> colTypeMap) {
         super();
-        LOGGER.info("Instatiating new EthResultSetMetaData Object ");
+        LOGGER.info("Instantiating new EthResultSetMetaData Object ");
         this.tableName = tableName;
         this.columnNamesMap = columnNamesMap;
         indexToColumnMap =
@@ -123,19 +125,19 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
         int sqlType = getColumnType(column);
         switch (sqlType) {
             case Types.INTEGER:
-                return "INTEGER";
+                return EthColumns.INTEGERTYPE;
             case Types.BIGINT:
-                return "BIGINTEGER";
+                return EthColumns.BIGINTEGERTYPE;
             case Types.DOUBLE:
-                return "DOUBLE";
+                return EthColumns.DOUBLETYPE;
             case Types.FLOAT:
-                return "FLOAT";
+                return EthColumns.FLOATTYPE;
             case Types.VARCHAR:
-                return "STRING";
+                return EthColumns.STRINGTYPE;
             case Types.JAVA_OBJECT:
-                return "OBJECT";
+                return EthColumns.OBJECTTYPE;
             default:
-                return "OBJECT";
+                return EthColumns.OBJECTTYPE;
         }
     }
 

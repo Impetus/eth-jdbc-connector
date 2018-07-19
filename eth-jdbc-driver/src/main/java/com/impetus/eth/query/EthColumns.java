@@ -52,4 +52,11 @@ public class EthColumns
     public static final String NONCE = "nonce";
     public static final String PARENTHASH = "parenthash";
     public static final String HASH = "hash";
+
+    public static final String STRINGTYPE = "String";
+    public static final String FLOATTYPE = "Float";
+    public static final String BIGINTEGERTYPE = "BigInteger";
+    public static final String DOUBLETYPE = "Double";
+    public static final String INTEGERTYPE = "Integer";
+    public static final String OBJECTTYPE = "Object";
 }

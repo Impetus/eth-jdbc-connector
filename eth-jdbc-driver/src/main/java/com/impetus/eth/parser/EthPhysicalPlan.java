@@ -45,9 +45,9 @@ public class EthPhysicalPlan extends PhysicalPlan {
 
     private static Map ethTableTypeMap = new HashMap<String, Map>();
 
-    private static Map ethCoulumnTypeBlckMap = new HashMap<String, Class>();
+    private static Map ethColumnTypeBlckMap = new HashMap<String, Class>();
 
-    private static Map ethCoulumnTypeTransactionMap = new HashMap<String, Class>();
+    private static Map ethColumnTypeTransactionMap = new HashMap<String, Class>();
 
     static {
         rangeColMap.put(EthTables.BLOCK, Arrays.asList(EthColumns.BLOCKNUMBER));
@@ -73,48 +73,48 @@ public class EthPhysicalPlan extends PhysicalPlan {
                 EthColumns.PUBLICKEY, EthColumns.R, EthColumns.RAW, EthColumns.S, EthColumns.TO,
                 EthColumns.TRANSACTIONINDEX, EthColumns.V, EthColumns.VALUE));
 
-        ethCoulumnTypeBlckMap.put(EthColumns.BLOCKNUMBER, BigInteger.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.EXTRADATA, String.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.SIZE, BigInteger.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.GASLIMIT, BigInteger.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.GASUSED, BigInteger.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.TIMESTAMP, BigInteger.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.TRANSACTIONS, Object.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.SEALFIELDS, Object.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.UNCLES, Object.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.TOTALDIFFICULTY, BigInteger.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.MIXHASH, String.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.MINER, String.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.AUTHOR, String.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.RECEIPTSROOT, String.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.STATEROOT, String.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.TRANSACTIONSROOT, String.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.LOGSBLOOM, String.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.SHA3UNCLES, String.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.NONCE, BigInteger.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.PARENTHASH, String.class);
-        ethCoulumnTypeBlckMap.put(EthColumns.HASH, String.class);
+        ethColumnTypeBlckMap.put(EthColumns.BLOCKNUMBER, BigInteger.class);
+        ethColumnTypeBlckMap.put(EthColumns.EXTRADATA, String.class);
+        ethColumnTypeBlckMap.put(EthColumns.SIZE, BigInteger.class);
+        ethColumnTypeBlckMap.put(EthColumns.GASLIMIT, BigInteger.class);
+        ethColumnTypeBlckMap.put(EthColumns.GASUSED, BigInteger.class);
+        ethColumnTypeBlckMap.put(EthColumns.TIMESTAMP, BigInteger.class);
+        ethColumnTypeBlckMap.put(EthColumns.TRANSACTIONS, Object.class);
+        ethColumnTypeBlckMap.put(EthColumns.SEALFIELDS, Object.class);
+        ethColumnTypeBlckMap.put(EthColumns.UNCLES, Object.class);
+        ethColumnTypeBlckMap.put(EthColumns.TOTALDIFFICULTY, BigInteger.class);
+        ethColumnTypeBlckMap.put(EthColumns.MIXHASH, String.class);
+        ethColumnTypeBlckMap.put(EthColumns.MINER, String.class);
+        ethColumnTypeBlckMap.put(EthColumns.AUTHOR, String.class);
+        ethColumnTypeBlckMap.put(EthColumns.RECEIPTSROOT, String.class);
+        ethColumnTypeBlckMap.put(EthColumns.STATEROOT, String.class);
+        ethColumnTypeBlckMap.put(EthColumns.TRANSACTIONSROOT, String.class);
+        ethColumnTypeBlckMap.put(EthColumns.LOGSBLOOM, String.class);
+        ethColumnTypeBlckMap.put(EthColumns.SHA3UNCLES, String.class);
+        ethColumnTypeBlckMap.put(EthColumns.NONCE, BigInteger.class);
+        ethColumnTypeBlckMap.put(EthColumns.PARENTHASH, String.class);
+        ethColumnTypeBlckMap.put(EthColumns.HASH, String.class);
 
-        ethCoulumnTypeTransactionMap.put(EthColumns.BLOCKHASH, String.class);
-        ethCoulumnTypeTransactionMap.put(EthColumns.BLOCKNUMBER, BigInteger.class);
-        ethCoulumnTypeTransactionMap.put(EthColumns.CREATES, String.class);
-        ethCoulumnTypeTransactionMap.put(EthColumns.FROM, String.class);
-        ethCoulumnTypeTransactionMap.put(EthColumns.GAS, String.class);
-        ethCoulumnTypeTransactionMap.put(EthColumns.GASPRICE, BigInteger.class);
-        ethCoulumnTypeTransactionMap.put(EthColumns.HASH, String.class);
-        ethCoulumnTypeTransactionMap.put(EthColumns.INPUT, String.class);
-        ethCoulumnTypeTransactionMap.put(EthColumns.NONCE, BigInteger.class);
-        ethCoulumnTypeTransactionMap.put(EthColumns.PUBLICKEY, String.class);
-        ethCoulumnTypeTransactionMap.put(EthColumns.R, String.class);
-        ethCoulumnTypeTransactionMap.put(EthColumns.RAW, String.class);
-        ethCoulumnTypeTransactionMap.put(EthColumns.S, String.class);
-        ethCoulumnTypeTransactionMap.put(EthColumns.TO, String.class);
-        ethCoulumnTypeTransactionMap.put(EthColumns.TRANSACTIONINDEX, BigInteger.class);
-        ethCoulumnTypeTransactionMap.put(EthColumns.V, String.class);
-        ethCoulumnTypeTransactionMap.put(EthColumns.VALUE, BigInteger.class);
+        ethColumnTypeTransactionMap.put(EthColumns.BLOCKHASH, String.class);
+        ethColumnTypeTransactionMap.put(EthColumns.BLOCKNUMBER, BigInteger.class);
+        ethColumnTypeTransactionMap.put(EthColumns.CREATES, String.class);
+        ethColumnTypeTransactionMap.put(EthColumns.FROM, String.class);
+        ethColumnTypeTransactionMap.put(EthColumns.GAS, String.class);
+        ethColumnTypeTransactionMap.put(EthColumns.GASPRICE, BigInteger.class);
+        ethColumnTypeTransactionMap.put(EthColumns.HASH, String.class);
+        ethColumnTypeTransactionMap.put(EthColumns.INPUT, String.class);
+        ethColumnTypeTransactionMap.put(EthColumns.NONCE, BigInteger.class);
+        ethColumnTypeTransactionMap.put(EthColumns.PUBLICKEY, String.class);
+        ethColumnTypeTransactionMap.put(EthColumns.R, String.class);
+        ethColumnTypeTransactionMap.put(EthColumns.RAW, String.class);
+        ethColumnTypeTransactionMap.put(EthColumns.S, String.class);
+        ethColumnTypeTransactionMap.put(EthColumns.TO, String.class);
+        ethColumnTypeTransactionMap.put(EthColumns.TRANSACTIONINDEX, BigInteger.class);
+        ethColumnTypeTransactionMap.put(EthColumns.V, String.class);
+        ethColumnTypeTransactionMap.put(EthColumns.VALUE, BigInteger.class);
 
-        ethTableTypeMap.put(EthTables.BLOCK, ethCoulumnTypeBlckMap);
-        ethTableTypeMap.put(EthTables.TRANSACTION, ethCoulumnTypeTransactionMap);
+        ethTableTypeMap.put(EthTables.BLOCK, ethColumnTypeBlckMap);
+        ethTableTypeMap.put(EthTables.TRANSACTION, ethColumnTypeTransactionMap);
     }
 
     public EthPhysicalPlan(LogicalPlan logicalPlan) {
