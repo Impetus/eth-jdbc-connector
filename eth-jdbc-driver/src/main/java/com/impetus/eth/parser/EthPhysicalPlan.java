@@ -150,7 +150,7 @@ public class EthPhysicalPlan extends PhysicalPlan {
     }
 
     @Override
-    public Map<String, Integer> columnTypeMap(String s) {
+    public Map<String, Integer> getColumnTypeMap(String s) {
         Map<String, Integer> mapType = new HashMap<>();
         List<SelectItem> cols = this.getSelectItems();
         Iterator colItterator = cols.iterator();

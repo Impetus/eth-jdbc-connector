@@ -21,6 +21,7 @@ import java.sql.*;
 import java.util.*;
 
 import com.impetus.blkch.BlkchnException;
+import com.impetus.blkch.sql.query.RangeNode;
 import com.impetus.eth.query.EthColumns;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.slf4j.Logger;
@@ -65,6 +66,8 @@ public class EthStatement implements BlkchnStatement {
     protected int rSetType;
 
     protected int rSetConcurrency;
+
+    private RangeNode<?> pageRange;
 
     private ResultSet queryResultSet = null;
 
@@ -309,13 +312,24 @@ public class EthStatement implements BlkchnStatement {
             default:
                 Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
                 String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
-                EthQueryExecutor executor =
-                    new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo());
+                EthQueryExecutor executor = new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo());
+                if(this.pageRange != null) {
+                    executor.paginate(pageRange);
+                }
                 DataFrame dataframe = executor.executeQuery();
                 Map<String, Integer> dataTypeColumnMap = executor.computeDataTypeColumnMap();
                 queryResultSet = new EthResultSet(dataframe, rSetType, rSetConcurrency, tableName, dataTypeColumnMap);
                 LOGGER.info("Exiting from executeQuery Block");
                 return queryResultSet;
+        }
+    }
+
+    public Number getBlockHeight() throws IOException {
+        if(connection.isClosed)
+            throw new BlkchnException("Eth Connection is closed");
+        else{
+            BigInteger blockHeight  = connection.getWeb3jClient().ethBlockNumber().send().getBlockNumber();
+            return blockHeight;
         }
     }
 
@@ -527,5 +541,10 @@ public class EthStatement implements BlkchnStatement {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         BlkchnSqlParser parser = new BlkchnSqlParser(tokens);
         return parser;
+    }
+
+    @Override
+    public void setPageRange(RangeNode<?> pageRange) {
+       this.pageRange = pageRange;
     }
 }

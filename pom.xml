@@ -295,5 +295,6 @@
 		<module>eth-jdbc-driver</module>
 		<module>eth-jdbc-examples</module>
 		<module>eth-jdbc-assembly</module>
-	</modules>
+       		<module>eth-spark-connector</module>
+       </modules>
 </project>

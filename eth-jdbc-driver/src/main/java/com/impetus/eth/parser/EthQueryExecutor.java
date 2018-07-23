@@ -108,7 +108,8 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         this.logicalPlan = logicalPlan;
         this.web3jClient = web3jClient;
         this.properties = properties;
-        this.physicalPlan = new EthPhysicalPlan(logicalPlan);
+        this.originalPhysicalPlan = new EthPhysicalPlan(logicalPlan);
+        this.physicalPlan = originalPhysicalPlan;
     }
 
     public DataFrame executeQuery() {
@@ -172,7 +173,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     public Map<String, Integer> computeDataTypeColumnMap() {
         Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
         String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
-        return physicalPlan.columnTypeMap(tableName);
+        return physicalPlan.getColumnTypeMap(tableName);
     }
 
     private DataFrame getFromTable() {
@@ -608,7 +609,9 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 BigInteger gaslimit = blockInfo.getGasLimit();
                 BigInteger gasused = blockInfo.getGasUsed();
                 BigInteger timestamp = blockInfo.getTimestamp();
-                List<TransactionResult> transactions = blockInfo.getTransactions();
+                List<String> transactions = blockInfo.getTransactions().stream()
+                        .map(transaction -> ((Transaction) transaction.get()).getHash())
+                        .collect(Collectors.toList());
                 List<String> uncles = blockInfo.getUncles();
                 List<String> sealfields = blockInfo.getSealFields();
                 data.add(Arrays.asList(blocknumber, hash, parenthash, nonce, sha3uncles, logsbloom, transactionsroot,
