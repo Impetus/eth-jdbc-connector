@@ -13,9 +13,9 @@ object EthSparkExample {
   lazy val spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
 
   def main(args : Array[String]): Unit = {
-    //test1
+    test1
     //test2
-    test3
+    //test3
   }
   def test1(): Unit ={
     Class.forName("com.impetus.eth.jdbc.EthDriver")

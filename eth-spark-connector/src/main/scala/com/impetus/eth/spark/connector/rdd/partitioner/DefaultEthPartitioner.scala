@@ -17,7 +17,7 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
         val blockHeight = stat.getBlockHeight
         blockHeight.longValue()
     }
-    def getPatitionRange(partitionSize: Long, split: Int, start: Long = 0) = {
+    def getPatitionRange(partitionSize: Long, split: Long, start: Long = 0) = {
       var preY = start
       for(i <- 0l until split) yield{
         val x = preY + 1
@@ -30,7 +30,7 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
     val start = new BigInteger("1")
     readConf.splitCount match {
       case Some(split) =>
-        val partitionRowCount = rowCount / split
+        val partitionRowCount = if((rowCount / split) * split < rowCount) (rowCount / split) + 1 else (rowCount / split)
         val partitionsRange = getPatitionRange(partitionRowCount,split)
         for(((startRange, endRange),i) <- partitionsRange.zipWithIndex){
           val rangeNode = new RangeNode[BigInteger]("block", "blocknumber")
@@ -41,7 +41,7 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
       case None =>
         readConf.fetchSizeInRows match {
           case Some(rowSize) =>
-            val split = if((rowCount / rowSize)*rowSize < rowCount) (rowCount / rowSize) + 1 else (rowCount / rowSize)
+            val split = if((rowCount / rowSize) * rowSize < rowCount) (rowCount / rowSize) + 1 else (rowCount / rowSize)
             val partitionsRange = getPatitionRange(rowSize,split)
             for(((startRange, endRange),i) <- partitionsRange.zipWithIndex){
               val rangeNode = new RangeNode[BigInteger]("block", "blocknumber")
