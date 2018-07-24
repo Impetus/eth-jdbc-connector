@@ -19,6 +19,7 @@ import java.math.BigInteger;
 import java.sql.Types;
 import java.util.*;
 
+import com.impetus.blkch.sql.BlkType;
 import com.impetus.blkch.sql.parser.LogicalPlan;
 import com.impetus.blkch.sql.parser.PhysicalPlan;
 import com.impetus.blkch.sql.query.*;
@@ -91,7 +92,7 @@ public class EthPhysicalPlan extends PhysicalPlan {
         ethColumnTypeBlckMap.put(EthColumns.TRANSACTIONSROOT, String.class);
         ethColumnTypeBlckMap.put(EthColumns.LOGSBLOOM, String.class);
         ethColumnTypeBlckMap.put(EthColumns.SHA3UNCLES, String.class);
-        ethColumnTypeBlckMap.put(EthColumns.NONCE, BigInteger.class);
+        ethColumnTypeBlckMap.put(EthColumns.NONCE, String.class);
         ethColumnTypeBlckMap.put(EthColumns.PARENTHASH, String.class);
         ethColumnTypeBlckMap.put(EthColumns.HASH, String.class);
 
@@ -103,7 +104,7 @@ public class EthPhysicalPlan extends PhysicalPlan {
         ethColumnTypeTransactionMap.put(EthColumns.GASPRICE, BigInteger.class);
         ethColumnTypeTransactionMap.put(EthColumns.HASH, String.class);
         ethColumnTypeTransactionMap.put(EthColumns.INPUT, String.class);
-        ethColumnTypeTransactionMap.put(EthColumns.NONCE, BigInteger.class);
+        ethColumnTypeTransactionMap.put(EthColumns.NONCE, String.class);
         ethColumnTypeTransactionMap.put(EthColumns.PUBLICKEY, String.class);
         ethColumnTypeTransactionMap.put(EthColumns.R, String.class);
         ethColumnTypeTransactionMap.put(EthColumns.RAW, String.class);
@@ -203,7 +204,7 @@ public class EthPhysicalPlan extends PhysicalPlan {
             return Types.DOUBLE;
         }
         // else take object type
-        return Types.JAVA_OBJECT;
+        return BlkType.JAVA_LIST_STRING;
     }
 
     static Map<String, List<String>> getEthTableColumnMap() {

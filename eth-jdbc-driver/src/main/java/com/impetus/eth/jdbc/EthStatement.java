@@ -324,11 +324,16 @@ public class EthStatement implements BlkchnStatement {
         }
     }
 
-    public Number getBlockHeight() throws IOException {
+    public Number getBlockHeight() {
         if(connection.isClosed)
             throw new BlkchnException("Eth Connection is closed");
         else{
-            BigInteger blockHeight  = connection.getWeb3jClient().ethBlockNumber().send().getBlockNumber();
+            BigInteger blockHeight  = null;
+            try{
+                blockHeight = connection.getWeb3jClient().ethBlockNumber().send().getBlockNumber();
+            }catch(IOException e){
+                throw new BlkchnException(e);
+            }
             return blockHeight;
         }
     }

@@ -12,33 +12,41 @@ import java.math.BigInteger
 class DefaultEthPartitioner extends BlkchnPartitioner {
 
   override def getPartitions(connector: BlkchnConnector, readConf: ReadConf): Array[BlkchnPartition] = {
-    val rowCount = 1000/*connector.withStatementDo {
+    val rowCount = connector.withStatementDo{
       stat =>
-        val rs = stat.executeQuery("SELECT count(block_no) AS cnt FROM block WHERE block_no >= 1")
-        rs.next() match {
-          case true => rs.getLong("cnt")
-          case false => 0l
-        }
-    }*/
+        val blockHeight = stat.getBlockHeight
+        blockHeight.longValue()
+    }
+    def getPatitionRange(partitionSize: Long, split: Int, start: Long = 0) = {
+      var preY = start
+      for(i <- 0l until split) yield{
+        val x = preY + 1
+        preY = partitionSize * (i + 1)
+        val y = if(preY > rowCount) rowCount else preY
+        (new BigInteger(String.valueOf(x)),new BigInteger(String.valueOf(y)))
+      }
+    }
     var buffer = ArrayBuffer[BlkchnPartition]()
-    var start = new BigInteger("1")
+    val start = new BigInteger("1")
     readConf.splitCount match {
-      case Some(split) => val partitionRowCount = rowCount / split
-        for(i <- 0 until split) {
+      case Some(split) =>
+        val partitionRowCount = rowCount / split
+        val partitionsRange = getPatitionRange(partitionRowCount,split)
+        for(((startRange, endRange),i) <- partitionsRange.zipWithIndex){
           val rangeNode = new RangeNode[BigInteger]("block", "blocknumber")
-          rangeNode.getRangeList.addRange(new BlkchRange[BigInteger](start, start.add(new BigInteger(String.valueOf(partitionRowCount)))))
+          rangeNode.getRangeList.addRange(new BlkchRange[BigInteger](startRange, endRange))
           buffer = buffer :+ new BlkchnPartition(i, rangeNode, readConf)
-          start = start.add(new BigInteger(String.valueOf(partitionRowCount + 1)));
         }
 
       case None =>
         readConf.fetchSizeInRows match {
-          case Some(rowSize) => val split = (rowCount / rowSize).toInt
-            for(i <- 0 until split) {
+          case Some(rowSize) =>
+            val split = if((rowCount / rowSize)*rowSize < rowCount) (rowCount / rowSize) + 1 else (rowCount / rowSize)
+            val partitionsRange = getPatitionRange(rowSize,split)
+            for(((startRange, endRange),i) <- partitionsRange.zipWithIndex){
               val rangeNode = new RangeNode[BigInteger]("block", "blocknumber")
-              rangeNode.getRangeList.addRange(new BlkchRange[BigInteger](start, start.add(new BigInteger(String.valueOf(rowSize)))))
-              buffer = buffer :+ new BlkchnPartition(i.toInt, rangeNode, readConf)
-              start = start.add(new BigInteger(String.valueOf(rowSize + 1)));
+              rangeNode.getRangeList.addRange(new BlkchRange[BigInteger](startRange, endRange))
+              buffer = buffer :+ new BlkchnPartition(i, rangeNode, readConf)
             }
           case None => val rangeNode = new RangeNode[BigInteger]("block", "blocknumber")
             rangeNode.getRangeList.addRange(new BlkchRange[BigInteger](start, new BigInteger(String.valueOf(rowCount))))
@@ -48,6 +56,8 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
     }
     buffer.toArray
   }
+
+  override def toString: String = this.getClass.getCanonicalName
 }
 
 case object DefaultEthPartitioner extends DefaultEthPartitioner
