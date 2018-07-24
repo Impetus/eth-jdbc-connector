@@ -56,6 +56,7 @@ import com.impetus.blkch.sql.query.Column;
 import com.impetus.blkch.sql.query.Comparator;
 import com.impetus.blkch.sql.query.DataNode;
 import com.impetus.blkch.sql.query.DirectAPINode;
+import com.impetus.blkch.sql.query.EmptyNode;
 import com.impetus.blkch.sql.query.FromItem;
 import com.impetus.blkch.sql.query.GroupByClause;
 import com.impetus.blkch.sql.query.HavingClause;
@@ -168,12 +169,14 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 System.out.println("in direct API Block");
                 DirectAPINode node = physicalPlan.getWhereClause().getChildType(DirectAPINode.class, 0);
                 finalData = getDataNode(node.getTable(), node.getColumn(), node.getValue());
-            } else {
+            } else if(physicalPlan.getWhereClause().hasChildType(EmptyNode.class)){
+               finalData=createEmptyDataNode(tableName);
+            }else {
                 RangeNode<?> rangeNode = physicalPlan.getWhereClause().getChildType(RangeNode.class, 0);
                 finalData = executeRangeNode(rangeNode);
                 finalData.traverse();
             }
-            return createDataFrame(finalData);
+            return createDataFrame(finalData, tableName);
         } else {
             throw new BlkchnException("Can't query without where clause. Data will be huge");
         }
@@ -306,8 +309,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         }
         return (DataNode<String>) finalDataNode;
     }
-    
-    
+
     @Override
     @SuppressWarnings("unchecked")
     protected <T extends Number & Comparable<T>> TreeNode combineRangeAndDataNodes(RangeNode<T> rangeNode,
@@ -331,7 +333,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     node.getRangeList().addRange(new Range<T>(blockNo, blockNo));
                     return node;
                 }).collect(Collectors.toList());
-                if(dataRanges.isEmpty()){
+                if (dataRanges.isEmpty()) {
                     return rangeNode;
                 }
                 RangeNode<T> dataRangeNodes = dataRanges.get(0);
@@ -346,8 +348,8 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     return rangeOps.rangeNodeOr(dataRangeNodes, rangeNode);
                 }
             }
-        } else if(EthColumns.BLOCKNUMBER.equals(rangeCol)) {
-            if(oper.isOr()) {
+        } else if (EthColumns.BLOCKNUMBER.equals(rangeCol)) {
+            if (oper.isOr()) {
                 LogicalOperation newOper = new LogicalOperation(Operator.OR);
                 newOper.addChildNode(dataNode);
                 newOper.addChildNode(rangeNode);
@@ -400,7 +402,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     }
                     break;
             }
-        } else if(obj instanceof Transaction){
+        } else if (obj instanceof Transaction) {
 
             Transaction txnInfo = (Transaction) obj;
             switch (fieldName) {
@@ -426,7 +428,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     }
                     break;
             }
-        
+
         }
         return retValue;
     }
@@ -438,18 +440,21 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 boolean include = false;
                 BigInteger bigIntKey = (BigInteger) key;
                 for (Range<?> range : rangeNode.getRangeList().getRanges()) {
-                    if (((BigInteger) range.getMin()).compareTo(bigIntKey) == -1 && ((BigInteger) range.getMax()).compareTo(bigIntKey) == 1) {
+                    if (((BigInteger) range.getMin()).compareTo(bigIntKey) == -1
+                            && ((BigInteger) range.getMax()).compareTo(bigIntKey) == 1) {
                         include = true;
                         break;
                     }
                 }
                 return include;
-            } else if(EthTables.TRANSACTION.equals(dataNode.getTable()) && EthColumns.BLOCKNUMBER.equals(rangeNode.getColumn())) {
+            } else if (EthTables.TRANSACTION.equals(dataNode.getTable())
+                    && EthColumns.BLOCKNUMBER.equals(rangeNode.getColumn())) {
                 boolean include = false;
                 Transaction transaction = (Transaction) dataMap.get(key);
                 BigInteger blockNo = transaction.getBlockNumber();
                 for (Range<?> range : rangeNode.getRangeList().getRanges()) {
-                    if (((BigInteger) range.getMin()).compareTo(blockNo) == -1 && ((BigInteger) range.getMax()).compareTo(blockNo) == 1) {
+                    if (((BigInteger) range.getMin()).compareTo(blockNo) == -1
+                            && ((BigInteger) range.getMax()).compareTo(blockNo) == 1) {
                         include = true;
                         break;
                     }
@@ -506,7 +511,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
 
     private Object insertTransaction(String toAddress, String value, String unit, boolean syncRequest)
             throws IOException, CipherException, InterruptedException, TransactionTimeoutException, ExecutionException {
-        if(toAddress == null || value == null || unit == null){
+        if (toAddress == null || value == null || unit == null) {
             LOGGER.error("Check if [toAddress, value, unit] are correctly used in insert query columns");
             throw new BlkchnException("Check if [toAddress, value, unit] are correctly used in insert query columns");
         }
@@ -524,12 +529,13 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             LOGGER.error("Exception while parsing value", e);
             throw new RuntimeException("Exception while parsing value", e);
         }
-        
-        if(properties == null || !properties.containsKey(DriverConstants.KEYSTORE_PASSWORD) 
-                || !properties.containsKey(DriverConstants.KEYSTORE_PATH)){
-            throw new BlkchnException("Insert query needs keystore path and password, passed as Properties while creating connection");
+
+        if (properties == null || !properties.containsKey(DriverConstants.KEYSTORE_PASSWORD)
+                || !properties.containsKey(DriverConstants.KEYSTORE_PATH)) {
+            throw new BlkchnException(
+                    "Insert query needs keystore path and password, passed as Properties while creating connection");
         }
-        
+
         Credentials credentials = WalletUtils.loadCredentials(properties.getProperty(DriverConstants.KEYSTORE_PASSWORD),
                 properties.getProperty(DriverConstants.KEYSTORE_PATH));
         Object transactionReceipt;
@@ -544,16 +550,35 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         return transactionReceipt;
     }
 
-    protected DataFrame createDataFrame(DataNode<?> dataNode) {
+    protected DataFrame createDataFrame(DataNode<?> dataNode, String tableName) {
+        System.out.println(dataNode.getKeys()+" isEmpty"+dataNode.getKeys().isEmpty());
         if (dataNode.getKeys().isEmpty()) {
-            return new DataFrame(new ArrayList<>(), new ArrayList<>(), physicalPlan.getColumnAliasMapping());
+            if (tableName.equals("block")) {
+                String[] columns = { EthColumns.BLOCKNUMBER, EthColumns.HASH, EthColumns.PARENTHASH, EthColumns.NONCE,
+                        EthColumns.SHA3UNCLES, EthColumns.LOGSBLOOM, EthColumns.TRANSACTIONSROOT, EthColumns.STATEROOT,
+                        EthColumns.RECEIPTSROOT, EthColumns.AUTHOR, EthColumns.MINER, EthColumns.MIXHASH,
+                        EthColumns.TOTALDIFFICULTY, EthColumns.EXTRADATA, EthColumns.SIZE, EthColumns.GASLIMIT,
+                        EthColumns.GASUSED, EthColumns.TIMESTAMP, EthColumns.TRANSACTIONS, EthColumns.UNCLES,
+                        EthColumns.SEALFIELDS };
+                return new DataFrame(new ArrayList<>(), columns, physicalPlan.getColumnAliasMapping());
+            } else if (tableName.equals("transaction")) {
+                String columns[] = { EthColumns.BLOCKHASH, EthColumns.BLOCKNUMBER, EthColumns.CREATES, EthColumns.FROM,
+                        EthColumns.GAS, EthColumns.GASPRICE, EthColumns.HASH, EthColumns.INPUT, EthColumns.NONCE,
+                        EthColumns.PUBLICKEY, EthColumns.R, EthColumns.RAW, EthColumns.S, EthColumns.TO,
+                        EthColumns.TRANSACTIONINDEX, EthColumns.V, EthColumns.VALUE };
+                return new DataFrame(new ArrayList<>(), columns, physicalPlan.getColumnAliasMapping());
+            } else
+                return new DataFrame(new ArrayList<>(), new ArrayList<>(), physicalPlan.getColumnAliasMapping());
         }
         DataFrame df = null;
         List<List<Object>> data = new ArrayList<>();
         if (dataMap.get(dataNode.getKeys().get(0).toString()) instanceof Block) {
-            String[] columns = { EthColumns.BLOCKNUMBER, EthColumns.HASH, EthColumns.PARENTHASH, EthColumns.NONCE, EthColumns.SHA3UNCLES, EthColumns.LOGSBLOOM,
-                    EthColumns.TRANSACTIONSROOT, EthColumns.STATEROOT, EthColumns.RECEIPTSROOT, EthColumns.AUTHOR, EthColumns.MINER, EthColumns.MIXHASH, EthColumns.TOTALDIFFICULTY,
-                    EthColumns.EXTRADATA, EthColumns.SIZE, EthColumns.GASLIMIT, EthColumns.GASUSED, EthColumns.TIMESTAMP, EthColumns.TRANSACTIONS, EthColumns.UNCLES, EthColumns.SEALFIELDS };
+            String[] columns = { EthColumns.BLOCKNUMBER, EthColumns.HASH, EthColumns.PARENTHASH, EthColumns.NONCE,
+                    EthColumns.SHA3UNCLES, EthColumns.LOGSBLOOM, EthColumns.TRANSACTIONSROOT, EthColumns.STATEROOT,
+                    EthColumns.RECEIPTSROOT, EthColumns.AUTHOR, EthColumns.MINER, EthColumns.MIXHASH,
+                    EthColumns.TOTALDIFFICULTY, EthColumns.EXTRADATA, EthColumns.SIZE, EthColumns.GASLIMIT,
+                    EthColumns.GASUSED, EthColumns.TIMESTAMP, EthColumns.TRANSACTIONS, EthColumns.UNCLES,
+                    EthColumns.SEALFIELDS };
 
             for (Object key : dataNode.getKeys()) {
                 Block blockInfo = (Block) dataMap.get(key.toString());
@@ -586,8 +611,10 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             df.setRawData(dataMap.values());
             return df;
         } else if (dataMap.get(dataNode.getKeys().get(0).toString()) instanceof Transaction) {
-            String columns[] = { EthColumns.BLOCKHASH, EthColumns.BLOCKNUMBER, EthColumns.CREATES, EthColumns.FROM, EthColumns.GAS, EthColumns.GASPRICE, EthColumns.HASH, EthColumns.INPUT,
-                    EthColumns.NONCE, EthColumns.PUBLICKEY, EthColumns.R, EthColumns.RAW, EthColumns.S, EthColumns.TO, EthColumns.TRANSACTIONINDEX, EthColumns.V, EthColumns.VALUE };
+            String columns[] = { EthColumns.BLOCKHASH, EthColumns.BLOCKNUMBER, EthColumns.CREATES, EthColumns.FROM,
+                    EthColumns.GAS, EthColumns.GASPRICE, EthColumns.HASH, EthColumns.INPUT, EthColumns.NONCE,
+                    EthColumns.PUBLICKEY, EthColumns.R, EthColumns.RAW, EthColumns.S, EthColumns.TO,
+                    EthColumns.TRANSACTIONINDEX, EthColumns.V, EthColumns.VALUE };
             for (Object key : dataNode.getKeys()) {
                 Transaction txnInfo = (Transaction) dataMap.get(key.toString());
                 String blockhash = txnInfo.getBlockHash();
@@ -650,12 +677,18 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         boolean async = namesMap.get(ASYNC) == null ? true : Boolean.parseBoolean(namesMap.get(ASYNC));
         Object result = null;
         try {
-            result = insertTransaction(namesMap.get(TO_ADDRESS), namesMap.get(EthColumns.VALUE), namesMap.get(UNIT), !async);
+            result = insertTransaction(namesMap.get(TO_ADDRESS), namesMap.get(EthColumns.VALUE), namesMap.get(UNIT),
+                    !async);
         } catch (IOException | CipherException | InterruptedException | TransactionTimeoutException
                 | ExecutionException e) {
             e.printStackTrace();
             throw new BlkchnException("Error while executing query", e);
         }
         return result;
+    }
+    
+    protected DataNode<?> createEmptyDataNode(String table) {
+        
+            return new DataNode<>(table, new ArrayList<>());
     }
 }
