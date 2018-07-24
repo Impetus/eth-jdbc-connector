@@ -185,8 +185,8 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             } else if (physicalPlan.getWhereClause().hasChildType(DirectAPINode.class)) {
                 DirectAPINode node = physicalPlan.getWhereClause().getChildType(DirectAPINode.class, 0);
                 finalData = getDataNode(node.getTable(), node.getColumn(), node.getValue());
-            } else if (physicalPlan.getWhereClause().hasChildType(GetRowsNode.class)) {
-                finalData = createRowsDataNode(tableName);
+            } else if (physicalPlan.getWhereClause().hasChildType(EmptyNode.class)) {
+                finalData = createEmptyDataNode(tableName);
             } else {
                 RangeNode<?> rangeNode = physicalPlan.getWhereClause().getChildType(RangeNode.class, 0);
                 finalData = executeRangeNode(rangeNode);
@@ -421,6 +421,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     node.getRangeList().addRange(new Range<T>(blockNo, blockNo));
                     return node;
                 }).collect(Collectors.toList());
+
                 if (dataRanges.isEmpty() && oper.isAnd()) {
                     return filterRangeNodeWithValue(rangeNode, dataNode);
                 } else if (dataRanges.isEmpty() && oper.isOr()) {
@@ -534,7 +535,6 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                             && ((BigInteger) range.getMax()).compareTo(bigIntKey) == 1)
                             || (((BigInteger) range.getMax()).compareTo(bigIntKey) == 0
                                     || ((BigInteger) range.getMin()).compareTo(bigIntKey) == 0)) {
-
                         include = true;
                         break;
                     }
@@ -550,7 +550,6 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                             && ((BigInteger) range.getMax()).compareTo(blockNo) == 1)
                             || (((BigInteger) range.getMax()).compareTo(blockNo) == 0
                                     || ((BigInteger) range.getMin()).compareTo(blockNo) == 0)) {
-
                         include = true;
                         break;
                     }
@@ -770,7 +769,6 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     }
 
     public Object executeAndReturn() {
-        // get values from logical plan and pass it to insertTransaction method
         Insert insert = logicalPlan.getInsert();
         String tableName = insert.getChildType(Table.class).get(0).getChildType(IdentifierNode.class, 0).getValue();
         if (!EthTables.TRANSACTION.equalsIgnoreCase(tableName)) {
@@ -974,11 +972,9 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         }
     }
 
-    protected DataNode<?> createRowsDataNode(String table) {
-        if (physicalPlan.getWhereClause().getChildType(GetRowsNode.class, 0).isNone())
-            return new DataNode<>(table, new ArrayList<>());
-        else
-            throw new BlkchnException(
-                    "WhereClasue evaluates to true and it will process all the block/transaction data. Not supported yet");
+
+    protected DataNode<?> createEmptyDataNode(String table) {
+
+        return new DataNode<>(table, new ArrayList<>());
     }
 }
