@@ -1,11 +1,8 @@
 package com.impetus.blkchn.eth
 
 import com.impetus.blkch.spark.connector.rdd.ReadConf
-import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
-import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.eth.EthSpark
-
-
+import org.apache.spark.sql.{Row, SparkSession}
 
 object EthSparkExample {
   import org.apache.spark.sql.eth.EthSpark.implicits._
