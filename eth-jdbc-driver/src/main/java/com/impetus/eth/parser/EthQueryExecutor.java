@@ -594,7 +594,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 BigInteger blocknumber = blockInfo.getNumber();
                 String hash = blockInfo.getHash();
                 String parenthash = blockInfo.getParentHash();
-                String nonce = blockInfo.getNonce().toString();
+                BigInteger nonce = blockInfo.getNonce();
                 String sha3uncles = blockInfo.getSha3Uncles();
                 String logsbloom = blockInfo.getLogsBloom();
                 String transactionsroot = blockInfo.getTransactionsRoot();
@@ -636,7 +636,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 BigInteger gasprice = txnInfo.getGasPrice();
                 String hash = txnInfo.getHash();
                 String input = txnInfo.getInput();
-                String nonce = txnInfo.getNonce().toString();
+                BigInteger nonce = txnInfo.getNonce();
                 String publickey = txnInfo.getPublicKey();
                 String r = txnInfo.getR();
                 String raw = txnInfo.getRaw();

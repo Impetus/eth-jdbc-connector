@@ -1,8 +1,11 @@
 package com.impetus.blkchn.eth
 
+import java.math.BigInteger
+
 import com.impetus.blkch.spark.connector.rdd.ReadConf
 import org.apache.spark.sql.eth.EthSpark
 import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.Column
 
 object EthSparkExample {
   import org.apache.spark.sql.eth.EthSpark.implicits._
@@ -10,9 +13,9 @@ object EthSparkExample {
   lazy val spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
 
   def main(args : Array[String]): Unit = {
-    test1
+    //test1
     //test2
-    //test3
+    test3
   }
   def test1(): Unit ={
     Class.forName("com.impetus.eth.jdbc.EthDriver")
@@ -39,7 +42,15 @@ object EthSparkExample {
     val df = spark.read.format("org.apache.spark.sql.eth").options(options).
       load()
     df.show
-    df.createOrReplaceTempView("block")
-    spark.sql("select blocknumber from block where blocknumber like '%12%'").show(false)
+    val df2 = df.select(
+      df.col("blocknumber").toString()
+    )
+
+    def bool(row:Row) = new BigInteger(row.getAs("blocknumber").toString()).compareTo(new BigInteger("12")) < 0
+    df2.filter(x => bool(x)).show(false)
+
+    df2.createOrReplaceTempView("block")
+    println(df2.schema)
+    spark.sql("select blocknumber from block where blocknumber > 5").show(false)
   }
 }
