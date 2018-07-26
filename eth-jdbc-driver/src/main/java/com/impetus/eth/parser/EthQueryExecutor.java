@@ -609,9 +609,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 BigInteger gaslimit = blockInfo.getGasLimit();
                 BigInteger gasused = blockInfo.getGasUsed();
                 BigInteger timestamp = blockInfo.getTimestamp();
-                List<String> transactions = blockInfo.getTransactions().stream()
-                        .map(transaction -> ((Transaction) transaction.get()).getHash())
-                        .collect(Collectors.toList());
+                List<TransactionResult> transactions = blockInfo.getTransactions();
                 List<String> uncles = blockInfo.getUncles();
                 List<String> sealfields = blockInfo.getSealFields();
                 data.add(Arrays.asList(blocknumber, hash, parenthash, nonce, sha3uncles, logsbloom, transactionsroot,
