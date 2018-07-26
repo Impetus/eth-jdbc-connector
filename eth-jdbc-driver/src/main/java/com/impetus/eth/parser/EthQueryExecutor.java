@@ -60,7 +60,6 @@ import com.impetus.blkch.sql.query.BytesArgs;
 import com.impetus.blkch.sql.query.Column;
 import com.impetus.blkch.sql.query.DataNode;
 import com.impetus.blkch.sql.query.DirectAPINode;
-import com.impetus.blkch.sql.query.EmptyNode;
 import com.impetus.blkch.sql.query.FromItem;
 import com.impetus.blkch.sql.query.GroupByClause;
 import com.impetus.blkch.sql.query.HavingClause;
