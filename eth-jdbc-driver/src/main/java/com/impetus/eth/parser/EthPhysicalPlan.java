@@ -19,7 +19,6 @@ import java.math.BigInteger;
 import java.sql.Types;
 import java.util.*;
 
-import com.impetus.blkch.sql.BlkType;
 import com.impetus.blkch.sql.parser.LogicalPlan;
 import com.impetus.blkch.sql.parser.PhysicalPlan;
 import com.impetus.blkch.sql.query.*;
@@ -204,7 +203,7 @@ public class EthPhysicalPlan extends PhysicalPlan {
             return Types.DOUBLE;
         }
         // else take object type
-        return BlkType.JAVA_LIST_STRING;
+        return Types.JAVA_OBJECT;
     }
 
     static Map<String, List<String>> getEthTableColumnMap() {

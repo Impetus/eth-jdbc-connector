@@ -22,7 +22,6 @@ import java.sql.Types;
 import java.util.*;
 
 import com.impetus.blkch.BlkchnErrorListener;
-import com.impetus.blkch.sql.BlkType;
 import com.impetus.blkch.sql.generated.BlkchnSqlLexer;
 import com.impetus.blkch.sql.generated.BlkchnSqlParser;
 import com.impetus.blkch.sql.parser.*;
@@ -37,7 +36,6 @@ import org.junit.experimental.categories.Category;
 
 import com.impetus.blkch.sql.DataFrame;
 import com.impetus.eth.jdbc.EthResultSet;
-import com.impetus.eth.jdbc.EthResultSetMetaData;
 import com.impetus.test.catagory.UnitTest;
 
 @Category(UnitTest.class)
@@ -60,7 +58,7 @@ public class TestEthResultSetMetadata extends TestCase {
 
     int stringType = Types.VARCHAR;
     int bigintType = Types.BIGINT;
-    int objectType = BlkType.JAVA_LIST_STRING;
+    int objectType = Types.JAVA_OBJECT;
 
     @Override
     protected void setUp() {
@@ -143,7 +141,7 @@ public class TestEthResultSetMetadata extends TestCase {
         assertEquals(stringType,(int)dataTypeMapQ1.get(EthColumns.TRANSACTIONSROOT));
         assertEquals(stringType,(int)dataTypeMapQ1.get(EthColumns.LOGSBLOOM));
         assertEquals(stringType,(int)dataTypeMapQ1.get(EthColumns.SHA3UNCLES));
-        assertEquals(stringType,(int)dataTypeMapQ1.get(EthColumns.NONCE));
+        assertEquals(bigintType,(int)dataTypeMapQ1.get(EthColumns.NONCE));
         assertEquals(stringType,(int)dataTypeMapQ1.get(EthColumns.PARENTHASH));
         assertEquals(stringType,(int)dataTypeMapQ1.get(EthColumns.HASH));
     }
@@ -217,7 +215,7 @@ public class TestEthResultSetMetadata extends TestCase {
         assertEquals(stringType,col16DT);
         assertEquals(stringType,col17DT);
         assertEquals(stringType,col18DT);
-        assertEquals(stringType,col19DT);
+        assertEquals(bigintType,col19DT);
         assertEquals(stringType,col20DT);
         assertEquals(stringType,col21DT);
     }
