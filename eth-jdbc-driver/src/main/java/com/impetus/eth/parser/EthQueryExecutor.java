@@ -56,8 +56,8 @@ import com.impetus.blkch.sql.query.Column;
 import com.impetus.blkch.sql.query.Comparator;
 import com.impetus.blkch.sql.query.DataNode;
 import com.impetus.blkch.sql.query.DirectAPINode;
-import com.impetus.blkch.sql.query.EmptyNode;
 import com.impetus.blkch.sql.query.FromItem;
+import com.impetus.blkch.sql.query.GetRowsNode;
 import com.impetus.blkch.sql.query.GroupByClause;
 import com.impetus.blkch.sql.query.HavingClause;
 import com.impetus.blkch.sql.query.IdentifierNode;
@@ -169,9 +169,9 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 System.out.println("in direct API Block");
                 DirectAPINode node = physicalPlan.getWhereClause().getChildType(DirectAPINode.class, 0);
                 finalData = getDataNode(node.getTable(), node.getColumn(), node.getValue());
-            } else if(physicalPlan.getWhereClause().hasChildType(EmptyNode.class)){
-               finalData=createEmptyDataNode(tableName);
-            }else {
+            } else if (physicalPlan.getWhereClause().hasChildType(GetRowsNode.class)) {
+                finalData = createRowsDataNode(tableName);
+            } else {
                 RangeNode<?> rangeNode = physicalPlan.getWhereClause().getChildType(RangeNode.class, 0);
                 finalData = executeRangeNode(rangeNode);
                 finalData.traverse();
@@ -484,7 +484,11 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     private Block getBlockByHash(String blockHash) throws IOException {
         LOGGER.info("Getting  information of block with hash - " + blockHash);
         EthBlock block = web3jClient.ethGetBlockByHash(blockHash, true).send();
-        return block.getBlock();
+        if (block.hasError())
+            throw new BlkchnException("Error querying block by hash " + blockHash);
+        else
+            return block.getBlock();
+
     }
 
     private Transaction getTransactionByHash(String transactionHash) throws IOException {
@@ -551,7 +555,6 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     }
 
     protected DataFrame createDataFrame(DataNode<?> dataNode, String tableName) {
-        System.out.println(dataNode.getKeys()+" isEmpty"+dataNode.getKeys().isEmpty());
         if (dataNode.getKeys().isEmpty()) {
             if (tableName.equals("block")) {
                 String[] columns = { EthColumns.BLOCKNUMBER, EthColumns.HASH, EthColumns.PARENTHASH, EthColumns.NONCE,
@@ -686,9 +689,12 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         }
         return result;
     }
-    
-    protected DataNode<?> createEmptyDataNode(String table) {
-        
+
+    protected DataNode<?> createRowsDataNode(String table) {
+        if (physicalPlan.getWhereClause().getChildType(GetRowsNode.class, 0).isNone())
             return new DataNode<>(table, new ArrayList<>());
+        else
+            throw new BlkchnException(
+                    "WhereClasue evaluates to true and it will process all the block/transaction data. Not supported yet");
     }
 }
