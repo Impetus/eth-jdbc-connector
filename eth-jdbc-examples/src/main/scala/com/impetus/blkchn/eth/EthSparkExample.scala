@@ -16,6 +16,7 @@ object EthSparkExample {
     //test1
     //test2
     test3
+    test4
   }
   def test1(): Unit ={
     Class.forName("com.impetus.eth.jdbc.EthDriver")
@@ -41,7 +42,7 @@ object EthSparkExample {
     val options = readConf.asOptions() ++ Map("url" -> "jdbc:blkchn:ethereum://172.25.41.52:8545")//, "spark.blkchn.partitioner"->"com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner")
     val df = spark.read.format("org.apache.spark.sql.eth").options(options).
       load()
-    df.show
+    df.select(df.col("transactions")).show()
     val df2 = df.select(
       df.col("blocknumber").toString()
     )
@@ -50,7 +51,18 @@ object EthSparkExample {
     df2.filter(x => bool(x)).show(false)
 
     df2.createOrReplaceTempView("block")
-    println(df2.schema)
+    println(df.schema)
     spark.sql("select blocknumber from block where blocknumber > 5").show(false)
+  }
+
+  def test4 = {
+    Class.forName("com.impetus.eth.jdbc.EthDriver")
+    val readConf = ReadConf(Some(20),None,"Select * from transaction")
+    val option = readConf.asOptions() ++ Map("url" -> "jdbc:blkchn:ethereum://172.25.41.52:8545")
+    val df = spark.read.format("org.apache.spark.sql.eth").options(option).load()
+
+    df.show()
+    println(df.schema)
+
   }
 }

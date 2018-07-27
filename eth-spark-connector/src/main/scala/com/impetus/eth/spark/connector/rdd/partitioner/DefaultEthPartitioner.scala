@@ -33,7 +33,8 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
         val partitionRowCount = if((rowCount / split) * split < rowCount) (rowCount / split) + 1 else (rowCount / split)
         val partitionsRange = getPatitionRange(partitionRowCount,split)
         for(((startRange, endRange),i) <- partitionsRange.zipWithIndex){
-          val rangeNode = new RangeNode[BigInteger]("block", "blocknumber")
+          /*Passing table name null and call setTableName function in physical plan paginate method*/
+          val rangeNode = new RangeNode[BigInteger]("","blocknumber")
           rangeNode.getRangeList.addRange(new BlkchRange[BigInteger](startRange, endRange))
           buffer = buffer :+ new BlkchnPartition(i, rangeNode, readConf)
         }
@@ -44,11 +45,14 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
             val split = if((rowCount / rowSize) * rowSize < rowCount) (rowCount / rowSize) + 1 else (rowCount / rowSize)
             val partitionsRange = getPatitionRange(rowSize,split)
             for(((startRange, endRange),i) <- partitionsRange.zipWithIndex){
-              val rangeNode = new RangeNode[BigInteger]("block", "blocknumber")
+              /*Passing table name null and call setTableName function in physical plan paginate method*/
+              val rangeNode = new RangeNode[BigInteger]("","blocknumber")
               rangeNode.getRangeList.addRange(new BlkchRange[BigInteger](startRange, endRange))
               buffer = buffer :+ new BlkchnPartition(i, rangeNode, readConf)
             }
-          case None => val rangeNode = new RangeNode[BigInteger]("block", "blocknumber")
+          case None =>
+            /*Passing table name null and call setTableName function in physical plan paginate method*/
+            val rangeNode = new RangeNode[BigInteger]("","blocknumber")
             rangeNode.getRangeList.addRange(new BlkchRange[BigInteger](start, new BigInteger(String.valueOf(rowCount))))
             buffer = buffer :+ new BlkchnPartition(0, rangeNode, readConf)
         }

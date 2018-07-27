@@ -194,7 +194,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 finalData = executeRangeNode(rangeNode);
                 finalData.traverse();
             }
-            return createDataFrame(finalData);
+            return createDataFrame(finalData,tableName);
         } else {
             throw new BlkchnException("Can't query without where clause. Data will be huge");
         }
@@ -575,9 +575,24 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         return transactionReceipt;
     }
 
-    protected DataFrame createDataFrame(DataNode<?> dataNode) {
+    protected DataFrame createDataFrame(DataNode<?> dataNode, String tableName) {
         if (dataNode.getKeys().isEmpty()) {
-            return new DataFrame(new ArrayList<>(), new ArrayList<>(), physicalPlan.getColumnAliasMapping());
+            if (tableName.equals("block")) {
+                String[] columns = { EthColumns.BLOCKNUMBER, EthColumns.HASH, EthColumns.PARENTHASH, EthColumns.NONCE,
+                        EthColumns.SHA3UNCLES, EthColumns.LOGSBLOOM, EthColumns.TRANSACTIONSROOT, EthColumns.STATEROOT,
+                        EthColumns.RECEIPTSROOT, EthColumns.AUTHOR, EthColumns.MINER, EthColumns.MIXHASH,
+                        EthColumns.TOTALDIFFICULTY, EthColumns.EXTRADATA, EthColumns.SIZE, EthColumns.GASLIMIT,
+                        EthColumns.GASUSED, EthColumns.TIMESTAMP, EthColumns.TRANSACTIONS, EthColumns.UNCLES,
+                        EthColumns.SEALFIELDS };
+                return new DataFrame(new ArrayList<>(), columns, physicalPlan.getColumnAliasMapping());
+            } else if (tableName.equals("transaction")) {
+                String columns[] = { EthColumns.BLOCKHASH, EthColumns.BLOCKNUMBER, EthColumns.CREATES, EthColumns.FROM,
+                        EthColumns.GAS, EthColumns.GASPRICE, EthColumns.HASH, EthColumns.INPUT, EthColumns.NONCE,
+                        EthColumns.PUBLICKEY, EthColumns.R, EthColumns.RAW, EthColumns.S, EthColumns.TO,
+                        EthColumns.TRANSACTIONINDEX, EthColumns.V, EthColumns.VALUE };
+                return new DataFrame(new ArrayList<>(), columns, physicalPlan.getColumnAliasMapping());
+            } else
+                return new DataFrame(new ArrayList<>(), new ArrayList<>(), physicalPlan.getColumnAliasMapping());
         }
         DataFrame df = null;
         List<List<Object>> data = new ArrayList<>();

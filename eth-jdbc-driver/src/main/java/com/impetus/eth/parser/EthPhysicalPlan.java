@@ -45,10 +45,6 @@ public class EthPhysicalPlan extends PhysicalPlan {
 
     private static Map ethTableTypeMap = new HashMap<String, Map>();
 
-    private static Map ethColumnTypeBlckMap = new HashMap<String, Class>();
-
-    private static Map ethColumnTypeTransactionMap = new HashMap<String, Class>();
-
     static {
         rangeColMap.put(EthTables.BLOCK, Arrays.asList(EthColumns.BLOCKNUMBER));
         rangeColMap.put(EthTables.TRANSACTION, Arrays.asList(EthColumns.BLOCKNUMBER));
@@ -72,6 +68,10 @@ public class EthPhysicalPlan extends PhysicalPlan {
                 EthColumns.GAS, EthColumns.GASPRICE, EthColumns.HASH, EthColumns.INPUT, EthColumns.NONCE,
                 EthColumns.PUBLICKEY, EthColumns.R, EthColumns.RAW, EthColumns.S, EthColumns.TO,
                 EthColumns.TRANSACTIONINDEX, EthColumns.V, EthColumns.VALUE));
+
+        Map ethColumnTypeBlckMap = new HashMap<String, Class>();
+
+        Map ethColumnTypeTransactionMap = new HashMap<String, Class>();
 
         ethColumnTypeBlckMap.put(EthColumns.BLOCKNUMBER, BigInteger.class);
         ethColumnTypeBlckMap.put(EthColumns.EXTRADATA, String.class);
@@ -155,10 +155,10 @@ public class EthPhysicalPlan extends PhysicalPlan {
         List<SelectItem> cols = this.getSelectItems();
         Iterator colItterator = cols.iterator();
         Map<String,Class> lclcolumnTypeMap = (Map) ethTableTypeMap.get(s);
-
         while (colItterator.hasNext()) {
             SelectItem col = (SelectItem) colItterator.next();
             if (col.hasChildType(StarNode.class)) {
+
                 for (Map.Entry<String, Class> entry : lclcolumnTypeMap.entrySet()) {
                     if(entry.getValue() instanceof Class){
                         mapType.put(entry.getKey(), getSQLType(entry.getValue()));
@@ -166,12 +166,12 @@ public class EthPhysicalPlan extends PhysicalPlan {
                 }
                 break;
             } else if (col.hasChildType(Column.class)) {
-                String colname = ((IdentifierNode) ((Column) col.getChildType(Column.class, 0))
+                String colName = ((IdentifierNode) ((Column) col.getChildType(Column.class, 0))
                     .getChildType(IdentifierNode.class, 0)).getValue();
-                if (lclcolumnTypeMap.containsKey(colname))
-                    mapType.put(colname, getSQLType((Class) lclcolumnTypeMap.get(colname)));
+                if (lclcolumnTypeMap.containsKey(colName))
+                    mapType.put(colName, getSQLType((Class) lclcolumnTypeMap.get(colName)));
                 else
-                    mapType.put(colname, getSQLType(Object.class));
+                    mapType.put(colName, getSQLType(Object.class));
             } else if (col.hasChildType(FunctionNode.class)) {
                 String func = ((IdentifierNode) ((FunctionNode) col.getChildType(FunctionNode.class, 0))
                         .getChildType(IdentifierNode.class, 0)).getValue();
@@ -189,7 +189,7 @@ public class EthPhysicalPlan extends PhysicalPlan {
         return mapType;
     }
 
-    /* Map Class to SQL.Types */
+    /* Map Class to SQL Types */
     public int getSQLType(Class className) {
         if (className.equals(String.class)) {
             return Types.VARCHAR;
@@ -207,6 +207,6 @@ public class EthPhysicalPlan extends PhysicalPlan {
     }
 
     static Map<String, List<String>> getEthTableColumnMap() {
-        return ethTableColumnMap;
+        return Collections.unmodifiableMap(ethTableColumnMap);
     }
 }
