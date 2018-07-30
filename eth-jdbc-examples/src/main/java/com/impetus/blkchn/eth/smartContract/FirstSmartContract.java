@@ -1,4 +1,4 @@
-package com.impetus.blkchn.eth;
+package com.impetus.blkchn.eth.smartContract;
 
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Bool;

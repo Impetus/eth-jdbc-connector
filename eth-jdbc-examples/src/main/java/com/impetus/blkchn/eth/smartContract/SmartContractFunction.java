@@ -13,7 +13,7 @@
 * * See the License for the specific language governing permissions and
 * * limitations under the License.
 ******************************************************************************/
-package com.impetus.blkchn.eth;
+package com.impetus.blkchn.eth.smartContract;
 
 import com.impetus.blkch.BlkchnException;
 import com.impetus.eth.jdbc.DriverConstants;
@@ -34,13 +34,7 @@ public class SmartContractFunction {
         String driverClass = "com.impetus.eth.jdbc.EthDriver";
         Long timeOutInSec = 30L;
         String query = "CALL getName() USE SMARTCONTRACT "
-                + "'com.impetus.blkchn.eth.FirstSmartContract' WITH ADDRESS '<address>' AND WITHASYNC true is_Valid";
-        // String query = "CALL getName (HEX('0x123')) USE SMARTCONTRACT
-        // 'com.impetus.blkchn.eth.FirstSmartContract' WITH ADDRESS '<address>' AND
-        // WITHASYNC true";
-        // String query = "CALL setName ('NewContractName') USE SMARTCONTRACT
-        // 'com.impetus.blkchn.eth.FirstSmartContract' WITH ADDRESS '<address>' AND
-        // WITHASYNC true";
+                + "'com.impetus.blkchn.eth.smartContract.FirstSmartContract' WITH ADDRESS '<address>' AND WITHASYNC true is_Valid";
         try {
             Class.forName(driverClass);
             Properties prop = new Properties();
