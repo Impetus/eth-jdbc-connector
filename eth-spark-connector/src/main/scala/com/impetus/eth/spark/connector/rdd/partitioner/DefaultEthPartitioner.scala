@@ -17,12 +17,12 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
         val blockHeight = stat.getBlockHeight
         blockHeight.longValue()
     }
-    def getPatitionRange(partitionSize: Long, split: Long, start: Long = 0) = {
+    def getPartitionRanges(partitionSize: Long, split: Long, start: Long = 0) = {
       var preY = start
       for(i <- 0l until split) yield{
         val x = preY + 1
         preY = partitionSize * (i + 1)
-        val y = if(preY > rowCount) rowCount else preY
+        val y = if(preY > rowCount) rowCount else if(i == split && preY < rowCount) rowCount else preY
         (new BigInteger(String.valueOf(x)),new BigInteger(String.valueOf(y)))
       }
     }
@@ -30,8 +30,8 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
     val start = new BigInteger("1")
     readConf.splitCount match {
       case Some(split) =>
-        val partitionRowCount = if((rowCount / split) * split < rowCount) (rowCount / split) + 1 else (rowCount / split)
-        val partitionsRange = getPatitionRange(partitionRowCount,split)
+        val partitionRowCount = rowCount / split
+        val partitionsRange = getPartitionRanges(partitionRowCount,split)
         for(((startRange, endRange),i) <- partitionsRange.zipWithIndex){
           /*Passing table name null and call setTableName function in physical plan paginate method*/
           val rangeNode = new RangeNode[BigInteger]("","blocknumber")
@@ -43,7 +43,7 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
         readConf.fetchSizeInRows match {
           case Some(rowSize) =>
             val split = if((rowCount / rowSize) * rowSize < rowCount) (rowCount / rowSize) + 1 else (rowCount / rowSize)
-            val partitionsRange = getPatitionRange(rowSize,split)
+            val partitionsRange = getPartitionRanges(rowSize,split)
             for(((startRange, endRange),i) <- partitionsRange.zipWithIndex){
               /*Passing table name null and call setTableName function in physical plan paginate method*/
               val rangeNode = new RangeNode[BigInteger]("","blocknumber")
