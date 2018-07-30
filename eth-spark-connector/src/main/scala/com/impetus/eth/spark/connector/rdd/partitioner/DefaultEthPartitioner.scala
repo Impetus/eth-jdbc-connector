@@ -22,7 +22,7 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
       for(i <- 0l until split) yield{
         val x = preY + 1
         preY = partitionSize * (i + 1)
-        val y = if(preY > rowCount) rowCount else if(i == split && preY < rowCount) rowCount else preY
+        val y = if(preY > rowCount) rowCount else if(i == (split - 1) && preY < rowCount) rowCount else preY
         (new BigInteger(String.valueOf(x)),new BigInteger(String.valueOf(y)))
       }
     }
