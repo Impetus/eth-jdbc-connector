@@ -2,11 +2,12 @@ package com.impetus.eth.test
 
 import com.impetus.blkch.spark.connector.rdd.{BlkchnRDD, ReadConf}
 import com.impetus.blkch.spark.connector.rdd.partitioner.BlkchnPartitioner
+import com.impetus.test.catagory.IntegrationTest
 import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.eth.EthSpark
 import org.scalatest.{BeforeAndAfter, FlatSpec}
 
-class TestFirst extends FlatSpec with BeforeAndAfter{
+class TestFirst extends FlatSpec with BeforeAndAfter with IntegrationTest{
 
   var spark: SparkSession = null
   val ethPartitioner:BlkchnPartitioner = TestEthPartitioner
