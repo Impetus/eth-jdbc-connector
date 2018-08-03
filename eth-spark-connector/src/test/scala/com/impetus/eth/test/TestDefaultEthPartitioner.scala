@@ -31,11 +31,11 @@ class TestDefaultEthPartitioner extends FlatSpec with BeforeAndAfter {
   }
 
   it should "give same number of line in partition if specified fetchSizeInRows" in {
-    val readConf = ReadConf(None, Some(3000), "Select * FROM block")(defaultPartition)
+    val readConf = ReadConf(None, Some(300000), "Select * FROM block")(defaultPartition)
     val bufferOfRange = defaultPartition.getPartitions(blkchnConnector,readConf)
     val max = bufferOfRange(0).range.getRangeList.getRanges.get(0).getMax.asInstanceOf[BigInteger]
     val min = bufferOfRange(0).range.getRangeList.getRanges.get(0).getMin.asInstanceOf[BigInteger]
-    assert(max.subtract(min).intValue() + 1 == 3000)
+    assert(max.subtract(min).intValue() + 1 == 300000)
   }
 
 }

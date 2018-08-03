@@ -2,6 +2,7 @@ package com.impetus.eth.test
 
 import com.impetus.blkch.spark.connector.rdd.{BlkchnRDD, ReadConf}
 import com.impetus.blkch.spark.connector.rdd.partitioner.BlkchnPartitioner
+import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
 import com.impetus.test.catagory.IntegrationTest
 import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.eth.EthSpark
@@ -10,13 +11,13 @@ import org.scalatest.{BeforeAndAfter, FlatSpec}
 class TestFirst extends FlatSpec with BeforeAndAfter with IntegrationTest{
 
   var spark: SparkSession = null
-  val ethPartitioner:BlkchnPartitioner = TestEthPartitioner
+  val ethPartitioner:BlkchnPartitioner = DefaultEthPartitioner
   var readConf:ReadConf = null
   var rdd: BlkchnRDD[Row] = null
 
   before {
     spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
-    readConf = ReadConf(Some(3), None, "Select * FROM block")(ethPartitioner)
+    readConf = ReadConf(Some(3), None, "Select * FROM block where blocknumber > 1 and blocknumber < 30")(ethPartitioner)
     rdd = EthSpark.load[Row](spark.sparkContext, readConf,Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
     Class.forName("com.impetus.eth.jdbc.EthDriver")
   }

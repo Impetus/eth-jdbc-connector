@@ -201,6 +201,101 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
 
     }
 
+    @Override
+    public RangeNode getFullRange(){
+        Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
+        String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
+        RangeNode rangeNode = new RangeNode<BigInteger>(tableName,"blockNumber");
+        BigInteger blockHeight = null;
+        try{
+            blockHeight = getBlockHeight();
+        }catch(IOException e){
+        }
+        rangeNode.getRangeList().addRange(new Range(new BigInteger("1"),blockHeight));
+        return rangeNode;
+    }
+
+    /*@Override
+    public RangeNode processDirectAPINodeForRange(DirectAPINode directAPINode) {
+        String column = directAPINode.getColumn();
+        String value = directAPINode.getValue();
+        String table = directAPINode.getTable();
+        BigInteger blocknumber = new BigInteger("0");
+        if (table.equals(EthTables.BLOCK)) {
+            Block block = null;
+            if (column.equals(EthColumns.BLOCKNUMBER)) {
+                try {
+                    block = getBlockByNumber(value);
+                    blocknumber = block.getNumber();
+                } catch (Exception e) {
+                    LOGGER.error("Error querying block by number " + value, e);
+                }
+            } else if (column.equals(EthColumns.HASH)) {
+                try {
+                    block = getBlockByHash(value.replace("'", ""));
+                    blocknumber = block.getNumber();
+                } catch (Exception e) {
+                    LOGGER.error("Error querying block by hash " + value.replace("'", ""), e);
+                }
+            }
+        } else if (table.equals(EthTables.TRANSACTION)) {
+            if (column.equals(EthColumns.HASH)) {
+                try {
+                    Transaction  transaction = getTransactionByHash(value.replace("'", ""));
+                    blocknumber = transaction.getBlockNumber();
+                } catch (Exception e) {
+                    LOGGER.error("Error querying transaction by hash " + value.replace("'", ""), e);
+                }
+            } else if (column.equals(EthColumns.BLOCKNUMBER)) {
+                try {
+                    Block block = getBlockByNumber(value);
+                    blocknumber = block.getNumber();
+                } catch (Exception e) {
+                    LOGGER.error("Error querying block by number " + value, e);
+                }
+            }
+        }
+
+        RangeNode rangeNode = new RangeNode<BigInteger>(getTableName(),"blockNumber");
+        rangeNode.getRangeList().addRange(new Range(blocknumber,blocknumber));
+        return rangeNode;
+    }*/
+
+    @Override
+    public RangeNode getRangeNodeFromDataNode(DataNode dataNode) {
+        Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
+        String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
+        if(dataNode.getTable().equalsIgnoreCase(EthTables.BLOCK) && dataNode.getKeys().get(0) != null){
+            BigInteger directBlock = new BigInteger(dataNode.getKeys().get(0).toString());
+            RangeNode rangeNode = new RangeNode<BigInteger>(tableName,"blockNumber");
+            rangeNode.getRangeList().addRange(new Range(directBlock,directBlock));
+            return rangeNode;
+        }else if(dataNode.getTable().equalsIgnoreCase(EthTables.TRANSACTION) && dataNode.getKeys().get(0) != null){
+            if(dataNode.getKeys().get(0) instanceof List && !((List) dataNode.getKeys().get(0)).isEmpty()){
+                RangeNode rangeNode = new RangeNode<BigInteger>(tableName,"blockNumber");
+                try{
+                    BigInteger directBlock = getTransactionByHash(((List) dataNode.getKeys().get(0)).get(0).toString()).getBlockNumber();
+                    rangeNode.getRangeList().addRange(new Range(directBlock,directBlock));
+                }catch(IOException e){
+                    rangeNode.getRangeList().addRange(new Range(new BigInteger("0"), new BigInteger("0")));
+                }
+                return rangeNode;
+            }else{
+                RangeNode rangeNode = new RangeNode<BigInteger>(tableName,"blockNumber");
+                try{
+                    BigInteger directBlock = getTransactionByHash(dataNode.getKeys().get(0).toString()).getBlockNumber();
+                    rangeNode.getRangeList().addRange(new Range(directBlock,directBlock));
+                }catch(IOException e){
+                    rangeNode.getRangeList().addRange(new Range(new BigInteger("0"), new BigInteger("0")));
+                }
+                return rangeNode;
+            }
+        } else {
+            throw new BlkchnException(
+                    String.format("There is no data node value for table ", table));
+        }
+    }
+
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     protected DataNode<?> getDataNode(String table, String column, String value) {

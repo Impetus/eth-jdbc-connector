@@ -22,6 +22,7 @@ import java.util.*;
 
 import com.impetus.blkch.BlkchnException;
 import com.impetus.blkch.sql.query.RangeNode;
+import com.impetus.blkch.util.Range;
 import com.impetus.eth.query.EthColumns;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.slf4j.Logger;
@@ -336,6 +337,15 @@ public class EthStatement implements BlkchnStatement {
             }
             return blockHeight;
         }
+    }
+
+    @Override
+    public RangeNode getProbableRange(String sql){
+        if (isClosed)
+            throw new BlkchnException("No operations allowed after statement closed.");
+        LOGGER.info("Entering into executeQuery Block");
+        LogicalPlan logicalPlan = getLogicalPlan(sql);
+        return new EthQueryExecutor(logicalPlan, connection.getWeb3jClient(), connection.getInfo()).getProbableRange();
     }
 
     @Override
