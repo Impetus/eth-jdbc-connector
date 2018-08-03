@@ -202,7 +202,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     }
 
     @Override
-    public RangeNode getFullRange(){
+    public <T extends Number & Comparable<T>>  RangeNode<T> getFullRange(){
         Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
         String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
         RangeNode rangeNode = new RangeNode<BigInteger>(tableName,"blockNumber");
@@ -262,7 +262,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     }*/
 
     @Override
-    public RangeNode getRangeNodeFromDataNode(DataNode dataNode) {
+    public <T extends Number & Comparable<T>>  RangeNode<T> getRangeNodeFromDataNode(DataNode<?> dataNode) {
         Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
         String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
         if(dataNode.getTable().equalsIgnoreCase(EthTables.BLOCK) && dataNode.getKeys().get(0) != null){
