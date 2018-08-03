@@ -2,7 +2,7 @@ package org.apache.spark.sql.eth
 
 import com.impetus.blkch.spark.connector.BlkchnConnector
 import com.impetus.blkch.spark.connector.rdd.partitioner.BlkchnPartitioner
-import com.impetus.blkch.spark.connector.rdd.{BlkchnRDD, ReadConf}
+import com.impetus.blkch.spark.connector.rdd.{BlkchnRDD, EthRDD, ReadConf}
 import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -12,7 +12,7 @@ import scala.reflect.ClassTag
 case class EthSpark(sparkSession: SparkSession, connector: BlkchnConnector, readConf: ReadConf) {
 
   private def rdd[D: ClassTag]: BlkchnRDD[D] = {
-    new BlkchnRDD[D](sparkSession.sparkContext, sparkSession.sparkContext.broadcast(connector), readConf)
+    new EthRDD[D](sparkSession.sparkContext, sparkSession.sparkContext.broadcast(connector), readConf)
   }
 
   def toRDD[D: ClassTag]: BlkchnRDD[D] = rdd[D]
