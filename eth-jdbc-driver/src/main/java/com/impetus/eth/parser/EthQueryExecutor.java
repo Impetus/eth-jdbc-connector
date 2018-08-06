@@ -439,7 +439,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         List<String> keys = dataNode.getKeys().stream().map(x -> x.toString()).collect(Collectors.toList());
         String rangeCol = rangeNode.getColumn();
         RangeOperations<T> rangeOps = (RangeOperations<T>) physicalPlan.getRangeOperations(tableName, rangeCol);
-        if (EthTables.BLOCK.equals(tableName)) {
+        if (EthTables.BLOCK.equals(tableName) && !(keys.isEmpty() && oper.isAnd())) {
             if (EthColumns.BLOCKNUMBER.equals(rangeCol)) {
                 List<RangeNode<T>> dataRanges = keys.stream().map(key -> {
                     Block blockInfo = (Block) dataMap.get(key);

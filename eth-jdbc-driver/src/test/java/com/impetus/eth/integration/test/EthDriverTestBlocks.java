@@ -76,6 +76,14 @@ public class EthDriverTestBlocks {
                     LOGGER.info(rs.getObject(i) + " | ");
             }
 
+            LOGGER.info("*****************Test when given the wrong value***************");
+            rs = stmt.executeQuery("select * from block where hash='wornghash'");
+            assert(!rs.next());
+
+            LOGGER.info("*****************Test when given the wrong value where range***************");
+            rs = stmt.executeQuery("select * from block where blocknumber > 123 and blocknumber < 132 and hash='wornghash'");
+            assert(!rs.next());
+
             conn.close();
             assert(true == conn.isClosed());
             assert(true == rs.isClosed());
