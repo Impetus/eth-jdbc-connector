@@ -265,12 +265,12 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     public <T extends Number & Comparable<T>>  RangeNode<T> getRangeNodeFromDataNode(DataNode<?> dataNode) {
         Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
         String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
-        if(dataNode.getTable().equalsIgnoreCase(EthTables.BLOCK) && dataNode.getKeys().get(0) != null){
+        if(dataNode.getTable().equalsIgnoreCase(EthTables.BLOCK) && !dataNode.getKeys().isEmpty()){
             BigInteger directBlock = new BigInteger(dataNode.getKeys().get(0).toString());
             RangeNode rangeNode = new RangeNode<BigInteger>(tableName,"blockNumber");
             rangeNode.getRangeList().addRange(new Range(directBlock,directBlock));
             return rangeNode;
-        }else if(dataNode.getTable().equalsIgnoreCase(EthTables.TRANSACTION) && dataNode.getKeys().get(0) != null){
+        }else if(dataNode.getTable().equalsIgnoreCase(EthTables.TRANSACTION) && !dataNode.getKeys().isEmpty()){
             if(dataNode.getKeys().get(0) instanceof List && !((List) dataNode.getKeys().get(0)).isEmpty()){
                 RangeNode rangeNode = new RangeNode<BigInteger>(tableName,"blockNumber");
                 try{
@@ -291,8 +291,9 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 return rangeNode;
             }
         } else {
-            throw new BlkchnException(
-                    String.format("There is no data node value for table ", table));
+            RangeNode rangeNode = new RangeNode<BigInteger>(tableName,"blockNumber");
+            rangeNode.getRangeList().addRange(new Range(new BigInteger("0"), new BigInteger("0")));
+            return rangeNode;
         }
     }
 
