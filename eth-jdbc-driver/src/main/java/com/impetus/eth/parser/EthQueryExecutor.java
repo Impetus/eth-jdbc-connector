@@ -276,7 +276,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 try{
                     BigInteger directBlock = getTransactionByHash(((List) dataNode.getKeys().get(0)).get(0).toString()).getBlockNumber();
                     rangeNode.getRangeList().addRange(new Range(directBlock,directBlock));
-                }catch(IOException e){
+                }catch(Exception e){
                     rangeNode.getRangeList().addRange(new Range(new BigInteger("0"), new BigInteger("0")));
                 }
                 return rangeNode;
@@ -285,7 +285,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 try{
                     BigInteger directBlock = getTransactionByHash(dataNode.getKeys().get(0).toString()).getBlockNumber();
                     rangeNode.getRangeList().addRange(new Range(directBlock,directBlock));
-                }catch(IOException e){
+                }catch(Exception e){
                     rangeNode.getRangeList().addRange(new Range(new BigInteger("0"), new BigInteger("0")));
                 }
                 return rangeNode;
@@ -309,13 +309,17 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 try {
                     block = getBlockByNumber(value);
                 } catch (Exception e) {
-                    throw new BlkchnException("Error querying block by number " + value, e);
+                    //throw new BlkchnException("Error querying block by number " + value, e);
+                    LOGGER.warn(e.getMessage());
+                    return new DataNode<>(table, Arrays.asList());
                 }
             } else if (column.equals(EthColumns.HASH)) {
                 try {
                     block = getBlockByHash(value.replace("'", ""));
                 } catch (Exception e) {
-                    throw new BlkchnException("Error querying block by hash " + value.replace("'", ""), e);
+                    //throw new BlkchnException("Error querying block by hash " + value.replace("'", ""), e);
+                    LOGGER.warn(e.getMessage());
+                    return new DataNode<>(table, Arrays.asList());
                 }
             }
             dataMap.put(block.getNumber().toString(), block);
@@ -330,7 +334,9 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     dataMap.put(transaction.getHash(), transaction);
 
                 } catch (Exception e) {
-                    throw new BlkchnException("Error querying transaction by hash " + value.replace("'", ""), e);
+                    //throw new BlkchnException("Error querying transaction by hash " + value.replace("'", ""), e);
+                    LOGGER.warn(e.getMessage());
+                    return new DataNode<>(table, Arrays.asList());
                 }
                 return new DataNode<>(table, Arrays.asList(transaction.getHash()));
             } else if (column.equals(EthColumns.BLOCKNUMBER)) {
@@ -344,16 +350,18 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     }
 
                 } catch (Exception e) {
-                    throw new BlkchnException("Error querying transaction by hash " + value.replace("'", ""), e);
+                    //throw new BlkchnException("Error querying transaction by hash " + value.replace("'", ""), e);
+                    LOGGER.warn(e.getMessage());
+                    return new DataNode<>(table, Arrays.asList());
                 }
                 return new DataNode<>(table, keys);
             } else
                 throw new BlkchnException(
-                    String.format("There is no direct API for table %s and column %s combination", table, column));
+                        String.format("There is no direct API for table %s and column %s combination", table, column));
 
         } else
             throw new BlkchnException(
-                String.format("There is no direct API for table %s and column %s combination", table, column));
+                    String.format("There is no direct API for table %s and column %s combination", table, column));
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -579,30 +587,45 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         return new DataNode<>(dataNode.getTable(), filteredKeys);
     }
 
-    private List<TransactionResult> getTransactions(String blockNumber) throws IOException {
+    private List<TransactionResult> getTransactions(String blockNumber) throws IOException,Exception {
         LOGGER.info("Getting details of transactions stored in block - " + blockNumber);
         EthBlock block =
             web3jClient.ethGetBlockByNumber(DefaultBlockParameter.valueOf(new BigInteger(blockNumber)), true).send();
 
+        if(block == null || block.hasError())
+            throw new Exception("blockNumber not found : "+blockNumber);
+
         return block.getBlock().getTransactions();
     }
 
-    private Block getBlockByNumber(String blockNumber) throws IOException {
+    private Block getBlockByNumber(String blockNumber) throws IOException,Exception  {
         LOGGER.info("Getting block - " + blockNumber + " Information ");
         EthBlock block =
             web3jClient.ethGetBlockByNumber(DefaultBlockParameter.valueOf(new BigInteger(blockNumber)), true).send();
+
+        if(block == null || block.hasError())
+            throw new Exception("blockNumber not found : "+blockNumber);
+
         return block.getBlock();
     }
 
-    private Block getBlockByHash(String blockHash) throws IOException {
+    private Block getBlockByHash(String blockHash) throws IOException,Exception  {
         LOGGER.info("Getting  information of block with hash - " + blockHash);
         EthBlock block = web3jClient.ethGetBlockByHash(blockHash, true).send();
+
+        if(block == null || block.hasError())
+            throw new Exception("blockHash not found : "+blockHash);
+
         return block.getBlock();
     }
 
-    private Transaction getTransactionByHash(String transactionHash) throws IOException {
+    private Transaction getTransactionByHash(String transactionHash) throws IOException,Exception  {
         LOGGER.info("Getting information of Transaction by hash - " + transactionHash);
         Transaction transaction = web3jClient.ethGetTransactionByHash(transactionHash).send().getResult();
+
+        if(transaction == null)
+            throw new Exception("blockHash not found : "+transactionHash);
+
         return transaction;
     }
 
@@ -671,7 +694,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     }
 
     protected DataFrame createDataFrame(DataNode<?> dataNode, String tableName) {
-        if (dataNode.getKeys().isEmpty()) {
+        if (dataNode.getKeys().isEmpty() || dataNode.getKeys().isEmpty()) {
             if (tableName.equals("block")) {
                 String[] columns = { EthColumns.BLOCKNUMBER, EthColumns.HASH, EthColumns.PARENTHASH, EthColumns.NONCE,
                         EthColumns.SHA3UNCLES, EthColumns.LOGSBLOOM, EthColumns.TRANSACTIONSROOT, EthColumns.STATEROOT,
