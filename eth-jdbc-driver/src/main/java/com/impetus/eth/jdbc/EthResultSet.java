@@ -83,7 +83,7 @@ public class EthResultSet extends AbstractResultSet {
     }
 
     public EthResultSet(DataFrame dataframe, int resultSetType, int rSetConcurrency, String tableName,
-        Map<String, Integer> colTypeMap) {
+            Map<String, Integer> colTypeMap) {
         LOGGER.info("Instantiating new Result Set ");
         this.rowData = dataframe.getData();
         this.columnNamesMap = dataframe.getColumnNamesMap();
@@ -105,8 +105,8 @@ public class EthResultSet extends AbstractResultSet {
         this.resultSetType = resultSetType;
         this.rSetConcurrency = rSetConcurrency;
         this.colTypeMap = new HashMap<>();
-        //Receipt 2000 for SQL JDBC_OBJECT type
-        colTypeMap.put("Receipt",2000);
+        // Receipt 2000 for SQL JDBC_OBJECT type
+        colTypeMap.put("Receipt", 2000);
         this.tableName = "TransactionReceipt";
         currentRowCursor = BEFORE_FIRST_ROW;
         totalRowCount = rowData.size();
@@ -270,7 +270,6 @@ public class EthResultSet extends AbstractResultSet {
     public String getString(String columnLabel) throws SQLException {
         int idx = getColumnIndex(columnLabel);
         lastReadColValue = currentRow[idx];
-
         if (currentRow[idx] instanceof BigInteger) {
             return ((BigInteger) currentRow[idx]).toString();
         }
@@ -294,7 +293,6 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public Object getObject(String columnLabel) throws SQLException {
-        checkClosed();
         lastReadColValue = currentRow[getColumnIndex(columnLabel)];
         return currentRow[getColumnIndex(columnLabel)];
     }
@@ -320,7 +318,6 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public int getInt(String columnLabel) throws SQLException {
-        checkClosed();
         lastReadColValue = currentRow[getColumnIndex(columnLabel)];
         return (int) currentRow[getColumnIndex(columnLabel)];
     }
@@ -337,7 +334,6 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public long getLong(String columnLabel) throws SQLException {
-        checkClosed();
         lastReadColValue = currentRow[getColumnIndex(columnLabel)];
         return (long) currentRow[getColumnIndex(columnLabel)];
     }
@@ -355,7 +351,7 @@ public class EthResultSet extends AbstractResultSet {
     @Override
     public BigDecimal getBigDecimal(String columnLabel) throws SQLException {
         if (currentRow[getColumnIndex(columnLabel)] instanceof BigInteger) {
-            return new BigDecimal((BigInteger)currentRow[getColumnIndex(columnLabel)]);
+            return new BigDecimal((BigInteger) currentRow[getColumnIndex(columnLabel)]);
         }
         return (BigDecimal) currentRow[getColumnIndex(columnLabel)];
     }
@@ -371,7 +367,6 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public boolean getBoolean(String columnLabel) throws SQLException {
-        checkClosed();
         lastReadColValue = currentRow[getColumnIndex(columnLabel)];
         return (boolean) currentRow[getColumnIndex(columnLabel)];
     }
@@ -387,7 +382,6 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public byte getByte(String columnLabel) throws SQLException {
-        checkClosed();
         lastReadColValue = currentRow[getColumnIndex(columnLabel)];
         return (byte) currentRow[getColumnIndex(columnLabel)];
     }
@@ -434,7 +428,6 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public short getShort(String columnLabel) throws SQLException {
-        checkClosed();
         lastReadColValue = currentRow[getColumnIndex(columnLabel)];
         return (short) currentRow[getColumnIndex(columnLabel)];
     }
@@ -493,5 +486,6 @@ public class EthResultSet extends AbstractResultSet {
     protected Object getLastColValue() {
         return this.lastReadColValue;
     }
+
 
 }

@@ -119,6 +119,7 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
                 throw new BlkchnException("Column is not present in result set");
         }
         throw new BlkchnException("Column is not present in result set");
+
     }
 
     @Override
