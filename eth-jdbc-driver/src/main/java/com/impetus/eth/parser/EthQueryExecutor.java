@@ -205,7 +205,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     public <T extends Number & Comparable<T>>  RangeNode<T> getFullRange(){
         Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
         String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
-        RangeNode rangeNode = new RangeNode<BigInteger>(tableName,"blocknumber");
+        RangeNode<T> rangeNode = new RangeNode<T>(tableName,EthColumns.BLOCKNUMBER);
         BigInteger blockHeight = null;
         try{
             blockHeight = getBlockHeight();
@@ -265,15 +265,15 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     public <T extends Number & Comparable<T>>  RangeNode<T> getRangeNodeFromDataNode(DataNode<?> dataNode) {
         Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
         String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
-        RangeOperations<T> rangeOps = physicalPlan.getRangeOperations(tableName, "blocknumber");
+        RangeOperations<T> rangeOps = physicalPlan.getRangeOperations(tableName, EthColumns.BLOCKNUMBER);
         if(dataNode.getTable().equalsIgnoreCase(EthTables.BLOCK) && !dataNode.getKeys().isEmpty()){
             BigInteger directBlock = new BigInteger(dataNode.getKeys().get(0).toString());
-            RangeNode<T> rangeNode = new RangeNode<T>(tableName,"blocknumber");
+            RangeNode<T> rangeNode = new RangeNode<T>(tableName,EthColumns.BLOCKNUMBER);
             rangeNode.getRangeList().addRange(new Range(directBlock,directBlock));
             return rangeNode;
         }else if(dataNode.getTable().equalsIgnoreCase(EthTables.TRANSACTION) && !dataNode.getKeys().isEmpty()){
             if(dataNode.getKeys().get(0) instanceof List && !((List) dataNode.getKeys().get(0)).isEmpty()){
-                RangeNode<T> rangeNode = new RangeNode<T>(tableName,"blocknumber");
+                RangeNode<T> rangeNode = new RangeNode<T>(tableName,EthColumns.BLOCKNUMBER);
                 try{
                     BigInteger directBlock = getTransactionByHash(((List) dataNode.getKeys().get(0)).get(0).toString()).getBlockNumber();
                     rangeNode.getRangeList().addRange(new Range(directBlock,directBlock));
@@ -282,7 +282,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 }
                 return rangeNode;
             }else{
-                RangeNode<T> rangeNode = new RangeNode<T>(tableName,"blocknumber");
+                RangeNode<T> rangeNode = new RangeNode<T>(tableName,EthColumns.BLOCKNUMBER);
                 try{
                     BigInteger directBlock = getTransactionByHash(dataNode.getKeys().get(0).toString()).getBlockNumber();
                     rangeNode.getRangeList().addRange(new Range(directBlock,directBlock));
@@ -292,7 +292,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 return rangeNode;
             }
         } else {
-            RangeNode<T> rangeNode = new RangeNode<>(tableName,"blocknumber");
+            RangeNode<T> rangeNode = new RangeNode<>(tableName,EthColumns.BLOCKNUMBER);
             rangeNode.getRangeList().addRange(new Range<T>(rangeOps.getMinValue(), rangeOps.getMinValue()));
             return rangeNode;
         }
