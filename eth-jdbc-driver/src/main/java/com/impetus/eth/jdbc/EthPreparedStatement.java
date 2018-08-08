@@ -57,6 +57,8 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
     protected PlaceholderHandler placeholderHandler;
 
     protected int rowCount;
+    
+    protected int fetchSize;
 
     public EthPreparedStatement(EthConnection connection, String sql, int rSetType, int rSetConcurrency) {
         super();
@@ -74,6 +76,7 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
             LOGGER.error("ERROR : Unknown Query Type ");
             throw new BlkchnException("ERROR : Unknown Query Type ");
         }
+        System.out.println("Sql is "+sql);
 
         placeholderHandler.setPlaceholderIndex();
         if (!placeholderHandler.isIndexListEmpty())
@@ -216,6 +219,11 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
     public void clearParameters() throws SQLException {
         if (!placeholderHandler.isIndexListEmpty())
             this.placeholderValues = new Object[placeholderHandler.getIndexListCount()];
+    }
+    
+    @Override
+    public void setFetchSize(int rows) throws SQLException {
+       this.fetchSize=rows;
     }
 
     @Override

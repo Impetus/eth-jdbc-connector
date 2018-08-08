@@ -66,6 +66,8 @@ public class EthResultSet extends AbstractResultSet {
 
     protected Map<String, Integer> colTypeMap;
 
+    protected Object lastReadColValue;
+
     private static final String EXCEPTION_MSG = "Result set doesn't contain index %d";
 
     public EthResultSet(DataFrame dataframe, int resultSetType, int rSetConcurrency, String tableName) {
@@ -203,7 +205,7 @@ public class EthResultSet extends AbstractResultSet {
     @Override
     public void afterLast() throws SQLException {
         checkClosed();
-        LOGGER.info("Moving the cursor to thee end of ResultSet Object");
+        LOGGER.info("Moving the cursor to the end of ResultSet Object");
         checkRSForward();
         currentRowCursor = AFTER_LAST_ROW;
     }
@@ -267,6 +269,8 @@ public class EthResultSet extends AbstractResultSet {
     @Override
     public String getString(String columnLabel) throws SQLException {
         int idx = getColumnIndex(columnLabel);
+        lastReadColValue = currentRow[idx];
+
         if (currentRow[idx] instanceof BigInteger) {
             return ((BigInteger) currentRow[idx]).toString();
         }
@@ -275,25 +279,33 @@ public class EthResultSet extends AbstractResultSet {
 
     @Override
     public String getString(int columnIndex) throws SQLException {
+        checkClosed();
+
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
+        lastReadColValue = currentRow[columnIndex - 1];
         if (currentRow[columnIndex - 1] instanceof BigInteger) {
             return ((BigInteger) currentRow[columnIndex - 1]).toString();
         }
+
         return (String) currentRow[columnIndex - 1];
     }
 
     @Override
     public Object getObject(String columnLabel) throws SQLException {
+        checkClosed();
+        lastReadColValue = currentRow[getColumnIndex(columnLabel)];
         return currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public Object getObject(int columnIndex) throws SQLException {
+        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
+        lastReadColValue = currentRow[columnIndex - 1];
         return currentRow[columnIndex - 1];
     }
 
@@ -302,35 +314,41 @@ public class EthResultSet extends AbstractResultSet {
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
+        lastReadColValue = currentRow[columnIndex - 1];
         return (int) currentRow[columnIndex - 1];
     }
 
     @Override
     public int getInt(String columnLabel) throws SQLException {
+        checkClosed();
+        lastReadColValue = currentRow[getColumnIndex(columnLabel)];
         return (int) currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public long getLong(int columnIndex) throws SQLException {
+        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
+        lastReadColValue = currentRow[columnIndex - 1];
         return (long) currentRow[columnIndex - 1];
     }
 
     @Override
     public long getLong(String columnLabel) throws SQLException {
+        checkClosed();
+        lastReadColValue = currentRow[getColumnIndex(columnLabel)];
         return (long) currentRow[getColumnIndex(columnLabel)];
     }
 
     @Override
     public BigDecimal getBigDecimal(int columnIndex) throws SQLException {
+        checkClosed();
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
-        if (currentRow[columnIndex - 1] instanceof BigInteger) {
-            return new BigDecimal((BigInteger)currentRow[columnIndex - 1]);
-        }
+        lastReadColValue = currentRow[columnIndex - 1];
         return (BigDecimal) currentRow[columnIndex - 1];
     }
 
@@ -347,11 +365,14 @@ public class EthResultSet extends AbstractResultSet {
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
+        lastReadColValue = currentRow[columnIndex - 1];
         return (boolean) currentRow[columnIndex - 1];
     }
 
     @Override
     public boolean getBoolean(String columnLabel) throws SQLException {
+        checkClosed();
+        lastReadColValue = currentRow[getColumnIndex(columnLabel)];
         return (boolean) currentRow[getColumnIndex(columnLabel)];
     }
 
@@ -360,11 +381,14 @@ public class EthResultSet extends AbstractResultSet {
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
+        lastReadColValue = currentRow[columnIndex - 1];
         return (byte) currentRow[columnIndex - 1];
     }
 
     @Override
     public byte getByte(String columnLabel) throws SQLException {
+        checkClosed();
+        lastReadColValue = currentRow[getColumnIndex(columnLabel)];
         return (byte) currentRow[getColumnIndex(columnLabel)];
     }
 
@@ -373,11 +397,13 @@ public class EthResultSet extends AbstractResultSet {
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
+        lastReadColValue = currentRow[columnIndex - 1];
         return (byte[]) currentRow[columnIndex - 1];
     }
 
     @Override
     public byte[] getBytes(String columnLabel) throws SQLException {
+        lastReadColValue = currentRow[getColumnIndex(columnLabel)];
         return (byte[]) currentRow[getColumnIndex(columnLabel)];
     }
 
@@ -386,11 +412,14 @@ public class EthResultSet extends AbstractResultSet {
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
+        lastReadColValue = currentRow[columnIndex - 1];
         return (double) currentRow[columnIndex - 1];
     }
 
     @Override
     public double getDouble(String columnLabel) throws SQLException {
+        checkClosed();
+        lastReadColValue = currentRow[getColumnIndex(columnLabel)];
         return (double) currentRow[getColumnIndex(columnLabel)];
     }
 
@@ -399,11 +428,14 @@ public class EthResultSet extends AbstractResultSet {
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
+        lastReadColValue = currentRow[columnIndex - 1];
         return (short) currentRow[columnIndex - 1];
     }
 
     @Override
     public short getShort(String columnLabel) throws SQLException {
+        checkClosed();
+        lastReadColValue = currentRow[getColumnIndex(columnLabel)];
         return (short) currentRow[getColumnIndex(columnLabel)];
     }
 
@@ -428,6 +460,15 @@ public class EthResultSet extends AbstractResultSet {
         return columnNamesMap.get(columnLabel);
     }
 
+    @Override
+    public boolean wasNull() throws SQLException {
+        if (getLastColValue() == null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     protected void checkRSForward() throws SQLException {
         checkClosed();
         LOGGER.info("checking result set type ");
@@ -448,6 +489,9 @@ public class EthResultSet extends AbstractResultSet {
             }
             return columnNamesMap.get(columnLabel);
         }
+    }
+    protected Object getLastColValue() {
+        return this.lastReadColValue;
     }
 
 }
