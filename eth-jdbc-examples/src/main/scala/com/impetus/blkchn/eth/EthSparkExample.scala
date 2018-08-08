@@ -10,16 +10,16 @@ import org.slf4j.LoggerFactory
 object EthSparkExample {
   import org.apache.spark.sql.eth.EthSpark.implicits._
 
-  private val LOGGER = LoggerFactory.getLogger("EthSparkExample")
+  //private val LOGGER = LoggerFactory.getLogger("EthSparkExample")
 
   lazy val spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
 
   def main(args : Array[String]): Unit = {
-    /*testA1
+    testA1
     test1
     test2
     test3
-    test4*/
+    test4
     testInsert
   }
   def test1 ={
@@ -74,10 +74,10 @@ object EthSparkExample {
   def testInsert ={
     val readConf = ReadConf(None,None,"insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)")
     val transactionStatus = EthSpark.insertTransaction(readConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234",
-        "KEYSTORE_PATH" -> "/home/impadmin/keystore/UTC--2017-09-11T04-53-29.614189140Z--8144c67b144a408abc989728e32965edf37adaa1",
-        "KEYSTORE_PASSWORD" -> "impetus123"
+        "KEYSTORE_PATH" -> "<Path To Keystore>",
+        "KEYSTORE_PASSWORD" -> "<password>"
     ))
-    println(s"Insert Transaction ${if(transactionStatus) "succeeded" else "failed" }")
+    println(s"\n\nInsert Transaction ${if(transactionStatus) "succeeded" else "failed" }")
 
   }
 
