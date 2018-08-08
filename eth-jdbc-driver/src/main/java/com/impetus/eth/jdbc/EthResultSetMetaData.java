@@ -119,6 +119,7 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
                 throw new BlkchnException("Column is not present in result set");
         }
         throw new BlkchnException("Column is not present in result set");
+
     }
 
     @Override
@@ -144,12 +145,12 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
 
     @Override
     public int getPrecision(int column) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        return 0;
     }
 
     @Override
     public int getScale(int column) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        return 0;
     }
 
     @Override
@@ -199,7 +200,7 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
 
     @Override
     public boolean isSigned(int column) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+       return false;
     }
 
     @Override

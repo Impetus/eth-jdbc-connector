@@ -107,7 +107,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     }
 
     public DataFrame executeQuery() {
-        physicalPlan.getWhereClause().traverse();
+        logicalPlan.getQuery().traverse();
         if (!physicalPlan.validateLogicalPlan()) {
             throw new BlkchnException("This query can't be executed");
         }
@@ -173,6 +173,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     private DataFrame getFromTable() {
         Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
         String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
+      //  physicalPlan.getWhereClause().traverse();
         if (physicalPlan.getWhereClause() != null) {
             DataNode<?> finalData;
             if (physicalPlan.getWhereClause().hasChildType(LogicalOperation.class)) {
