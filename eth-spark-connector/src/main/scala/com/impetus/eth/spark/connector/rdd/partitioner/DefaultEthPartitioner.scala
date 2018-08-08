@@ -70,7 +70,8 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
     readConf.splitCount match {
       case Some(split) =>
         require(split > 0, s"Split should be positive : $split")
-        val partitionRowCount = rangesTotalSum / split
+        val partitionRowCount = if((rangesTotalSum / split) * split < rangesTotalSum) (rangesTotalSum / split) + 1 else (rangesTotalSum / split)
+        //val partitionRowCount = rangesTotalSum / split
         val rangeNodes = getRanges(partitionRowCount, split)
         for((rangenode,i) <- rangeNodes.zipWithIndex){
           buffer = buffer :+ new BlkchnPartition(i, rangenode, readConf)
