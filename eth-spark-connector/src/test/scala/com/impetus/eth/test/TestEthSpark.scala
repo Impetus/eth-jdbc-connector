@@ -8,7 +8,7 @@ import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.eth.EthSpark
 import org.scalatest.{BeforeAndAfter, FlatSpec}
 
-class TestFirst extends FlatSpec with BeforeAndAfter with IntegrationTest{
+class TestEthSpark extends FlatSpec with BeforeAndAfter with IntegrationTest{
 
   var spark: SparkSession = null
   val ethPartitioner:BlkchnPartitioner = DefaultEthPartitioner
@@ -19,7 +19,7 @@ class TestFirst extends FlatSpec with BeforeAndAfter with IntegrationTest{
     spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
     readConf = ReadConf(Some(3), None, "Select * FROM block where blocknumber > 1 and blocknumber < 30")(ethPartitioner)
     rdd = EthSpark.load[Row](spark.sparkContext, readConf,Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
-    Class.forName("com.impetus.eth.jdbc.EthDriver")
+    rdd.cache()
   }
 
   "Eth Spark" should "have Read Conf" in {
@@ -40,11 +40,13 @@ class TestFirst extends FlatSpec with BeforeAndAfter with IntegrationTest{
     assert(df.select(df.col("blocknumber")).collect().length > 0)
   }
 
+  "Read Conf asOption" should "return Default Partition Name" in {
+    val option = readConf.asOptions()
+    assert(option.getOrElse("spark.blkchn.partitioner","").toString.equals(ethPartitioner.getClass.getCanonicalName.replaceAll("\\$","")))
+  }
+
   after {
     spark.stop()
   }
-
-
-
 
 }

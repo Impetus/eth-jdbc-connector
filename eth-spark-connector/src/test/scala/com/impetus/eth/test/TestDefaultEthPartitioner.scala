@@ -1,15 +1,17 @@
 package com.impetus.eth.test
 
 import java.math.BigInteger
+
 import com.impetus.blkch.spark.connector.rdd.ReadConf
 import com.impetus.blkch.spark.connector.BlkchnConnector
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.eth.EthConnectorConf
 import org.scalatest.{BeforeAndAfter, FlatSpec}
 import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
+import com.impetus.test.catagory.IntegrationTest
 
 
-class TestDefaultEthPartitioner extends FlatSpec with BeforeAndAfter {
+class TestDefaultEthPartitioner extends FlatSpec with BeforeAndAfter with IntegrationTest {
 
   var spark: SparkSession = null
   var ethConnectorConf : EthConnectorConf = null
