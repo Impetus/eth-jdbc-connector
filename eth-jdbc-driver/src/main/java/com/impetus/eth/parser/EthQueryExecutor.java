@@ -205,7 +205,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     public <T extends Number & Comparable<T>>  RangeNode<T> getFullRange(){
         Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
         String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
-        RangeNode rangeNode = new RangeNode<BigInteger>(tableName,"blockNumber");
+        RangeNode rangeNode = new RangeNode<BigInteger>(tableName,"blocknumber");
         BigInteger blockHeight = null;
         try{
             blockHeight = getBlockHeight();
@@ -256,7 +256,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             }
         }
 
-        RangeNode rangeNode = new RangeNode<BigInteger>(getTableName(),"blockNumber");
+        RangeNode rangeNode = new RangeNode<BigInteger>(getTableName(),"blocknumber");
         rangeNode.getRangeList().addRange(new Range(blocknumber,blocknumber));
         return rangeNode;
     }*/
@@ -265,34 +265,35 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     public <T extends Number & Comparable<T>>  RangeNode<T> getRangeNodeFromDataNode(DataNode<?> dataNode) {
         Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
         String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
+        RangeOperations<T> rangeOps = physicalPlan.getRangeOperations(tableName, "blocknumber");
         if(dataNode.getTable().equalsIgnoreCase(EthTables.BLOCK) && !dataNode.getKeys().isEmpty()){
             BigInteger directBlock = new BigInteger(dataNode.getKeys().get(0).toString());
-            RangeNode rangeNode = new RangeNode<BigInteger>(tableName,"blockNumber");
+            RangeNode<T> rangeNode = new RangeNode<T>(tableName,"blocknumber");
             rangeNode.getRangeList().addRange(new Range(directBlock,directBlock));
             return rangeNode;
         }else if(dataNode.getTable().equalsIgnoreCase(EthTables.TRANSACTION) && !dataNode.getKeys().isEmpty()){
             if(dataNode.getKeys().get(0) instanceof List && !((List) dataNode.getKeys().get(0)).isEmpty()){
-                RangeNode rangeNode = new RangeNode<BigInteger>(tableName,"blockNumber");
+                RangeNode<T> rangeNode = new RangeNode<T>(tableName,"blocknumber");
                 try{
                     BigInteger directBlock = getTransactionByHash(((List) dataNode.getKeys().get(0)).get(0).toString()).getBlockNumber();
                     rangeNode.getRangeList().addRange(new Range(directBlock,directBlock));
                 }catch(Exception e){
-                    rangeNode.getRangeList().addRange(new Range(new BigInteger("0"), new BigInteger("0")));
+                    rangeNode.getRangeList().addRange(new Range<T>(rangeOps.getMinValue(), rangeOps.getMinValue()));
                 }
                 return rangeNode;
             }else{
-                RangeNode rangeNode = new RangeNode<BigInteger>(tableName,"blockNumber");
+                RangeNode<T> rangeNode = new RangeNode<T>(tableName,"blocknumber");
                 try{
                     BigInteger directBlock = getTransactionByHash(dataNode.getKeys().get(0).toString()).getBlockNumber();
                     rangeNode.getRangeList().addRange(new Range(directBlock,directBlock));
                 }catch(Exception e){
-                    rangeNode.getRangeList().addRange(new Range(new BigInteger("0"), new BigInteger("0")));
+                    rangeNode.getRangeList().addRange(new Range<T>(rangeOps.getMinValue(), rangeOps.getMinValue()));
                 }
                 return rangeNode;
             }
         } else {
-            RangeNode rangeNode = new RangeNode<BigInteger>(tableName,"blockNumber");
-            rangeNode.getRangeList().addRange(new Range(new BigInteger("0"), new BigInteger("0")));
+            RangeNode<T> rangeNode = new RangeNode<>(tableName,"blocknumber");
+            rangeNode.getRangeList().addRange(new Range<T>(rangeOps.getMinValue(), rangeOps.getMinValue()));
             return rangeNode;
         }
     }

@@ -25,7 +25,6 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
       x =>
         val min:Long =x.getMin.asInstanceOf[BigInteger].longValue()
         val max:Long = x.getMax.asInstanceOf[BigInteger].longValue()
-        println(min, max)
         (min, max)
     }
 
@@ -39,7 +38,7 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
       for(i <- 0l until split) yield {
         var currRowsSum = 0l
         var currRowsList = new scala.collection.mutable.ListBuffer[(Long, Long)]
-        while (currRowsSum < rows && !currRows.isEmpty) {
+        while (currRowsSum < rows && currRows.nonEmpty) {
           if (ranges.head <= rows - currRowsSum) {
             currRowsSum += ranges.head
             ranges = ranges.tail
@@ -70,7 +69,7 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
     readConf.splitCount match {
       case Some(split) =>
         require(split > 0, s"Split should be positive : $split")
-        val partitionRowCount = if((rangesTotalSum / split) * split < rangesTotalSum) (rangesTotalSum / split) + 1 else (rangesTotalSum / split)
+        val partitionRowCount = if((rangesTotalSum / split) * split < rangesTotalSum) (rangesTotalSum / split) + 1 else rangesTotalSum / split
         //val partitionRowCount = rangesTotalSum / split
         val rangeNodes = getRanges(partitionRowCount, split)
         for((rangenode,i) <- rangeNodes.zipWithIndex){
@@ -81,15 +80,9 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
         readConf.fetchSizeInRows match {
           case Some(rowSize) =>
             require(rowSize > 0, s"Row Size should be positive : $rowSize")
-            val split = if((rangesTotalSum / rowSize) * rowSize < rangesTotalSum) (rangesTotalSum / rowSize) + 1 else (rangesTotalSum / rowSize)
+            val split = if((rangesTotalSum / rowSize) * rowSize < rangesTotalSum) (rangesTotalSum / rowSize) + 1 else rangesTotalSum / rowSize
             val rangeNodes = getRanges(rowSize, split)
             for((rangenode,i) <- rangeNodes.zipWithIndex){
-              rangenode.getRangeList.getRanges.toList.map {
-                x =>
-                  val min: Long = x.getMin.longValue()
-                  val max: Long = x.getMax.longValue()
-                  println(i, min, max)
-              }
               buffer = buffer :+ new BlkchnPartition(i, rangenode, readConf)
             }
 
