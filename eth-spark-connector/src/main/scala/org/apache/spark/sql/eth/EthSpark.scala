@@ -4,7 +4,7 @@ import com.impetus.blkch.spark.connector.BlkchnConnector
 import com.impetus.blkch.spark.connector.rdd.partitioner.BlkchnPartitioner
 import com.impetus.blkch.spark.connector.rdd.{BlkchnRDD, EthRDD, ReadConf}
 import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
-import org.apache.spark.SparkContext
+import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import scala.reflect.ClassTag
@@ -33,6 +33,12 @@ object EthSpark {
 
   def load[D: ClassTag](sc: SparkContext, readConf: ReadConf, options: Map[String, String]): BlkchnRDD[D] = {
     builder().sc(sc).readConf(readConf).options(options).build().toRDD
+  }
+
+  def insertTransaction(readConf: ReadConf, options: Map[String, String]) ={
+    val ethCon = new BlkchnConnector(EthConnectorConf(new SparkConf(),options ++ readConf.asOptions()))
+    val transactionStatus = ethCon.withStatementDo(stat => stat.execute(readConf.query))
+    transactionStatus
   }
 
   def load(spark: SparkSession): DataFrame = builder().sparkSession(spark).build().toDF()

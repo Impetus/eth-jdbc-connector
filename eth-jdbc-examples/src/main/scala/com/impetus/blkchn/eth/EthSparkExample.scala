@@ -15,11 +15,12 @@ object EthSparkExample {
   lazy val spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
 
   def main(args : Array[String]): Unit = {
-    testA1
+    /*testA1
     test1
     test2
     test3
-    test4
+    test4*/
+    testInsert
   }
   def test1 ={
     val readConf = ReadConf(None, Some(30000), "select * from block where blocknumber > 123 and blocknumber < 132 and hash='2f32268b02c2d498c926401f6e74406525c02f735feefe457c5689'")
@@ -68,6 +69,16 @@ object EthSparkExample {
     val df = spark.read.format("org.apache.spark.sql.eth").options(option).load()
     df.show()
     println(df.schema)
+  }
+
+  def testInsert ={
+    val readConf = ReadConf(None,None,"insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)")
+    val transactionStatus = EthSpark.insertTransaction(readConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234",
+        "KEYSTORE_PATH" -> "/home/impadmin/keystore/UTC--2017-09-11T04-53-29.614189140Z--8144c67b144a408abc989728e32965edf37adaa1",
+        "KEYSTORE_PASSWORD" -> "impetus123"
+    ))
+    println(s"Insert Transaction ${if(transactionStatus) "succeeded" else "failed" }")
+
   }
 
 }
