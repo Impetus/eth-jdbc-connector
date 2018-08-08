@@ -105,22 +105,22 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
 
     @Override
     public int getColumnType(int column) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        return 1;
     }
 
     @Override
     public String getColumnTypeName(int column) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        return "String";
     }
 
     @Override
     public int getPrecision(int column) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        return 0;
     }
 
     @Override
     public int getScale(int column) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+        return 0;
     }
 
     @Override
@@ -170,7 +170,7 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
 
     @Override
     public boolean isSigned(int column) throws SQLException {
-        throw new SQLFeatureNotSupportedException();
+       return false;
     }
 
     @Override
