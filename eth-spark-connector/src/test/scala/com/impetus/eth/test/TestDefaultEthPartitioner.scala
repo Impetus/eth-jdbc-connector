@@ -8,10 +8,11 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.eth.EthConnectorConf
 import org.scalatest.{BeforeAndAfter, FlatSpec}
 import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
-import com.impetus.test.catagory.IntegrationTest
+import com.impetus.test.catagory.{UnitTest}
+import org.junit.experimental.categories.Category
 
-
-class TestDefaultEthPartitioner extends FlatSpec with BeforeAndAfter with IntegrationTest {
+@Category(Array(classOf[UnitTest]))
+class TestDefaultEthPartitioner extends FlatSpec with BeforeAndAfter with UnitTest {
 
   var spark: SparkSession = null
   var ethConnectorConf : EthConnectorConf = null

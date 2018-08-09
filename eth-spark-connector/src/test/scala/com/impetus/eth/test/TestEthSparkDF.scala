@@ -8,7 +8,9 @@ import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.eth.EthSpark
 import org.apache.spark.sql.types.{ArrayType, DecimalType, StringType, TransactionUTD}
 import org.scalatest.{BeforeAndAfter, FlatSpec}
+import org.junit.experimental.categories.Category
 
+@Category(Array(classOf[IntegrationTest]))
 class TestEthSparkDF extends FlatSpec with BeforeAndAfter with IntegrationTest {
 
   var spark: SparkSession = null
@@ -16,7 +18,7 @@ class TestEthSparkDF extends FlatSpec with BeforeAndAfter with IntegrationTest {
   var readConf:ReadConf = null
   var df: DataFrame = null
 
-    before {
+  before {
     spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
     readConf = ReadConf(Some(3), None, "Select blocknumber, hash, transactions FROM block where blocknumber > 1 and blocknumber < 30")(ethPartitioner)
   }

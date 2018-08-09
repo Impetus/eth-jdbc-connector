@@ -72,7 +72,7 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
         val partitionRowCount = if((rangesTotalSum / split) * split < rangesTotalSum) (rangesTotalSum / split) + 1 else rangesTotalSum / split
         //val partitionRowCount = rangesTotalSum / split
         val rangeNodes = getRanges(partitionRowCount, split)
-        for((rangenode,i) <- rangeNodes.zipWithIndex){
+        for((rangenode,i) <- rangeNodes.zipWithIndex; if rangenode.getRangeList.getRanges.nonEmpty){
           buffer = buffer :+ new BlkchnPartition(i, rangenode, readConf)
         }
 
@@ -82,7 +82,7 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
             require(rowSize > 0, s"Row Size should be positive : $rowSize")
             val split = if((rangesTotalSum / rowSize) * rowSize < rangesTotalSum) (rangesTotalSum / rowSize) + 1 else rangesTotalSum / rowSize
             val rangeNodes = getRanges(rowSize, split)
-            for((rangenode,i) <- rangeNodes.zipWithIndex){
+            for((rangenode,i) <- rangeNodes.zipWithIndex; if rangenode.getRangeList.getRanges.nonEmpty){
               buffer = buffer :+ new BlkchnPartition(i, rangenode, readConf)
             }
 

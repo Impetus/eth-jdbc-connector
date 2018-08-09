@@ -1,0 +1,56 @@
+package com.impetus.eth.test
+
+import com.impetus.blkch.spark.connector.rdd.{BlkchnRDD, ReadConf}
+import com.impetus.blkch.spark.connector.rdd.partitioner.BlkchnPartitioner
+import com.impetus.eth.jdbc.EthResultSetMetaData
+import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
+import com.impetus.test.catagory.IntegrationTest
+import org.apache.spark.sql.eth.EthSpark
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
+import org.junit.experimental.categories.Category
+import org.scalatest.{BeforeAndAfter, FlatSpec}
+import org.apache.spark.sql.types.{ArrayType, StringType, TransactionType}
+
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.JavaConverters._
+import com.impetus.blkch.spark.connector.rdd._
+
+@Category(Array(classOf[IntegrationTest]))
+class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfter with IntegrationTest {
+
+  var spark: SparkSession = null
+  val ethPartitioner:BlkchnPartitioner = DefaultEthPartitioner
+  var readConf:ReadConf = null
+  var rdd: BlkchnRDD[Row] = null
+  var transactions:Array[Any] = null
+  var ethRDD : EthRDD[_] = null
+
+  before {
+    spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
+    readConf = ReadConf(Some(3), None, "Select transactions FROM block where blocknumber = 3796441")(ethPartitioner)
+    rdd = EthSpark.load[Row](spark.sparkContext, readConf,Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
+    ethRDD = new com.impetus.blkch.spark.connector.rdd.EthRDD(spark.sparkContext, null, null)
+    rdd.cache()
+  }
+
+  "Transaction" should "give data in Transaction UTD" in {
+    transactions = rdd.map{row => row.get(0)}.collect()
+    assert(transactions(0).asInstanceOf[ArrayBuffer[_]].forall(_.isInstanceOf[TransactionType]))
+  }
+
+  it should "give data as expected" in {
+    assert(transactions(0).asInstanceOf[ArrayBuffer[_]].forall(_.asInstanceOf[TransactionType].blockNumber.equals("3796441")))
+    assert(transactions(0).asInstanceOf[ArrayBuffer[_]].forall(_.asInstanceOf[TransactionType].blockHash.equals("0x388f5e0c424dc5eda1bf8fa741cecd88e2082df3e3e4491e4565bce9bdb0b880")))
+  }
+
+  "EthRDD" should "give expected result with handleExtraType" in {
+    val data = new java.util.ArrayList[String]
+    val resultSetMetaData = new EthResultSetMetaData("block", Map("blocknumber" -> 0.asInstanceOf[Integer]).asJava,
+      Map("blocknumber" -> "blocknumber").asJava, Map("blocknumber" -> (-5).asInstanceOf[Integer]).asJava)
+    data.add("3124")
+    val structType = ethRDD.handleExtraType(1, resultSetMetaData, data)
+    assert(structType.name.equals("blocknumber"))
+    assert(structType.dataType.equals(ArrayType(StringType, true)))
+  }
+
+}

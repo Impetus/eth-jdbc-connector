@@ -5,7 +5,8 @@ import java.math.BigInteger
 import com.impetus.blkch.spark.connector.rdd.ReadConf
 import org.apache.spark.sql.eth.EthSpark
 import org.apache.spark.sql.{Row, SparkSession}
-import org.slf4j.LoggerFactory
+import org.apache.spark.sql.types.TransactionType
+import scala.collection.mutable.ArrayBuffer
 
 object EthSparkExample {
   import org.apache.spark.sql.eth.EthSpark.implicits._
@@ -15,6 +16,7 @@ object EthSparkExample {
   lazy val spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
 
   def main(args : Array[String]): Unit = {
+    test21
     testA1
     test1
     test2
@@ -28,6 +30,16 @@ object EthSparkExample {
       Map("url" -> "jdbc:blkchn:ethereum://172.25.41.52:8545"))
     rdd.map(x => x.get(1)).collect().foreach(println)
     rdd.foreach(x => println(x.schema))
+  }
+
+  def test21 ={
+    val readConf = ReadConf(Some(4), None, "Select transactions FROM block where blocknumber = 3796441")
+    val rdd = EthSpark.load[Row](spark.sparkContext, readConf,
+      Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
+    rdd.collect().foreach(println)
+    rdd.foreach(x => println(x.schema))
+    val transactions = rdd.map{row => row.get(0)}.collect()
+    assert(transactions(0).asInstanceOf[ArrayBuffer[_]].forall(_.isInstanceOf[TransactionType]))
   }
 
   def testA1 ={
