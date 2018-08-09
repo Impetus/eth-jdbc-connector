@@ -51,6 +51,8 @@ class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfter with Integrati
     val structType = ethRDD.handleExtraType(1, resultSetMetaData, data)
     assert(structType.name.equals("blocknumber"))
     assert(structType.dataType.equals(ArrayType(StringType, true)))
+    val returnData = ethRDD.handleExtraData(1, resultSetMetaData, data)
+    assert(returnData.equals(data.asScala))
   }
 
 }
