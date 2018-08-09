@@ -42,7 +42,7 @@
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.11</artifactId>
             <version>2.0.0</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.impetus.eth</groupId>
@@ -134,10 +134,23 @@
               </configuration>
               <executions>
                 <execution>
-                  <id>test</id>
-                  <goals>
-                    <goal>test</goal>
-                  </goals>
+                    <id>integration-tests</id>
+                    <goals>
+                        <goal>test</goal>
+                    </goals>
+                    <configuration>
+                        <tagsToInclude>com.impetus.test.catagory.IntegrationTest</tagsToInclude>
+                        <skipTests>${skip.integration.tests}</skipTests>
+                    </configuration>
+                </execution>
+                <execution>
+                      <id>test</id>
+                      <goals>
+                          <goal>test</goal>
+                      </goals>
+                      <configuration>
+                          <tagsToInclude>com.impetus.test.catagory.UnitTest</tagsToInclude>
+                      </configuration>
                 </execution>
               </executions>
             </plugin>

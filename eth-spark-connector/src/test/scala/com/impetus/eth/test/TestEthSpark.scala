@@ -7,10 +7,9 @@ import com.impetus.test.catagory.IntegrationTest
 import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.eth.EthSpark
 import org.scalatest.{BeforeAndAfter, FlatSpec}
-import org.junit.experimental.categories.Category
 
-@Category(Array(classOf[IntegrationTest]))
-class TestEthSpark extends FlatSpec with BeforeAndAfter with IntegrationTest{
+@IntegrationTest
+class TestEthSpark extends FlatSpec with BeforeAndAfter{
 
   var spark: SparkSession = null
   val ethPartitioner:BlkchnPartitioner = DefaultEthPartitioner

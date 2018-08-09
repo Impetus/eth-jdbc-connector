@@ -5,7 +5,8 @@ import org.apache.spark.SparkConf
 import org.scalatest.{BeforeAndAfter, FlatSpec}
 import org.apache.spark.sql.eth._
 
-class TestEthConnectorConf extends FlatSpec with BeforeAndAfter with UnitTest {
+@UnitTest
+class TestEthConnectorConf extends FlatSpec with BeforeAndAfter {
 
   var ethConnectorConf:EthConnectorConf = null
   val conf = new SparkConf().set("placeHolder", "Temp")

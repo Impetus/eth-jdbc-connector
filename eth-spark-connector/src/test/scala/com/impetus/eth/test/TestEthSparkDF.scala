@@ -4,14 +4,12 @@ import com.impetus.blkch.spark.connector.rdd.{BlkchnRDD, ReadConf}
 import com.impetus.blkch.spark.connector.rdd.partitioner.BlkchnPartitioner
 import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
 import com.impetus.test.catagory.IntegrationTest
-import org.apache.spark.sql.{DataFrame, Row, SparkSession}
-import org.apache.spark.sql.eth.EthSpark
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.types.{ArrayType, DecimalType, StringType, TransactionUTD}
 import org.scalatest.{BeforeAndAfter, FlatSpec}
-import org.junit.experimental.categories.Category
 
-@Category(Array(classOf[IntegrationTest]))
-class TestEthSparkDF extends FlatSpec with BeforeAndAfter with IntegrationTest {
+@IntegrationTest
+class TestEthSparkDF extends FlatSpec with BeforeAndAfter{
 
   var spark: SparkSession = null
   val ethPartitioner:BlkchnPartitioner = DefaultEthPartitioner

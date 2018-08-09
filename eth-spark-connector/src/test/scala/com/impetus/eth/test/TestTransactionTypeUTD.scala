@@ -6,8 +6,7 @@ import com.impetus.eth.jdbc.EthResultSetMetaData
 import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
 import com.impetus.test.catagory.IntegrationTest
 import org.apache.spark.sql.eth.EthSpark
-import org.apache.spark.sql.{DataFrame, Row, SparkSession}
-import org.junit.experimental.categories.Category
+import org.apache.spark.sql.{Row, SparkSession}
 import org.scalatest.{BeforeAndAfter, FlatSpec}
 import org.apache.spark.sql.types.{ArrayType, StringType, TransactionType}
 
@@ -15,8 +14,8 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConverters._
 import com.impetus.blkch.spark.connector.rdd._
 
-@Category(Array(classOf[IntegrationTest]))
-class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfter with IntegrationTest {
+@IntegrationTest
+class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfter {
 
   var spark: SparkSession = null
   val ethPartitioner:BlkchnPartitioner = DefaultEthPartitioner
