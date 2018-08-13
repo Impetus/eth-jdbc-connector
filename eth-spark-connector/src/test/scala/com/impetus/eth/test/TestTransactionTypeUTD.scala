@@ -1,14 +1,29 @@
+/******************************************************************************* 
+ * * Copyright 2018 Impetus Infotech.
+ * *
+ * * Licensed under the Apache License, Version 2.0 (the "License");
+ * * you may not use this file except in compliance with the License.
+ * * You may obtain a copy of the License at
+ * *
+ * * http://www.apache.org/licenses/LICENSE-2.0
+ * *
+ * * Unless required by applicable law or agreed to in writing, software
+ * * distributed under the License is distributed on an "AS IS" BASIS,
+ * * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * * See the License for the specific language governing permissions and
+ * * limitations under the License.
+ ******************************************************************************/
 package com.impetus.eth.test
 
-import com.impetus.blkch.spark.connector.rdd.{BlkchnRDD, ReadConf}
+import com.impetus.blkch.spark.connector.rdd.{ BlkchnRDD, ReadConf }
 import com.impetus.blkch.spark.connector.rdd.partitioner.BlkchnPartitioner
 import com.impetus.eth.jdbc.EthResultSetMetaData
 import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
 import com.impetus.test.catagory.IntegrationTest
 import org.apache.spark.sql.eth.EthSpark
-import org.apache.spark.sql.{Row, SparkSession}
-import org.scalatest.{BeforeAndAfter, FlatSpec}
-import org.apache.spark.sql.types.{ArrayType, StringType, TransactionType}
+import org.apache.spark.sql.{ Row, SparkSession }
+import org.scalatest.{ BeforeAndAfter, FlatSpec }
+import org.apache.spark.sql.types.{ ArrayType, StringType, TransactionType }
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConverters._
@@ -18,22 +33,22 @@ import com.impetus.blkch.spark.connector.rdd._
 class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfter with ShearedSparkSession {
 
   //var spark: SparkSession = null
-  val ethPartitioner:BlkchnPartitioner = DefaultEthPartitioner
-  var readConf:ReadConf = null
+  val ethPartitioner: BlkchnPartitioner = DefaultEthPartitioner
+  var readConf: ReadConf = null
   var rdd: BlkchnRDD[Row] = null
-  var transactions:Array[Any] = null
-  var ethRDD : EthRDD[_] = null
+  var transactions: Array[Any] = null
+  var ethRDD: EthRDD[_] = null
 
   before {
     //spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
     readConf = ReadConf(Some(3), None, "Select transactions FROM block where blocknumber = 3796441")(ethPartitioner)
-    rdd = EthSpark.load[Row](spark.sparkContext, readConf,Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
+    rdd = EthSpark.load[Row](spark.sparkContext, readConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
     ethRDD = new com.impetus.blkch.spark.connector.rdd.EthRDD(spark.sparkContext, null, null)
     rdd.cache()
   }
 
   "Transaction" should "give data in Transaction UTD" in {
-    transactions = rdd.map{row => row.get(0)}.collect()
+    transactions = rdd.map { row => row.get(0) }.collect()
     assert(transactions(0).asInstanceOf[ArrayBuffer[_]].forall(_.isInstanceOf[TransactionType]))
   }
 

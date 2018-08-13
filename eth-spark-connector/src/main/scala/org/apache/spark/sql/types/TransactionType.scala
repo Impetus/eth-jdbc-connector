@@ -1,11 +1,26 @@
+/******************************************************************************* 
+ * * Copyright 2018 Impetus Infotech.
+ * *
+ * * Licensed under the Apache License, Version 2.0 (the "License");
+ * * you may not use this file except in compliance with the License.
+ * * You may obtain a copy of the License at
+ * *
+ * * http://www.apache.org/licenses/LICENSE-2.0
+ * *
+ * * Unless required by applicable law or agreed to in writing, software
+ * * distributed under the License is distributed on an "AS IS" BASIS,
+ * * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * * See the License for the specific language governing permissions and
+ * * limitations under the License.
+ ******************************************************************************/
 package org.apache.spark.sql.types
 
-import org.apache.spark.sql.catalyst.util.{ArrayData, GenericArrayData}
+import org.apache.spark.sql.catalyst.util.{ ArrayData, GenericArrayData }
 import org.apache.spark.unsafe.types.UTF8String
 import org.web3j.protocol.core.methods.response._
 
 @SQLUserDefinedType(udt = classOf[TransactionUTD])
-class TransactionType(@transient val transaction:Transaction) extends Serializable {
+class TransactionType(@transient val transaction: Transaction) extends Serializable {
 
   override def hashCode(): Int = transaction.hashCode()
 
@@ -37,7 +52,7 @@ class TransactionType(@transient val transaction:Transaction) extends Serializab
 
 private[sql] class TransactionUTD extends UserDefinedType[TransactionType] {
 
-  override def sqlType: DataType = ArrayType(StringType,false)
+  override def sqlType: DataType = ArrayType(StringType, false)
 
   override def serialize(p: TransactionType): GenericArrayData = {
     val output = new Array[Any](17)
@@ -66,24 +81,23 @@ private[sql] class TransactionUTD extends UserDefinedType[TransactionType] {
     datum match {
       case values: ArrayData =>
         val trn = new Transaction(
-          if(values.getUTF8String(0) != null) values.getUTF8String(0).toString else null,
-          if(values.getUTF8String(1) != null) values.getUTF8String(1).toString else "0x0",
-          if(values.getUTF8String(2) != null) values.getUTF8String(2).toString else null,
-          if(values.getUTF8String(3) != null) values.getUTF8String(3).toString else "0x0",
-          if(values.getUTF8String(4) != null) values.getUTF8String(4).toString else "0x0",
-          if(values.getUTF8String(5) != null) values.getUTF8String(5).toString else null,
-          if(values.getUTF8String(6) != null) values.getUTF8String(6).toString else null,
-          if(values.getUTF8String(7) != null) values.getUTF8String(7).toString else "0x0",
-          if(values.getUTF8String(8) != null) values.getUTF8String(8).toString else "0x0",
-          if(values.getUTF8String(9) != null) values.getUTF8String(9).toString else "0x0",
-          if(values.getUTF8String(10) != null) values.getUTF8String(10).toString else null,
-          if(values.getUTF8String(11) != null) values.getUTF8String(11).toString else null,
-          if(values.getUTF8String(12) != null) values.getUTF8String(12).toString else null,
-          if(values.getUTF8String(13) != null) values.getUTF8String(13).toString else null,
-          if(values.getUTF8String(14) != null) values.getUTF8String(14).toString else null,
-          if(values.getUTF8String(15) != null) values.getUTF8String(15).toString else null,
-          if(values.getUTF8String(15) != null) values.getUTF8String(16).toString.toInt else 0
-        )
+          if (values.getUTF8String(0) != null) values.getUTF8String(0).toString else null,
+          if (values.getUTF8String(1) != null) values.getUTF8String(1).toString else "0x0",
+          if (values.getUTF8String(2) != null) values.getUTF8String(2).toString else null,
+          if (values.getUTF8String(3) != null) values.getUTF8String(3).toString else "0x0",
+          if (values.getUTF8String(4) != null) values.getUTF8String(4).toString else "0x0",
+          if (values.getUTF8String(5) != null) values.getUTF8String(5).toString else null,
+          if (values.getUTF8String(6) != null) values.getUTF8String(6).toString else null,
+          if (values.getUTF8String(7) != null) values.getUTF8String(7).toString else "0x0",
+          if (values.getUTF8String(8) != null) values.getUTF8String(8).toString else "0x0",
+          if (values.getUTF8String(9) != null) values.getUTF8String(9).toString else "0x0",
+          if (values.getUTF8String(10) != null) values.getUTF8String(10).toString else null,
+          if (values.getUTF8String(11) != null) values.getUTF8String(11).toString else null,
+          if (values.getUTF8String(12) != null) values.getUTF8String(12).toString else null,
+          if (values.getUTF8String(13) != null) values.getUTF8String(13).toString else null,
+          if (values.getUTF8String(14) != null) values.getUTF8String(14).toString else null,
+          if (values.getUTF8String(15) != null) values.getUTF8String(15).toString else null,
+          if (values.getUTF8String(15) != null) values.getUTF8String(16).toString.toInt else 0)
         new TransactionType(trn)
     }
   }

@@ -1,11 +1,26 @@
+/******************************************************************************* 
+ * * Copyright 2018 Impetus Infotech.
+ * *
+ * * Licensed under the Apache License, Version 2.0 (the "License");
+ * * you may not use this file except in compliance with the License.
+ * * You may obtain a copy of the License at
+ * *
+ * * http://www.apache.org/licenses/LICENSE-2.0
+ * *
+ * * Unless required by applicable law or agreed to in writing, software
+ * * distributed under the License is distributed on an "AS IS" BASIS,
+ * * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * * See the License for the specific language governing permissions and
+ * * limitations under the License.
+ ******************************************************************************/
 package org.apache.spark.sql.eth
 
 import com.impetus.blkch.spark.connector.BlkchnConnector
 import com.impetus.blkch.spark.connector.rdd.partitioner.BlkchnPartitioner
-import com.impetus.blkch.spark.connector.rdd.{BlkchnRDD, EthRDD, ReadConf}
+import com.impetus.blkch.spark.connector.rdd.{ BlkchnRDD, EthRDD, ReadConf }
 import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.{ SparkConf, SparkContext }
+import org.apache.spark.sql.{ DataFrame, SparkSession }
 
 import scala.reflect.ClassTag
 
@@ -35,8 +50,8 @@ object EthSpark {
     builder().sc(sc).readConf(readConf).options(options).build().toRDD
   }
 
-  def insertTransaction(readConf: ReadConf, options: Map[String, String]) ={
-    val ethCon = new BlkchnConnector(EthConnectorConf(new SparkConf(),options ++ readConf.asOptions()))
+  def insertTransaction(readConf: ReadConf, options: Map[String, String]) = {
+    val ethCon = new BlkchnConnector(EthConnectorConf(new SparkConf(), options ++ readConf.asOptions()))
     val transactionStatus = ethCon.withStatementDo(stat => stat.execute(readConf.query))
     transactionStatus
   }
