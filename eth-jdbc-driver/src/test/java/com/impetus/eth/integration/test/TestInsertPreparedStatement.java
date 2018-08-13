@@ -42,9 +42,9 @@ public class TestInsertPreparedStatement {
         try {
             Class.forName(driverClass);
             Properties prop = new Properties();
-            prop.put(DriverConstants.KEYSTORE_PATH,
-                    "D:\\Ethereum\\Ashish\\UTC--2017-09-11T04-49-35.811622052Z--a76cd046cf6089fe2adcf1680fcede500e44bacd");
-            prop.put(DriverConstants.KEYSTORE_PASSWORD, "impetus123");
+            
+            prop.put(DriverConstants.KEYSTORE_PATH, ConnectionUtil.getKeyStorePath());
+            prop.put(DriverConstants.KEYSTORE_PASSWORD, ConnectionUtil.getKeyStorePassword());
             Connection conn = DriverManager.getConnection(url, prop);
             String query = "insert into transaction (toAddress, value, unit, async) values (?, ?, 'ether', true)";
 
