@@ -15,6 +15,7 @@
 ******************************************************************************/
 package com.impetus.blkchn.eth.smartContract;
 
+import com.impetus.blkchn.eth.ReadConfig;
 import com.impetus.eth.jdbc.DriverConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,15 +32,18 @@ import java.util.concurrent.TimeUnit;
 public class SmartContractDeployWithAsync {
     private static final Logger LOGGER = LoggerFactory.getLogger(SmartContractDeployWithAsync.class);
 
-    public static void main(String[] args) throws InterruptedException, ExecutionException {
+    public static void main(String[] args) {
         String url = "jdbc:blkchn:ethereum://ropsten.infura.io/1234";
         String driverClass = "com.impetus.eth.jdbc.EthDriver";
+        ReadConfig.loadConfig();
+        String keystorePath = ReadConfig.keystorePath;
+        String keystorePassword = ReadConfig.keystorePassword;
         String query = "DEPLOY smartcontract 'com.impetus.blkchn.eth.smartContract.FirstSmartContract'() AND withasync true";
         try {
             Class.forName(driverClass);
             Properties prop = new Properties();
-            prop.put(DriverConstants.KEYSTORE_PATH, "/home/<path>");
-            prop.put(DriverConstants.KEYSTORE_PASSWORD, "<password>");
+            prop.put(DriverConstants.KEYSTORE_PATH, keystorePath);
+            prop.put(DriverConstants.KEYSTORE_PASSWORD, keystorePassword);
             Connection conn = DriverManager.getConnection(url, prop);
             Statement stmt = conn.createStatement();
             boolean retBool = stmt.execute(query);

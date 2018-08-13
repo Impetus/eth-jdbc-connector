@@ -15,6 +15,7 @@
 ******************************************************************************/
 package com.impetus.blkchn.eth.smartContract;
 
+import com.impetus.blkchn.eth.ReadConfig;
 import com.impetus.eth.jdbc.DriverConstants;
 
 import java.sql.Connection;
@@ -33,12 +34,15 @@ public class SmartContractDeploy {
     public static void main(String[] args) throws InterruptedException, ExecutionException {
         String url = "jdbc:blkchn:ethereum://127.0.0.1:8545";
         String driverClass = "com.impetus.eth.jdbc.EthDriver";
+        ReadConfig.loadConfig();
+        String keystorePath = ReadConfig.keystorePath;
+        String keystorePassword = ReadConfig.keystorePassword;
         String query = "DEPLOY smartcontract 'com.impetus.blkchn.eth.smartContract.FirstSmartContract'()";
         try {
             Class.forName(driverClass);
             Properties prop = new Properties();
-            prop.put(DriverConstants.KEYSTORE_PATH, "/home/<path>");
-            prop.put(DriverConstants.KEYSTORE_PASSWORD, "<password>");
+            prop.put(DriverConstants.KEYSTORE_PATH, keystorePath);
+            prop.put(DriverConstants.KEYSTORE_PASSWORD, keystorePassword);
             Connection conn = DriverManager.getConnection(url, prop);
             Statement stmt = conn.createStatement();
             boolean retBool = stmt.execute(query);

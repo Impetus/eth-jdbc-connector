@@ -4,20 +4,20 @@ import com.impetus.blkch.spark.connector.rdd.{BlkchnRDD, ReadConf}
 import com.impetus.blkch.spark.connector.rdd.partitioner.BlkchnPartitioner
 import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
 import com.impetus.test.catagory.IntegrationTest
-import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.{Row}
 import org.apache.spark.sql.eth.EthSpark
 import org.scalatest.{BeforeAndAfter, FlatSpec}
 
 @IntegrationTest
-class TestEthSpark extends FlatSpec with BeforeAndAfter{
+class TestEthSpark extends FlatSpec with BeforeAndAfter with ShearedSparkSession {
 
-  var spark: SparkSession = null
+  //var spark: SparkSession = null
   val ethPartitioner:BlkchnPartitioner = DefaultEthPartitioner
   var readConf:ReadConf = null
   var rdd: BlkchnRDD[Row] = null
 
   before {
-    spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
+    //spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
     readConf = ReadConf(Some(3), None, "Select * FROM block where blocknumber > 1 and blocknumber < 30")(ethPartitioner)
     rdd = EthSpark.load[Row](spark.sparkContext, readConf,Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
     rdd.cache()
@@ -45,9 +45,4 @@ class TestEthSpark extends FlatSpec with BeforeAndAfter{
     val option = readConf.asOptions()
     assert(option.getOrElse("spark.blkchn.partitioner","").toString.equals(ethPartitioner.getClass.getCanonicalName.replaceAll("\\$","")))
   }
-
-  after {
-    spark.stop()
-  }
-
 }

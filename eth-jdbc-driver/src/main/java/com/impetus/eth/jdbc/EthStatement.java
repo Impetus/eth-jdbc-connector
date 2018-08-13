@@ -19,11 +19,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.*;
 import java.util.*;
-
 import com.impetus.blkch.BlkchnException;
 import com.impetus.blkch.sql.query.RangeNode;
-import com.impetus.blkch.util.Range;
-import com.impetus.eth.query.EthColumns;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +29,6 @@ import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult;
 import org.web3j.protocol.core.methods.response.Transaction;
-
 import com.impetus.blkch.BlkchnErrorListener;
 import com.impetus.blkch.jdbc.BlkchnStatement;
 import com.impetus.blkch.sql.DataFrame;

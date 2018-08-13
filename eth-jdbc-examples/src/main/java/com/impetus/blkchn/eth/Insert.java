@@ -15,15 +15,13 @@
 ******************************************************************************/
 package com.impetus.blkchn.eth;
 
-import java.io.IOException;
+
 import java.sql.*;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.web3j.crypto.CipherException;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import com.impetus.eth.jdbc.DriverConstants;
@@ -32,18 +30,20 @@ import com.impetus.eth.jdbc.EthStatement;
 public class Insert {
     private static final Logger LOGGER = LoggerFactory.getLogger(Insert.class);
 
-    public static void main(String[] args) throws ClassNotFoundException, IOException, CipherException,
-            InterruptedException, ExecutionException, Exception {
-        String url = "jdbc:blkchn:ethereum://localhost:8545";
+    public static void main(String[] ar) throws Exception{
+        ReadConfig.loadConfig();
+        String keystorePath = ReadConfig.keystorePath;
+        String keystorePassword = ReadConfig.keystorePassword;
+        String address = ReadConfig.address;
+        String url = "jdbc:blkchn:ethereum://ropsten.infura.io/1234";
         String driverClass = "com.impetus.eth.jdbc.EthDriver";
 
-        String query = "insert into transaction (toAddress, value, unit, async) values ('<to address>', 1.11, 'ether', true)";
+        String query = "insert into transaction (toAddress, value, unit, async) values ('"+ address +"', 1.11, 'ether', true)";
         try {
             Class.forName(driverClass);
             Properties prop = new Properties();
-            prop.put(DriverConstants.KEYSTORE_PATH,
-                    "/local/path/to/ethereum/keystore/UTC--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-            prop.put(DriverConstants.KEYSTORE_PASSWORD, "<password>");
+            prop.put(DriverConstants.KEYSTORE_PATH, keystorePath);
+            prop.put(DriverConstants.KEYSTORE_PASSWORD, keystorePassword);
             Connection conn = DriverManager.getConnection(url, prop);
             Statement stmt = conn.createStatement();
             ResultSet ret = ((EthStatement) stmt).executeAndReturn(query);
@@ -54,7 +54,6 @@ public class Insert {
         } catch (SQLException | ClassNotFoundException e1) {
             e1.printStackTrace();
         }
-
     }
 
 }

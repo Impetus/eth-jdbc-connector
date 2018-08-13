@@ -15,9 +15,9 @@ import scala.collection.JavaConverters._
 import com.impetus.blkch.spark.connector.rdd._
 
 @IntegrationTest
-class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfter {
+class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfter with ShearedSparkSession {
 
-  var spark: SparkSession = null
+  //var spark: SparkSession = null
   val ethPartitioner:BlkchnPartitioner = DefaultEthPartitioner
   var readConf:ReadConf = null
   var rdd: BlkchnRDD[Row] = null
@@ -25,7 +25,7 @@ class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfter {
   var ethRDD : EthRDD[_] = null
 
   before {
-    spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
+    //spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
     readConf = ReadConf(Some(3), None, "Select transactions FROM block where blocknumber = 3796441")(ethPartitioner)
     rdd = EthSpark.load[Row](spark.sparkContext, readConf,Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
     ethRDD = new com.impetus.blkch.spark.connector.rdd.EthRDD(spark.sparkContext, null, null)

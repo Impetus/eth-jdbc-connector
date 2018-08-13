@@ -16,6 +16,7 @@
 package com.impetus.blkchn.eth.smartContract;
 
 import com.impetus.blkch.BlkchnException;
+import com.impetus.blkchn.eth.ReadConfig;
 import com.impetus.eth.jdbc.DriverConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,14 +33,18 @@ public class SmartContractFunction {
     public static void main(String[] args) throws InterruptedException, ExecutionException {
         String url = "jdbc:blkchn:ethereum://ropsten.infura.io/1234";
         String driverClass = "com.impetus.eth.jdbc.EthDriver";
+        ReadConfig.loadConfig();
+        String keystorePath = ReadConfig.keystorePath;
+        String keystorePassword = ReadConfig.keystorePassword;
+        String smartContractAddress = ReadConfig.smartContractAddress;
         Long timeOutInSec = 30L;
         String query = "CALL getName() USE SMARTCONTRACT "
-                + "'com.impetus.blkchn.eth.smartContract.FirstSmartContract' WITH ADDRESS '<address>' AND WITHASYNC true is_Valid";
+                + "'com.impetus.blkchn.eth.smartContract.FirstSmartContract' WITH ADDRESS '"+smartContractAddress+"' AND WITHASYNC true is_Valid";
         try {
             Class.forName(driverClass);
             Properties prop = new Properties();
-            prop.put(DriverConstants.KEYSTORE_PATH, "/home/<path>");
-            prop.put(DriverConstants.KEYSTORE_PASSWORD, "<password>");
+            prop.put(DriverConstants.KEYSTORE_PATH, keystorePath);
+            prop.put(DriverConstants.KEYSTORE_PASSWORD, keystorePassword);
             Connection conn = DriverManager.getConnection(url, prop);
             Statement stmt = conn.createStatement();
             boolean retBool = stmt.execute(query);
@@ -47,7 +52,7 @@ public class SmartContractFunction {
                 ResultSet ret = stmt.getResultSet();
                 ret.next();
                 CompletableFuture return_value = (CompletableFuture) ret.getObject(1);
-                LOGGER.info("completed :: " + return_value.get(10,TimeUnit.SECONDS));
+                LOGGER.info("completed :: " + return_value.get(timeOutInSec,TimeUnit.SECONDS));
             }
         } catch (Exception e1) {
             throw new BlkchnException("Error while running function transaction", e1);

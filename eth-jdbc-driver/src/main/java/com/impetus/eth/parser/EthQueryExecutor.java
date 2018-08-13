@@ -25,11 +25,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import com.impetus.blkch.sql.smartcontract.*;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 import com.impetus.blkch.sql.query.*;
 import com.impetus.blkch.sql.query.Comparator;
-import com.impetus.blkch.util.Tuple2;
 import com.impetus.blkch.util.Utilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +45,6 @@ import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.Transfer;
 import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Convert;
-
 import com.impetus.blkch.BlkchnException;
 import com.impetus.blkch.sql.DataFrame;
 import com.impetus.blkch.sql.GroupedDataFrame;
@@ -62,7 +58,6 @@ import com.impetus.blkch.sql.parser.LogicalPlan;
 import com.impetus.blkch.sql.parser.TreeNode;
 import com.impetus.blkch.sql.query.BytesArgs;
 import com.impetus.blkch.sql.query.Column;
-import com.impetus.blkch.sql.query.Comparator;
 import com.impetus.blkch.sql.query.DataNode;
 import com.impetus.blkch.sql.query.DirectAPINode;
 import com.impetus.blkch.sql.query.FromItem;
@@ -75,7 +70,6 @@ import com.impetus.blkch.sql.query.LogicalOperation;
 import com.impetus.blkch.sql.query.LogicalOperation.Operator;
 import com.impetus.blkch.util.Range;
 import com.impetus.blkch.util.RangeOperations;
-import com.impetus.blkch.util.Utilities;
 import com.impetus.eth.jdbc.DriverConstants;
 import com.impetus.eth.query.EthColumns;
 import com.impetus.eth.query.EthTables;
@@ -200,12 +194,12 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         }
 
     }
-
+//<T extends Number & Comparable<T>>
     @Override
-    public <T extends Number & Comparable<T>>  RangeNode<T> getFullRange(){
+    public RangeNode getFullRange(){
         Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
         String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
-        RangeNode<T> rangeNode = new RangeNode<T>(tableName,EthColumns.BLOCKNUMBER);
+        RangeNode rangeNode = new RangeNode(tableName,EthColumns.BLOCKNUMBER);
         BigInteger blockHeight = null;
         try{
             blockHeight = getBlockHeight();
@@ -215,85 +209,39 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         return rangeNode;
     }
 
-    /*@Override
-    public RangeNode processDirectAPINodeForRange(DirectAPINode directAPINode) {
-        String column = directAPINode.getColumn();
-        String value = directAPINode.getValue();
-        String table = directAPINode.getTable();
-        BigInteger blocknumber = new BigInteger("0");
-        if (table.equals(EthTables.BLOCK)) {
-            Block block = null;
-            if (column.equals(EthColumns.BLOCKNUMBER)) {
-                try {
-                    block = getBlockByNumber(value);
-                    blocknumber = block.getNumber();
-                } catch (Exception e) {
-                    LOGGER.error("Error querying block by number " + value, e);
-                }
-            } else if (column.equals(EthColumns.HASH)) {
-                try {
-                    block = getBlockByHash(value.replace("'", ""));
-                    blocknumber = block.getNumber();
-                } catch (Exception e) {
-                    LOGGER.error("Error querying block by hash " + value.replace("'", ""), e);
-                }
-            }
-        } else if (table.equals(EthTables.TRANSACTION)) {
-            if (column.equals(EthColumns.HASH)) {
-                try {
-                    Transaction  transaction = getTransactionByHash(value.replace("'", ""));
-                    blocknumber = transaction.getBlockNumber();
-                } catch (Exception e) {
-                    LOGGER.error("Error querying transaction by hash " + value.replace("'", ""), e);
-                }
-            } else if (column.equals(EthColumns.BLOCKNUMBER)) {
-                try {
-                    Block block = getBlockByNumber(value);
-                    blocknumber = block.getNumber();
-                } catch (Exception e) {
-                    LOGGER.error("Error querying block by number " + value, e);
-                }
-            }
-        }
-
-        RangeNode rangeNode = new RangeNode<BigInteger>(getTableName(),"blocknumber");
-        rangeNode.getRangeList().addRange(new Range(blocknumber,blocknumber));
-        return rangeNode;
-    }*/
-
     @Override
-    public <T extends Number & Comparable<T>>  RangeNode<T> getRangeNodeFromDataNode(DataNode<?> dataNode) {
+    public  RangeNode getRangeNodeFromDataNode(DataNode dataNode) {
         Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
         String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
-        RangeOperations<T> rangeOps = physicalPlan.getRangeOperations(tableName, EthColumns.BLOCKNUMBER);
+        RangeOperations rangeOps = physicalPlan.getRangeOperations(tableName, EthColumns.BLOCKNUMBER);
         if(dataNode.getTable().equalsIgnoreCase(EthTables.BLOCK) && !dataNode.getKeys().isEmpty()){
             BigInteger directBlock = new BigInteger(dataNode.getKeys().get(0).toString());
-            RangeNode<T> rangeNode = new RangeNode<T>(tableName,EthColumns.BLOCKNUMBER);
+            RangeNode rangeNode = new RangeNode(tableName,EthColumns.BLOCKNUMBER);
             rangeNode.getRangeList().addRange(new Range(directBlock,directBlock));
             return rangeNode;
         }else if(dataNode.getTable().equalsIgnoreCase(EthTables.TRANSACTION) && !dataNode.getKeys().isEmpty()){
             if(dataNode.getKeys().get(0) instanceof List && !((List) dataNode.getKeys().get(0)).isEmpty()){
-                RangeNode<T> rangeNode = new RangeNode<T>(tableName,EthColumns.BLOCKNUMBER);
+                RangeNode rangeNode = new RangeNode(tableName,EthColumns.BLOCKNUMBER);
                 try{
                     BigInteger directBlock = getTransactionByHash(((List) dataNode.getKeys().get(0)).get(0).toString()).getBlockNumber();
                     rangeNode.getRangeList().addRange(new Range(directBlock,directBlock));
                 }catch(Exception e){
-                    rangeNode.getRangeList().addRange(new Range<T>(rangeOps.getMinValue(), rangeOps.getMinValue()));
+                    rangeNode.getRangeList().addRange(new Range(rangeOps.getMinValue(), rangeOps.getMinValue()));
                 }
                 return rangeNode;
             }else{
-                RangeNode<T> rangeNode = new RangeNode<T>(tableName,EthColumns.BLOCKNUMBER);
+                RangeNode rangeNode = new RangeNode(tableName,EthColumns.BLOCKNUMBER);
                 try{
                     BigInteger directBlock = getTransactionByHash(dataNode.getKeys().get(0).toString()).getBlockNumber();
                     rangeNode.getRangeList().addRange(new Range(directBlock,directBlock));
                 }catch(Exception e){
-                    rangeNode.getRangeList().addRange(new Range<T>(rangeOps.getMinValue(), rangeOps.getMinValue()));
+                    rangeNode.getRangeList().addRange(new Range(rangeOps.getMinValue(), rangeOps.getMinValue()));
                 }
                 return rangeNode;
             }
         } else {
-            RangeNode<T> rangeNode = new RangeNode<>(tableName,EthColumns.BLOCKNUMBER);
-            rangeNode.getRangeList().addRange(new Range<T>(rangeOps.getMinValue(), rangeOps.getMinValue()));
+            RangeNode rangeNode = new RangeNode<>(tableName,EthColumns.BLOCKNUMBER);
+            rangeNode.getRangeList().addRange(new Range(rangeOps.getMinValue(), rangeOps.getMinValue()));
             return rangeNode;
         }
     }
