@@ -15,12 +15,15 @@ After discussion, Raise a new issue on [github](https://github.com/Impetus/eth-j
 - Add proper javadocs and comments.
 - Contributed code must pass existing test cases.
 - Write new test cases using junit.
+- For Eclipse: use this [Formatter](https://github.com/JeetenJaiswal/eth-jdbc-connector/blob/updateReadMe/sites/eclipse-java-code-formatter.xml)
 - We recommend contributor to use Java 8.
 
 
 ### 3. Code Submission and Review:
 
 The contributor needs to open a pull request on the [trunk](https://github.com/Impetus/eth-jdbc-connector/compare?expand=1) and get it reviewed by eth-jdbc-connector developers.
+
+Please follow [these steps](https://github.com/JeetenJaiswal/eth-jdbc-connector/wiki/Git-Workflow) before creating pull request.
 
 The contributor needs to incorporate code changes (_if any_).
 
