@@ -250,10 +250,7 @@ public class EthStatement implements BlkchnStatement {
                         }
                     }
                 if (sqlEx != null) {
-                    // StringBuilder exceptionMessage = new StringBuilder();
                     for (Object stmNum : exceptionMap.keySet()) {
-                        // exceptionMessage.append("Statement : "+ batchedArgs.get((int)stmNum) +" : throw exception
-                        // "+exceptionMap.get(stmNum)+"\n");
                         LOGGER.error("Statement : " + batchedArgs.get((int) stmNum) + " : throw exception "
                             + exceptionMap.get(stmNum) + "\n");
                     }

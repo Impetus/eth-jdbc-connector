@@ -97,7 +97,7 @@ private[sql] class TransactionUTD extends UserDefinedType[TransactionType] {
           if (values.getUTF8String(13) != null) values.getUTF8String(13).toString else null,
           if (values.getUTF8String(14) != null) values.getUTF8String(14).toString else null,
           if (values.getUTF8String(15) != null) values.getUTF8String(15).toString else null,
-          if (values.getUTF8String(15) != null) values.getUTF8String(16).toString.toInt else 0)
+          if (values.getUTF8String(16) != null) values.getUTF8String(16).toString.toInt else 0)
         new TransactionType(trn)
     }
   }

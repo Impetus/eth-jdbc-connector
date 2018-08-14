@@ -194,7 +194,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         }
 
     }
-//<T extends Number & Comparable<T>>
+
     @Override
     public RangeNode getFullRange(){
         Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
@@ -259,7 +259,6 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 try {
                     block = getBlockByNumber(value);
                 } catch (Exception e) {
-                    //throw new BlkchnException("Error querying block by number " + value, e);
                     LOGGER.warn(e.getMessage());
                     return new DataNode<>(table, Arrays.asList());
                 }
@@ -267,7 +266,6 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 try {
                     block = getBlockByHash(value.replace("'", ""));
                 } catch (Exception e) {
-                    //throw new BlkchnException("Error querying block by hash " + value.replace("'", ""), e);
                     LOGGER.warn(e.getMessage());
                     return new DataNode<>(table, Arrays.asList());
                 }
@@ -284,7 +282,6 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     dataMap.put(transaction.getHash(), transaction);
 
                 } catch (Exception e) {
-                    //throw new BlkchnException("Error querying transaction by hash " + value.replace("'", ""), e);
                     LOGGER.warn(e.getMessage());
                     return new DataNode<>(table, Arrays.asList());
                 }
@@ -300,7 +297,6 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                     }
 
                 } catch (Exception e) {
-                    //throw new BlkchnException("Error querying transaction by hash " + value.replace("'", ""), e);
                     LOGGER.warn(e.getMessage());
                     return new DataNode<>(table, Arrays.asList());
                 }
