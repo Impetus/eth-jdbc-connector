@@ -18,6 +18,9 @@ package com.impetus.eth.jdbc;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +36,8 @@ import com.impetus.blkch.util.placeholder.InsertPlaceholderHandler;
 import com.impetus.blkch.util.placeholder.PlaceholderHandler;
 import com.impetus.blkch.util.placeholder.QueryPlaceholderHandler;
 import com.impetus.eth.parser.EthQueryExecutor;
+
+import jnr.ffi.Struct.int16_t;
 
 public class EthPreparedStatement extends AbstractPreparedStatement {
 
@@ -59,6 +64,8 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
     protected int rowCount;
     
     protected int fetchSize;
+    
+    protected List<Object[]> batchList= new ArrayList<Object[]>();
 
     public EthPreparedStatement(EthConnection connection, String sql, int rSetType, int rSetConcurrency) {
         super();
@@ -83,6 +90,23 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
             this.placeholderValues = new Object[placeholderHandler.getIndexListCount()];
     }
 
+    @Override
+    public void addBatch() throws SQLException {
+       batchList.add(placeholderValues);
+       this.placeholderValues=new Object[placeholderHandler.getIndexListCount()];;
+    }
+    
+    @Override
+    public int[] executeBatch() throws SQLException {
+        int[] updateCounts= new int[batchList.size()];
+        for(int i=0;i<batchList.size();i++){
+            for(int j=0;j<batchList.get(i).length;j++)
+                System.out.println("batchlist "+i+" object "+j+" value "+batchList.get(i)[j]);
+            this.placeholderValues=batchList.get(i);
+            updateCounts[i]=executeUpdate();
+        }
+        return updateCounts;
+    }
     @Override
     public ResultSet executeQuery() throws SQLException {
         LOGGER.info("Entering into executeQuery Block");

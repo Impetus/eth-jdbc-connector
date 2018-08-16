@@ -265,7 +265,7 @@ public class EthConnection implements BlkchnConnection {
 
     @Override
     public DatabaseMetaData getMetaData() throws SQLException {
-        throw new UnsupportedOperationException();
+        return new EthDatabaseMetadata();
     }
 
     @Override
