@@ -1,27 +1,16 @@
 package com.impetus.eth.jdbc;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
 import java.sql.SQLException;
 
-public class EthDatabaseMetadata implements DatabaseMetaData {
+import com.impetus.blkch.jdbc.BlkchnDatabaseMetaData;
+
+public class EthDatabaseMetadata implements BlkchnDatabaseMetaData {
 
     public EthDatabaseMetadata() {
         // TODO Auto-generated constructor stub
-    }
-
-    @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        // TODO Auto-generated method stub
-        return false;
     }
 
     @Override
@@ -1078,6 +1067,18 @@ public class EthDatabaseMetadata implements DatabaseMetaData {
 
     @Override
     public boolean generatedKeyAlwaysReturned() throws SQLException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
         // TODO Auto-generated method stub
         return false;
     }
