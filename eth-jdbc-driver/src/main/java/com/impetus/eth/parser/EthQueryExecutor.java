@@ -174,7 +174,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     private DataFrame getFromTable() {
         Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
         String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
-      //  physicalPlan.getWhereClause().traverse();
+        physicalPlan.getWhereClause().traverse();
         if (physicalPlan.getWhereClause() != null) {
             DataNode<?> finalData;
             if (physicalPlan.getWhereClause().hasChildType(LogicalOperation.class)) {
@@ -564,13 +564,14 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
 
     private List<TransactionResult> getTransactions(String blockNumber) throws IOException, Exception {
         LOGGER.info("Getting details of transactions stored in block - " + blockNumber);
-        EthBlock block = web3jClient
-                .ethGetBlockByNumber(DefaultBlockParameter.valueOf(new BigInteger(blockNumber)), true).send();
+        try {
+            EthBlock block = web3jClient
+                    .ethGetBlockByNumber(DefaultBlockParameter.valueOf(new BigInteger(blockNumber)), true).send();
 
-        if (block == null || block.hasError())
-            throw new Exception("blockNumber not found : " + blockNumber);
-
-        return block.getBlock().getTransactions();
+            return block.getBlock().getTransactions();
+        } catch (Exception e) {
+             return  new ArrayList<>();
+        }
     }
 
     private Block getBlockByNumber(String blockNumber) throws IOException, Exception {
