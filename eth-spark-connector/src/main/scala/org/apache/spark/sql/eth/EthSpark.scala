@@ -17,10 +17,10 @@ package org.apache.spark.sql.eth
 
 import com.impetus.blkch.spark.connector.BlkchnConnector
 import com.impetus.blkch.spark.connector.rdd.partitioner.BlkchnPartitioner
-import com.impetus.blkch.spark.connector.rdd.{ BlkchnRDD, EthRDD, ReadConf }
+import com.impetus.blkch.spark.connector.rdd.{BlkchnRDD, EthRDD, ReadConf}
 import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
-import org.apache.spark.{ SparkConf, SparkContext }
-import org.apache.spark.sql.{ DataFrame, SparkSession }
+import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 import scala.reflect.ClassTag
 
@@ -36,6 +36,28 @@ case class EthSpark(sparkSession: SparkSession, connector: BlkchnConnector, read
     sparkSession.read.format(EthFormat)
       .options(readConf.asOptions()).load()
   }
+
+  def save(dataFrame: DataFrame) ={
+    def createInsertStat(row: Row): String = {
+      val sb = new StringBuilder
+      sb.append("insert into transaction (toAddress, value, unit, async) values (")
+      sb.append("'" + (if(row.get(0) == null) null else row.get(0).toString) + "',")
+      sb.append(if(row.get(1) == null) null else row.get(1).toString)
+      sb.append(",'ether', false)")
+      sb.toString
+    }
+    dataFrame.foreachPartition {
+      rows =>
+        connector.withStatementDo {
+          stat =>
+            for(row <- rows) {
+              val insertCmd = createInsertStat(row)
+              stat.execute(insertCmd)
+            }
+        }
+    }
+  }
+
 }
 
 object EthSpark {
@@ -58,12 +80,17 @@ object EthSpark {
 
   def load(spark: SparkSession): DataFrame = builder().sparkSession(spark).build().toDF()
 
+  def save(dataframe: DataFrame, options: Map[String, String])= {
+    builder().sparkSession(dataframe.sparkSession).options(options).mode(Mode.Write).build().save(dataframe)
+  }
+
   class Builder {
 
     private var sparkSession: Option[SparkSession] = None
     private var connector: Option[BlkchnConnector] = None
     private var readConfig: Option[ReadConf] = None
     private var options: Map[String, String] = Map()
+    private var mode: Mode.Value = Mode.Read
 
     def sparkSession(sparkSession: SparkSession): Builder = {
       this.sparkSession = Some(sparkSession)
@@ -95,12 +122,20 @@ object EthSpark {
       this
     }
 
+    def mode(mode: Mode.Value): Builder = {
+      this.mode = mode
+      this
+    }
+
     def build(): EthSpark = {
       require(sparkSession.isDefined, "The SparkSession must be set, either explicitly or via the SparkContext")
       val session = sparkSession.get
       val readConf = readConfig match {
         case Some(config) => config
-        case None => ReadConf(session.sparkContext.conf, options)
+        case None => mode match {
+          case Mode.Read => ReadConf(session.sparkContext.conf, options)
+          case Mode.Write => null
+        }
       }
       val conn = connector match {
         case Some(connect) => connect
@@ -108,6 +143,13 @@ object EthSpark {
       }
       new EthSpark(session, conn, readConf)
     }
+  }
+
+  private object Mode extends Enumeration {
+    type Mode = Value
+
+    val Read = Value
+    val Write = Value
   }
 
   object implicits extends Serializable {

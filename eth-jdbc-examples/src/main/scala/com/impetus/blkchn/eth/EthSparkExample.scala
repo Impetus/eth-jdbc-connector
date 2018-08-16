@@ -39,6 +39,7 @@ object EthSparkExample {
     test3
     test4
     testInsert
+    testDataFrameSave
   }
   def test1 = {
     val readConf = ReadConf(None, Some(30000), "select * from block where blocknumber > 123 and blocknumber < 132 and hash='2f32268b02c2d498c926401f6e74406525c02f735feefe457c5689'")
@@ -99,7 +100,8 @@ object EthSparkExample {
   }
 
   def testInsert = {
-    val readConf = ReadConf(None, None, "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)")
+    val readConf = ReadConf(None, None,
+      "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)")
     val transactionStatus = EthSpark.insertTransaction(readConf, Map(
       "url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234",
       "KEYSTORE_PATH" -> "<Path To Keystore>",
@@ -107,5 +109,17 @@ object EthSparkExample {
     LOGGER.info(s"\n\nInsert Transaction ${if (transactionStatus) "succeeded" else "failed"}")
 
   }
+
+  def testDataFrameSave ={
+    var output = spark.createDataFrame(Seq(
+      ("8144c67b144a408abc989728e32965edf37adaa1", 2),
+      ("8144c67b144a408abc989728e32965edf37adaa1", 2)
+    )).toDF("address", "value_in_ether")
+    val transactionStatus = EthSpark.save(output,Map(
+      "url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234",
+      "KEYSTORE_PATH" -> "<Path To Keystore>",
+      "KEYSTORE_PASSWORD" -> "<password>"))
+  }
+
 
 }

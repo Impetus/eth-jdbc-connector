@@ -53,7 +53,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.impetus.blkchn</groupId>
-			<artifactId>spark-blkchn-connector</artifactId>
+			<artifactId>blkchn-spark-connector</artifactId>
 			<version>${blkchn.driver.version}</version>
 		</dependency>
 	</dependencies>

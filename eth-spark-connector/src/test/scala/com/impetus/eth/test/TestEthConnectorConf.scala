@@ -29,7 +29,7 @@ class TestEthConnectorConf extends FlatSpec with BeforeAndAfter {
   before {
     ethConnectorConf = new EthConnectorConf(conf, Map(
       "url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234",
-      "KEYSTORE_PASSWORD" -> "impetus123", "KEYSTORE_PATH" -> "UTC--2017-09-11T04-53-29.614189140Z--8144c67b144a408abc989728e32965edf37adaa1"))
+      "KEYSTORE_PASSWORD" -> "impetus123", "KEYSTORE_PATH" -> "src/test/resources/UTC--2017-09-11T04-53-29.614189140Z--8144c67b144a408abc989728e32965edf37adaa1"))
   }
 
   "EthConnectorConf" should "have default value" in {
@@ -40,7 +40,7 @@ class TestEthConnectorConf extends FlatSpec with BeforeAndAfter {
 
   it should "able to return passed value from option" in {
     assert(ethConnectorConf.connectionURL.equals("jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
-    assert(ethConnectorConf.keystorePath.equals("UTC--2017-09-11T04-53-29.614189140Z--8144c67b144a408abc989728e32965edf37adaa1"))
+    assert(ethConnectorConf.keystorePath.equals("src/test/resources/UTC--2017-09-11T04-53-29.614189140Z--8144c67b144a408abc989728e32965edf37adaa1"))
     assert(ethConnectorConf.keystorePassword.equals("impetus123"))
   }
 
@@ -55,10 +55,10 @@ class TestEthConnectorConf extends FlatSpec with BeforeAndAfter {
 
   it should "able to work with spark conf only" in {
     val sparkConf = new SparkConf().set("url", "jdbc:blkchn:ethereum://ropsten.infura.io/1234").
-      set("KEYSTORE_PASSWORD", "impetus123").set("KEYSTORE_PATH", "UTC--2017-09-11T04-53-29.614189140Z--8144c67b144a408abc989728e32965edf37adaa1")
+      set("KEYSTORE_PASSWORD", "impetus123").set("KEYSTORE_PATH", "src/test/resources/UTC--2017-09-11T04-53-29.614189140Z--8144c67b144a408abc989728e32965edf37adaa1")
     ethConnectorConf = EthConnectorConf(sparkConf)
     assert(ethConnectorConf.connectionURL.equals("jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
-    assert(ethConnectorConf.keystorePath.equals("UTC--2017-09-11T04-53-29.614189140Z--8144c67b144a408abc989728e32965edf37adaa1"))
+    assert(ethConnectorConf.keystorePath.equals("src/test/resources/UTC--2017-09-11T04-53-29.614189140Z--8144c67b144a408abc989728e32965edf37adaa1"))
     assert(ethConnectorConf.keystorePassword.equals("impetus123"))
     assert(ethConnectorConf.toString.contains("impetus123"))
   }

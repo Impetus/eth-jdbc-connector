@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.impetus.eth.test
 
-import java.math.BigInteger
-
 import com.impetus.blkch.spark.connector.rdd.ReadConf
 import com.impetus.test.catagory.IntegrationTest
 import org.apache.spark.sql.Row
@@ -71,6 +69,16 @@ class TestEthSparkSamples extends FunSuite with ShearedSparkSession {
     val df = spark.read.format("org.apache.spark.sql.eth").options(option).load()
     df.show()
     LOGGER.info(df.schema.toString())
+  }
+
+  test("save dataFrame") {
+    var output = spark.createDataFrame(Seq(
+      ("8144c67b144a408abc989728e32965edf37adaa1", 1)
+    )).toDF("address", "value_in_ether")
+    val transactionStatus = EthSpark.save(output,Map(
+      "url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234",
+      "KEYSTORE_PATH" -> getClass.getResource("/UTC--2017-09-11T04-53-29.614189140Z--8144c67b144a408abc989728e32965edf37adaa1").getPath,
+      "KEYSTORE_PASSWORD" -> "impetus123"))
   }
 
   def getReadConf(splitCount: Option[Int], fetchSizeInRows: Option[Int], query: String): ReadConf = {

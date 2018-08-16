@@ -333,11 +333,17 @@ public class EthResultSet extends AbstractResultSet {
         if (columnIndex < 1 || columnIndex > currentRow.length) {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
+        if (currentRow[columnIndex - 1] instanceof BigInteger) {
+            return new BigDecimal((BigInteger)currentRow[columnIndex - 1]);
+        }
         return (BigDecimal) currentRow[columnIndex - 1];
     }
 
     @Override
     public BigDecimal getBigDecimal(String columnLabel) throws SQLException {
+        if (currentRow[getColumnIndex(columnLabel)] instanceof BigInteger) {
+            return new BigDecimal((BigInteger)currentRow[getColumnIndex(columnLabel)]);
+        }
         return (BigDecimal) currentRow[getColumnIndex(columnLabel)];
     }
 

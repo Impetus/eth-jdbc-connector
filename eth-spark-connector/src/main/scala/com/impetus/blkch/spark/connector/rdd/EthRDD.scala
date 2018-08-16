@@ -37,7 +37,7 @@ class EthRDD[R: ClassTag](
     } else if (data.isInstanceOf[java.util.ArrayList[_]]) {
       StructField(metadata.getColumnLabel(index), ArrayType(StringType, true), true)
     } else {
-      StructField(metadata.getColumnLabel(index), StringType, true)
+      StructField(metadata.getColumnLabel(index), ArrayType(StringType, true), true)
     }
 
   override def handleExtraData(index: Int, metadata: ResultSetMetaData, data: java.lang.Object): Any = if (data.isInstanceOf[java.util.ArrayList[_]] && metadata.getColumnName(index).equalsIgnoreCase("transactions")) {
@@ -47,7 +47,8 @@ class EthRDD[R: ClassTag](
     val strList = data.asInstanceOf[java.util.ArrayList[String]].asScala
     strList.asInstanceOf[Any]
   } else {
-    data.asInstanceOf[Any]
+    val dataList = data.asInstanceOf[java.util.ArrayList[_]].asScala
+    dataList.asInstanceOf[Any]
   }
 
 }
