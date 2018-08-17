@@ -41,21 +41,21 @@ public class InsertInBatch {
         String driverClass = "com.impetus.eth.jdbc.EthDriver";
 
         String query1 =
-            "insert into transaction (toAddress, value, unit, async) values (address, 1.11, 'ether', false)";
+            "insert into transaction (toAddress, value, unit, async) values ('"+address+"', 1.11, 'ether', false)";
         String query2 =
-            "insert into transaction (toAddress, value, unit, async) values (address, 1.11, 'ether', false)";
+            "insert into transaction (toAddress, value, unit, async) values ('"+address+"', 1.11, 'ether', false)";
         String query3 =
-            "insert into transaction (toAddress, value, unit, async) values (address, 1.11, 'ether', false)";
+            "insert into transaction (toAddress, value, unit, async) values ('"+address+"', 1.11, 'ether', false)";
         String query4 =
-            "insert into transaction (toAddress, value, unit, async) values (address, 1.11, 'ether', false)";
+            "insert into transaction (toAddress, value, unit, async) values ('"+address+"', 1.11, 'ether', false)";
         String query5 =
-            "insert into transaction (toAddress, value, unit, async) values (address, 1.11, 'ether', false)";
+            "insert into transaction (toAddress, value, unit, async) values ('"+address+"', 1.11, 'ether', false)";
         String query6 =
-            "insert into transaction (toAddress, value, unit, async) values (address, 1.11, 'ether', false)";
+            "insert into transaction (toAddress, value, unit, async) values ('"+address+"', 1.11, 'ether', false)";
         String query7 =
-            "insert into transaction (toAddress, value, unit, async) values (address, 1.11, 'ether', false)";
+            "insert into transaction (toAddress, value, unit, async) values ('"+address+"', 1.11, 'ether', false)";
         String query8 =
-            "insert into transaction (toAddress, value, unit, async) values (address, 1.11, 'ether', false)";
+            "insert into transaction (toAddress, value, unit, async) values ('"+address+"', 1.11, 'ether', false)";
         try {
             Class.forName(driverClass);
             Properties prop = new Properties();
@@ -63,7 +63,6 @@ public class InsertInBatch {
             prop.put(DriverConstants.KEYSTORE_PASSWORD, keystorePassword);
             Connection conn = DriverManager.getConnection(url, prop);
             Statement stmt = conn.createStatement();
-            ((EthStatement) stmt).setContinueBatchOnError(true);
             stmt.addBatch(query1);
             stmt.addBatch(query2);
             stmt.addBatch(query3);

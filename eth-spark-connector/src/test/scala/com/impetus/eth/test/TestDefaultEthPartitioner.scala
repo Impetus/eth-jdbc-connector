@@ -26,7 +26,7 @@ import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
 import com.impetus.test.catagory.{ UnitTest }
 
 @UnitTest
-class TestDefaultEthPartitioner extends FlatSpec with BeforeAndAfter with ShearedSparkSession {
+class TestDefaultEthPartitioner extends FlatSpec with BeforeAndAfter with SharedSparkSession {
 
   //var spark: SparkSession = null
   var ethConnectorConf: EthConnectorConf = null

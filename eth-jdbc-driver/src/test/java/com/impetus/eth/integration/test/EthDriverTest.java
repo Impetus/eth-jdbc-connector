@@ -100,6 +100,24 @@ public class EthDriverTest {
                 System.out.println();
             }
 
+            LOGGER.info("********************SELECT TRANSACTION WITH Transaction HASH************");
+            rs = stmt.executeQuery(
+                    "Select * FROM transaction where blocknumber > 3853669 and blocknumber < 3853671 and hash = '0xbbbaa1005707a8b86e6a3c2d55ab8381f9f42d88873f8d2f857f40acd7dfb69e'");//blockhash = '0x938ecd8eee580ac0998571d4105cb27266926a24686a66dbcc36cf609ece5f05'");
+            rsmd = rs.getMetaData();
+            for (int i = 1; i <= rsmd.getColumnCount(); i++)
+                LOGGER.info(rsmd.getColumnLabel(i) + " | ");
+            assert(rs.next());
+
+
+            LOGGER.info("********************SELECT TRANSACTION WITH BLOCKHASH************");
+            rs = stmt.executeQuery(
+                    "Select * FROM transaction where blocknumber > 3853669 and blocknumber < 3853671 and blockhash = '0x938ecd8eee580ac0998571d4105cb27266926a24686a66dbcc36cf609ece5f05'");//blockhash = '0x938ecd8eee580ac0998571d4105cb27266926a24686a66dbcc36cf609ece5f05'");
+            rsmd = rs.getMetaData();
+            for (int i = 1; i <= rsmd.getColumnCount(); i++)
+                LOGGER.info(rsmd.getColumnLabel(i) + " | ");
+            assert(rs.next());
+
+
         } catch (Exception e1) {
             e1.printStackTrace();
         }

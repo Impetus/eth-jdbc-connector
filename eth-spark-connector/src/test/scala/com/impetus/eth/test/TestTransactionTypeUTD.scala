@@ -30,7 +30,7 @@ import scala.collection.JavaConverters._
 import com.impetus.blkch.spark.connector.rdd._
 
 @IntegrationTest
-class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfter with ShearedSparkSession {
+class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfter with SharedSparkSession {
 
   //var spark: SparkSession = null
   val ethPartitioner: BlkchnPartitioner = DefaultEthPartitioner

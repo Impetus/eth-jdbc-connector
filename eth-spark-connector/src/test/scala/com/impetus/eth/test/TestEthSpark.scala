@@ -24,7 +24,7 @@ import org.apache.spark.sql.eth.EthSpark
 import org.scalatest.{ BeforeAndAfter, FlatSpec }
 
 @IntegrationTest
-class TestEthSpark extends FlatSpec with BeforeAndAfter with ShearedSparkSession {
+class TestEthSpark extends FlatSpec with BeforeAndAfter with SharedSparkSession {
 
   //var spark: SparkSession = null
   val ethPartitioner: BlkchnPartitioner = DefaultEthPartitioner

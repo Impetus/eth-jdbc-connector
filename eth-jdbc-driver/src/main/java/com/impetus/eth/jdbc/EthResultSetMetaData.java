@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.sql.Types;
 
+import com.impetus.blkch.BlkchnException;
 import com.impetus.eth.query.EthColumns;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,9 +116,9 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
             if (colTypeMap.containsKey(colName))
                 return (int) colTypeMap.get(colName);
             else
-                throw new SQLFeatureNotSupportedException();
+                throw new BlkchnException("Column is not present in result set");
         }
-        throw new SQLFeatureNotSupportedException();
+        throw new BlkchnException("Column is not present in result set");
     }
 
     @Override

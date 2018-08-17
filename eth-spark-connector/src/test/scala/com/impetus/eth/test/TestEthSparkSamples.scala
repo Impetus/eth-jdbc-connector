@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory
 import scala.collection.mutable.ArrayBuffer
 
 @IntegrationTest
-class TestEthSparkSamples extends FunSuite with ShearedSparkSession {
+class TestEthSparkSamples extends FunSuite with SharedSparkSession {
   import org.apache.spark.sql.eth.EthSpark.implicits._
 
   private val LOGGER = LoggerFactory.getLogger(classOf[TestEthSparkSamples])

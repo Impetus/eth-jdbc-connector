@@ -43,18 +43,23 @@ public class TestEthResultSetMetadata extends TestCase {
 
     String queryT1 = "select * from block";
     String queryT2 = "select count(*), sum(blocknumber) as sum, blocknumber, transactions from block";
+    String queryT3 = "select  blocknumber, hash from transaction";
     Map<String,Integer> dataTypeMapQ1 = null;
     Map<String,Integer> dataTypeMapQ2 = null;
+    Map<String,Integer> dataTypeMapQ3 = null;
     ResultSet queryResultSetQ1 = null;
     ResultSet queryResultSetQ2 = null;
+    ResultSet queryResultSetQ3 = null;
     String[] columns = { EthColumns.BLOCKNUMBER, EthColumns.HASH, EthColumns.PARENTHASH, EthColumns.NONCE,
             EthColumns.SHA3UNCLES, EthColumns.LOGSBLOOM, EthColumns.TRANSACTIONSROOT, EthColumns.STATEROOT,
             EthColumns.RECEIPTSROOT, EthColumns.AUTHOR, EthColumns.MINER, EthColumns.MIXHASH,
             EthColumns.TOTALDIFFICULTY, EthColumns.EXTRADATA, EthColumns.SIZE, EthColumns.GASLIMIT,
             EthColumns.GASUSED, EthColumns.TIMESTAMP, EthColumns.TRANSACTIONS, EthColumns.UNCLES,
             EthColumns.SEALFIELDS };
+    List<String> colmnstoExpect = new ArrayList<>();
 
     String[] columnsQ2 = { "count(*)", "sum(blocknumber)", "blocknumber", "transactions" };
+    String[] columnsQ3 = { "blocknumber", "hash" };
 
     int stringType = Types.VARCHAR;
     int bigintType = Types.BIGINT;
@@ -64,19 +69,36 @@ public class TestEthResultSetMetadata extends TestCase {
     protected void setUp() {
         LogicalPlan logicalPlanT1 = getLogicalPlan(queryT1);
         LogicalPlan logicalPlanT2 = getLogicalPlan(queryT2);
+        LogicalPlan logicalPlanT3 = getLogicalPlan(queryT3);
         EthQueryExecutor qext1 = new EthQueryExecutor(logicalPlanT1,null,null);
         EthQueryExecutor qext2 = new EthQueryExecutor(logicalPlanT2,null,null);
+        EthQueryExecutor qext3 = new EthQueryExecutor(logicalPlanT3,null,null);
         dataTypeMapQ1 = qext1.computeDataTypeColumnMap();
         dataTypeMapQ2 = qext2.computeDataTypeColumnMap();
+        dataTypeMapQ3 = qext3.computeDataTypeColumnMap();
         PhysicalPlan physicalPlanT1 = new EthPhysicalPlan(logicalPlanT1);
         PhysicalPlan physicalPlanT2 = new EthPhysicalPlan(logicalPlanT2);
+        PhysicalPlan physicalPlanT3 = new EthPhysicalPlan(logicalPlanT3);
+
+        colmnstoExpect = ((EthPhysicalPlan) physicalPlanT1).getColumns("block");
+
 
         List<List<Object>> data = new ArrayList<List<Object>>();
         DataFrame dfT1 = new DataFrame(data, columns, physicalPlanT1.getColumnAliasMapping());
         DataFrame dfT2 = new DataFrame(data, columnsQ2, physicalPlanT2.getColumnAliasMapping());
+        DataFrame dfT3 = new DataFrame(data, columnsQ3, physicalPlanT3.getColumnAliasMapping());
 
         queryResultSetQ1 = new EthResultSet(dfT1, java.sql.ResultSet.FETCH_FORWARD, java.sql.ResultSet.CONCUR_READ_ONLY,"block", dataTypeMapQ1);
         queryResultSetQ2 = new EthResultSet(dfT2, java.sql.ResultSet.FETCH_FORWARD, java.sql.ResultSet.CONCUR_READ_ONLY, "block", dataTypeMapQ2);
+        queryResultSetQ3 = new EthResultSet(dfT3, java.sql.ResultSet.FETCH_FORWARD, java.sql.ResultSet.CONCUR_READ_ONLY, "transaction", dataTypeMapQ3);
+    }
+
+    @Test
+    public void testGetColumns(){
+        List<String> columnsActual = Arrays.asList(columns);
+        Collections.sort(colmnstoExpect);
+        Collections.sort(columnsActual);
+        assertEquals(colmnstoExpect, columnsActual);
     }
 
     @Test
@@ -92,11 +114,23 @@ public class TestEthResultSetMetadata extends TestCase {
     }
 
     @Test
+    public void testEthResultSetQ3Size() {
+        int actual = dataTypeMapQ3.size();
+        assertEquals(2,actual);
+    }
+
+    @Test
     public void testDataTypeMapQ2DataType() {
         assertEquals(bigintType,(int)dataTypeMapQ2.get(columnsQ2[0]));
         assertEquals(bigintType,(int)dataTypeMapQ2.get(columnsQ2[1]));
         assertEquals(bigintType,(int)dataTypeMapQ2.get(columnsQ2[2]));
         assertEquals(objectType,(int)dataTypeMapQ2.get(columnsQ2[3]));
+    }
+
+    @Test
+    public void testDataTypeMapQ3DataType() {
+        assertEquals(bigintType,(int)dataTypeMapQ3.get(columnsQ3[0]));
+        assertEquals(stringType,(int)dataTypeMapQ3.get(columnsQ3[1]));
     }
 
     @Test
@@ -119,6 +153,22 @@ public class TestEthResultSetMetadata extends TestCase {
         assertEquals(bigintType,col2DT);
         assertEquals(bigintType,col3DT);
         assertEquals(objectType,col4DT);
+    }
+
+    @Test
+    public void testEthResultSetQ3DataType() {
+        int col1DT = Integer.MIN_VALUE;
+        int col2DT = Integer.MIN_VALUE;
+        try {
+            ResultSetMetaData rsMetaData = queryResultSetQ3.getMetaData();
+            List colList = Arrays.asList(columnsQ3);
+            col1DT = rsMetaData.getColumnType(1);
+            col2DT = rsMetaData.getColumnType(2);
+        }catch (SQLException e) {
+
+        }
+        assertEquals(bigintType,col1DT);
+        assertEquals(stringType,col2DT);
     }
 
     @Test

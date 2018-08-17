@@ -24,7 +24,7 @@ import org.apache.spark.sql.types.{ ArrayType, DecimalType, StringType, Transact
 import org.scalatest.{ BeforeAndAfter, FlatSpec }
 
 @IntegrationTest
-class TestEthSparkDF extends FlatSpec with BeforeAndAfter with ShearedSparkSession {
+class TestEthSparkDF extends FlatSpec with BeforeAndAfter with SharedSparkSession {
 
   //var spark: SparkSession = null
   val ethPartitioner: BlkchnPartitioner = DefaultEthPartitioner

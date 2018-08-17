@@ -21,6 +21,8 @@ import java.sql.*;
 import java.util.*;
 import com.impetus.blkch.BlkchnException;
 import com.impetus.blkch.sql.query.RangeNode;
+import com.impetus.eth.parser.EthPhysicalPlan;
+import com.impetus.eth.query.EthColumns;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,8 +59,6 @@ public class EthStatement implements BlkchnStatement {
 
     /** Holds batched commands */
     protected List<Object> batchedArgs;
-
-    private boolean continueBatchOnError = false;
 
     protected int rSetType;
 
@@ -110,6 +110,10 @@ public class EthStatement implements BlkchnStatement {
 
     @Override
     public void addBatch(String sql) throws SQLException {
+        LogicalPlan logicalPlan = getLogicalPlan(sql);
+        if(logicalPlan.getType() == LogicalPlan.SQLType.QUERY){
+            throw new BlkchnException("BlkchnStatement Batch can only contains insert or call statements !!");
+        }
         if (this.batchedArgs == null) {
             this.batchedArgs = new ArrayList<Object>();
         }
@@ -201,80 +205,39 @@ public class EthStatement implements BlkchnStatement {
 
     @Override
     public int[] executeBatch() throws SQLException {
-        return truncateAndConvertToInt(executeBatchInternal());
+        return executeBatchInternal();
     }
 
-    public boolean isContinueBatchOnError() {
-        return continueBatchOnError;
-    }
 
-    public void setContinueBatchOnError(boolean continueBatchOnError) {
-        this.continueBatchOnError = continueBatchOnError;
-    }
-
-    protected long[] executeBatchInternal() throws SQLException {
+    protected int[] executeBatchInternal() throws SQLException {
         if (isClosed)
             throw new BlkchnException("No operations allowed after statement closed.");
         connection.verifyConnection();
         if (this.batchedArgs == null || this.batchedArgs.size() == 0) {
-            return new long[0];
+            return new int[0];
         }
         try {
-            long[] updateCounts = null;
-            Map exceptionMap = new HashMap<Integer, Exception>();
+            int[] updateCounts = null;
 
             if (this.batchedArgs != null) {
                 int nbrCommands = this.batchedArgs.size();
-                updateCounts = new long[nbrCommands];
+                updateCounts = new int[nbrCommands];
                 for (int i = 0; i < nbrCommands; i++) {
                     updateCounts[i] = -3;
                 }
-                Exception sqlEx = null;
                 for (int commandIndex = 0; commandIndex < nbrCommands; commandIndex++)
                     try {
                         String sql = (String) this.batchedArgs.get(commandIndex);
                         updateCounts[commandIndex] = execute(sql) ? 1 : 0;
                     } catch (SQLException | BlkchnException ex) {
                         updateCounts[commandIndex] = EXECUTE_FAILED;
-                        if (this.continueBatchOnError) {
-                            sqlEx = ex;
-                            exceptionMap.put(commandIndex, ex);
-                        } else {
-                            long[] newUpdateCounts = new long[commandIndex];
-                            for (int i = 0; i < newUpdateCounts.length; i++)
-                                newUpdateCounts[i] = updateCounts[i];
-                            SQLException newEx =
-                                new BatchUpdateException(ex.getMessage(), truncateAndConvertToInt(newUpdateCounts));
-                            newEx.initCause(ex);
-                            throw newEx;
-                        }
+                        System.out.println("Statement : " + batchedArgs.get(commandIndex) + " : "+ex.getMessage());
                     }
-                if (sqlEx != null) {
-                    for (Object stmNum : exceptionMap.keySet()) {
-                        LOGGER.error("Statement : " + batchedArgs.get((int) stmNum) + " : throw exception "
-                            + exceptionMap.get(stmNum) + "\n");
-                    }
-                    SQLException newEx =
-                        new BatchUpdateException("Some of the queries throw exception check error log for detail "// exceptionMessage
-                            + sqlEx.getMessage(), truncateAndConvertToInt(updateCounts));
-                    newEx.initCause(sqlEx);
-                    throw newEx;
-                }
             }
-            return (updateCounts != null) ? updateCounts : new long[0];
+            return (updateCounts != null) ? updateCounts : new int[0];
         } finally {
             clearBatch();
         }
-    }
-
-    public static int[] truncateAndConvertToInt(long[] longArray) {
-        int[] intArray = new int[longArray.length];
-
-        for (int i = 0; i < longArray.length; i++) {
-            intArray[i] = longArray[i] > Integer.MAX_VALUE ? Integer.MAX_VALUE
-                : longArray[i] < Integer.MIN_VALUE ? Integer.MIN_VALUE : (int) longArray[i];
-        }
-        return intArray;
     }
 
     @Override
@@ -315,6 +278,28 @@ public class EthStatement implements BlkchnStatement {
                 queryResultSet = new EthResultSet(dataframe, rSetType, rSetConcurrency, tableName, dataTypeColumnMap);
                 LOGGER.info("Exiting from executeQuery Block");
                 return queryResultSet;
+        }
+    }
+
+    @Override
+    public ResultSetMetaData getSchema(String sql) {
+        LOGGER.info("Entering into getSchema Block");
+        LogicalPlan logicalPlan = getLogicalPlan(sql);
+        Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
+        String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
+        EthPhysicalPlan physicalPlan = new EthPhysicalPlan(logicalPlan);
+
+        Map<String, String> aliasMapping = physicalPlan.getColumnAliasMapping();
+        List<List<Object>> data = new ArrayList<List<Object>>();
+        Map<String, Integer> dataTypeColumnMap = physicalPlan.getColumnTypeMap(tableName);
+        List<String> returnCols = physicalPlan.getColumns(tableName);
+
+        DataFrame dataframe = new DataFrame(data, returnCols, aliasMapping);
+        ResultSet queryResultSet = new EthResultSet(dataframe, rSetType, rSetConcurrency, tableName, dataTypeColumnMap);
+        try {
+            return queryResultSet.getMetaData();
+        } catch (SQLException e) {
+            throw new BlkchnException("Exception while getSchema "+e.getMessage());
         }
     }
 

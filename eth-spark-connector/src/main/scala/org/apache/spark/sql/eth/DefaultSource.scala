@@ -15,14 +15,12 @@
  ******************************************************************************/
 package org.apache.spark.sql.eth
 
-import com.impetus.blkch.spark.connector.BlkchnConnector
 import com.impetus.blkch.spark.connector.rdd.ReadConf
 import com.impetus.blkch.spark.connector.util.Logging
 import org.apache.spark.sql.{ Row, SQLContext }
 import org.apache.spark.sql.sources.{ BaseRelation, RelationProvider, SchemaRelationProvider }
 import org.apache.spark.sql.blkch.BlkchnSourceRelation
 import org.apache.spark.sql.types.StructType
-import java.util.logging.Logging
 
 class DefaultSource extends RelationProvider with SchemaRelationProvider with Logging {
 
@@ -33,7 +31,8 @@ class DefaultSource extends RelationProvider with SchemaRelationProvider with Lo
       (key, value)
     }
     val rdd = EthSpark.load[Row](sqlContext.sparkContext, readConf, options)
-    val schema = rdd.first.schema
+    val firstRow = rdd.take(1)
+    val schema = if(rdd.isEmpty) rdd.getSchema else firstRow(0).schema
     BlkchnSourceRelation(rdd, schema)(sqlContext)
   }
 

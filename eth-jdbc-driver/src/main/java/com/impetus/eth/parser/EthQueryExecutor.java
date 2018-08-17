@@ -211,10 +211,9 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
 
     @Override
     public  RangeNode getRangeNodeFromDataNode(DataNode dataNode) {
-        Table table = logicalPlan.getQuery().getChildType(FromItem.class, 0).getChildType(Table.class, 0);
-        String tableName = table.getChildType(IdentifierNode.class, 0).getValue();
+        String tableName = dataNode.getTable();
         RangeOperations rangeOps = physicalPlan.getRangeOperations(tableName, EthColumns.BLOCKNUMBER);
-        if(dataNode.getTable().equalsIgnoreCase(EthTables.BLOCK) && !dataNode.getKeys().isEmpty()){
+        if(tableName.equalsIgnoreCase(EthTables.BLOCK) && !dataNode.getKeys().isEmpty()){
             BigInteger directBlock = new BigInteger(dataNode.getKeys().get(0).toString());
             RangeNode rangeNode = new RangeNode(tableName,EthColumns.BLOCKNUMBER);
             rangeNode.getRangeList().addRange(new Range(directBlock,directBlock));
@@ -223,7 +222,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             if(dataNode.getKeys().get(0) instanceof List && !((List) dataNode.getKeys().get(0)).isEmpty()){
                 RangeNode rangeNode = new RangeNode(tableName,EthColumns.BLOCKNUMBER);
                 try{
-                    BigInteger directBlock = getTransactionByHash(((List) dataNode.getKeys().get(0)).get(0).toString()).getBlockNumber();
+                    BigInteger directBlock = ((Transaction)dataMap.get(((List) dataNode.getKeys().get(0)).get(0).toString())).getBlockNumber();
                     rangeNode.getRangeList().addRange(new Range(directBlock,directBlock));
                 }catch(Exception e){
                     rangeNode.getRangeList().addRange(new Range(rangeOps.getMinValue(), rangeOps.getMinValue()));
@@ -232,7 +231,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             }else{
                 RangeNode rangeNode = new RangeNode(tableName,EthColumns.BLOCKNUMBER);
                 try{
-                    BigInteger directBlock = getTransactionByHash(dataNode.getKeys().get(0).toString()).getBlockNumber();
+                    BigInteger directBlock = ((Transaction)dataMap.get(dataNode.getKeys().get(0).toString())).getBlockNumber();
                     rangeNode.getRangeList().addRange(new Range(directBlock,directBlock));
                 }catch(Exception e){
                     rangeNode.getRangeList().addRange(new Range(rangeOps.getMinValue(), rangeOps.getMinValue()));
@@ -291,6 +290,21 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 try {
 
                     List<?> txnList = getTransactions(value.replace("'", ""));
+                    for (Transaction txnInfo : (List<Transaction>) txnList) {
+                        dataMap.put(txnInfo.getHash(), txnInfo);
+                        keys.add(txnInfo.getHash());
+                    }
+
+                } catch (Exception e) {
+                    LOGGER.warn(e.getMessage());
+                    return new DataNode<>(table, Arrays.asList());
+                }
+                return new DataNode<>(table, keys);
+            }else if (column.equals(EthColumns.BLOCKHASH)) {
+                List keys = new ArrayList();
+                try {
+                    Block block = getBlockByHash(value.replace("'", ""));
+                    List<?> txnList = block.getTransactions().stream().map(transactionResult -> transactionResult.get()).collect(Collectors.toList());
                     for (Transaction txnInfo : (List<Transaction>) txnList) {
                         dataMap.put(txnInfo.getHash(), txnInfo);
                         keys.add(txnInfo.getHash());
@@ -509,8 +523,10 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 boolean include = false;
                 BigInteger bigIntKey = (BigInteger) key;
                 for (Range<?> range : rangeNode.getRangeList().getRanges()) {
-                    if (((BigInteger) range.getMin()).compareTo(bigIntKey) == -1
-                        && ((BigInteger) range.getMax()).compareTo(bigIntKey) == 1) {
+                    if ((((BigInteger) range.getMin()).compareTo(bigIntKey) == -1
+                        && ((BigInteger) range.getMax()).compareTo(bigIntKey) == 1) ||
+                            (((BigInteger) range.getMax()).compareTo(bigIntKey) == 0 ||
+                                    ((BigInteger) range.getMin()).compareTo(bigIntKey) == 0)) {
                         include = true;
                         break;
                     }
@@ -522,8 +538,10 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                 Transaction transaction = (Transaction) dataMap.get(key);
                 BigInteger blockNo = transaction.getBlockNumber();
                 for (Range<?> range : rangeNode.getRangeList().getRanges()) {
-                    if (((BigInteger) range.getMin()).compareTo(blockNo) == -1
-                        && ((BigInteger) range.getMax()).compareTo(blockNo) == 1) {
+                    if ((((BigInteger) range.getMin()).compareTo(blockNo) == -1
+                        && ((BigInteger) range.getMax()).compareTo(blockNo) == 1) ||
+                            (((BigInteger) range.getMax()).compareTo(blockNo) == 0 ||
+                                    ((BigInteger) range.getMin()).compareTo(blockNo) == 0)) {
                         include = true;
                         break;
                     }

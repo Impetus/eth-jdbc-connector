@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.impetus.eth.test;
 
+import com.impetus.blkch.BlkchnException;
 import com.impetus.eth.jdbc.DriverConstants;
 import com.impetus.eth.jdbc.EthStatement;
 import com.impetus.test.catagory.UnitTest;
@@ -23,7 +24,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,18 +42,18 @@ public class TestEthStatement extends TestCase {
     @Test
     public void testCreateBatch() {
         try {
-            statement.addBatch("select * from blocks where blocknumber = 123");
-            statement.addBatch("select * from blocks where blocknumber = 124");
-            statement.addBatch("select * from blocks where blocknumber = 125");
-            statement.addBatch("select * from blocks where blocknumber = 126");
+            statement.addBatch("insert into transaction (toAddress, value, unit, async) values ('\"+ address +\"', 1.11, 'ether', true)");
+            statement.addBatch("insert into transaction (toAddress, value, unit, async) values ('\"+ address +\"', 1.11, 'ether', true)");
+            statement.addBatch("insert into transaction (toAddress, value, unit, async) values ('\"+ address +\"', 1.11, 'ether', true)");
+            statement.addBatch("insert into transaction (toAddress, value, unit, async) values ('\"+ address +\"', 1.11, 'ether', true)");
         } catch (SQLException e) {
 
         }
         List expected = new ArrayList<Object>();
-        expected.add("select * from blocks where blocknumber = 123");
-        expected.add("select * from blocks where blocknumber = 124");
-        expected.add("select * from blocks where blocknumber = 125");
-        expected.add("select * from blocks where blocknumber = 126");
+        expected.add("insert into transaction (toAddress, value, unit, async) values ('\"+ address +\"', 1.11, 'ether', true)");
+        expected.add("insert into transaction (toAddress, value, unit, async) values ('\"+ address +\"', 1.11, 'ether', true)");
+        expected.add("insert into transaction (toAddress, value, unit, async) values ('\"+ address +\"', 1.11, 'ether', true)");
+        expected.add("insert into transaction (toAddress, value, unit, async) values ('\"+ address +\"', 1.11, 'ether', true)");
         assertEquals(statement.getBatchedArgs(), expected);
     }
 
@@ -64,18 +67,37 @@ public class TestEthStatement extends TestCase {
         assertEquals(statement.getBatchedArgs(), null);
     }
 
+
     @Test
-    public void testContinueBatchOnError() {
-        assertEquals(statement.isContinueBatchOnError(), false);
-        statement.setContinueBatchOnError(true);
-        assertEquals(statement.isContinueBatchOnError(), true);
+    public void testgetSchema(){
+        ResultSetMetaData resultSetMetaData = statement.getSchema("select blocknumber,extradata,size from block");
+        int getColumnType1 = 0;
+        int getColumnType2 = 0;
+        int getColumnCount = 0;
+        int getColumnType3 = 0;
+        try {
+            getColumnCount = resultSetMetaData.getColumnCount();
+            getColumnType1 = resultSetMetaData.getColumnType(1);
+            getColumnType2 = resultSetMetaData.getColumnType(2);
+            getColumnType3 = resultSetMetaData.getColumnType(3);
+        } catch (Exception e) {
+
+        }
+        assertEquals(getColumnCount, 3);
+        assertEquals(getColumnType1,Types.BIGINT);
+        assertEquals(getColumnType3,Types.BIGINT);
+        assertEquals(getColumnType2,Types.VARCHAR);
     }
 
     @Test
-    public void testTruncateAndConvertToInt() {
-        long[] longArray = { 1L, 2L, 3L, 4L };
-        int[] expectedArray = { 1, 2, 3, 4 };
-        int[] gotArray = statement.truncateAndConvertToInt(longArray);
-        Assert.assertArrayEquals(expectedArray, gotArray);
+    public void testCheckStatemetType(){
+        Exception exceptionExpected = null;
+        try{
+            statement.addBatch("Select * from block");
+        } catch (Exception e) {
+            exceptionExpected = e;
+        }
+        assert(exceptionExpected instanceof BlkchnException);
     }
+
 }

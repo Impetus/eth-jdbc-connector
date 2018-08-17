@@ -33,6 +33,10 @@ public class EthPhysicalPlan extends PhysicalPlan {
 
     public static final String DESCRIPTION = "ETHEREUM_PHYSICAL_PLAN";
 
+    private ArrayList<String> returnCols = new ArrayList<>();
+
+    private Map<String, Integer> mapType = new HashMap<>();
+
     private static Map<String, List<String>> rangeColMap = new HashMap<>();
 
     private static Map<String, List<String>> queryColMap = new HashMap<>();
@@ -50,7 +54,7 @@ public class EthPhysicalPlan extends PhysicalPlan {
         rangeColMap.put(EthTables.TRANSACTION, Arrays.asList(EthColumns.BLOCKNUMBER));
 
         queryColMap.put(EthTables.BLOCK, Arrays.asList(EthColumns.HASH));
-        queryColMap.put(EthTables.TRANSACTION, Arrays.asList(EthColumns.HASH));
+        queryColMap.put(EthTables.TRANSACTION, Arrays.asList(EthColumns.HASH, EthColumns.BLOCKHASH));
 
         rangeOpMap.put(new Tuple2<>(EthTables.BLOCK, EthColumns.BLOCKNUMBER), new BigIntegerRangeOperations());
         rangeOpMap.put(new Tuple2<>(EthTables.TRANSACTION, EthColumns.BLOCKNUMBER), new BigIntegerRangeOperations());
@@ -150,11 +154,13 @@ public class EthPhysicalPlan extends PhysicalPlan {
     }
 
     @Override
-    public Map<String, Integer> getColumnTypeMap(String s) {
-        Map<String, Integer> mapType = new HashMap<>();
+    public Map<String, Integer> getColumnTypeMap(String table) {
+        if(!mapType.isEmpty())
+            return mapType;
+        returnCols.clear();
         List<SelectItem> cols = this.getSelectItems();
         Iterator colItterator = cols.iterator();
-        Map<String,Class> lclcolumnTypeMap = (Map) ethTableTypeMap.get(s);
+        Map<String,Class> lclcolumnTypeMap = (Map) ethTableTypeMap.get(table);
         while (colItterator.hasNext()) {
             SelectItem col = (SelectItem) colItterator.next();
             if (col.hasChildType(StarNode.class)) {
@@ -164,14 +170,18 @@ public class EthPhysicalPlan extends PhysicalPlan {
                         mapType.put(entry.getKey(), getSQLType(entry.getValue()));
                     }
                 }
+                returnCols.addAll(lclcolumnTypeMap.keySet());
                 break;
             } else if (col.hasChildType(Column.class)) {
                 String colName = ((IdentifierNode) ((Column) col.getChildType(Column.class, 0))
                     .getChildType(IdentifierNode.class, 0)).getValue();
-                if (lclcolumnTypeMap.containsKey(colName))
+                if (lclcolumnTypeMap.containsKey(colName)) {
                     mapType.put(colName, getSQLType((Class) lclcolumnTypeMap.get(colName)));
-                else
+                    returnCols.add(colName);
+                }else{
                     mapType.put(colName, getSQLType(Object.class));
+                    returnCols.add(colName);
+                }
             } else if (col.hasChildType(FunctionNode.class)) {
                 String func = ((IdentifierNode) ((FunctionNode) col.getChildType(FunctionNode.class, 0))
                         .getChildType(IdentifierNode.class, 0)).getValue();
@@ -180,9 +190,11 @@ public class EthPhysicalPlan extends PhysicalPlan {
                 switch (func) {
                     case "sum":
                         mapType.put(functionString, getSQLType(Long.class));
+                        returnCols.add(functionString);
                         break;
                     case "count":
                         mapType.put(functionString, getSQLType(Long.class));
+                        returnCols.add(functionString);
                 }
             }
         }
@@ -204,6 +216,15 @@ public class EthPhysicalPlan extends PhysicalPlan {
         }
         // else take object type
         return Types.JAVA_OBJECT;
+    }
+
+    public ArrayList<String> getColumns(String table){
+        if(returnCols.isEmpty()){
+            getColumnTypeMap(table);
+            return returnCols;
+        }else{
+            return returnCols;
+        }
     }
 
     static Map<String, List<String>> getEthTableColumnMap() {
