@@ -189,11 +189,11 @@ public class EthPhysicalPlan extends PhysicalPlan {
                         Utilities.createFunctionColName((FunctionNode) col.getChildType(FunctionNode.class, 0));
                 switch (func) {
                     case "sum":
-                        mapType.put(functionString, getSQLType(Long.class));
+                        mapType.put(functionString, getSQLType(Double.class));
                         returnCols.add(functionString);
                         break;
                     case "count":
-                        mapType.put(functionString, getSQLType(Long.class));
+                        mapType.put(functionString, getSQLType(int.class));
                         returnCols.add(functionString);
                 }
             }

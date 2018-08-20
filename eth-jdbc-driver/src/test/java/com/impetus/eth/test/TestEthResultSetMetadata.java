@@ -64,6 +64,8 @@ public class TestEthResultSetMetadata extends TestCase {
     int stringType = Types.VARCHAR;
     int bigintType = Types.BIGINT;
     int objectType = Types.JAVA_OBJECT;
+    int intType = Types.INTEGER;
+    int doubleType = Types.DOUBLE;
 
     @Override
     protected void setUp() {
@@ -121,8 +123,8 @@ public class TestEthResultSetMetadata extends TestCase {
 
     @Test
     public void testDataTypeMapQ2DataType() {
-        assertEquals(bigintType,(int)dataTypeMapQ2.get(columnsQ2[0]));
-        assertEquals(bigintType,(int)dataTypeMapQ2.get(columnsQ2[1]));
+        assertEquals(intType,(int)dataTypeMapQ2.get(columnsQ2[0]));
+        assertEquals(doubleType,(int)dataTypeMapQ2.get(columnsQ2[1]));
         assertEquals(bigintType,(int)dataTypeMapQ2.get(columnsQ2[2]));
         assertEquals(objectType,(int)dataTypeMapQ2.get(columnsQ2[3]));
     }
@@ -149,8 +151,8 @@ public class TestEthResultSetMetadata extends TestCase {
         }catch (SQLException e) {
 
         }
-        assertEquals(bigintType,col1DT);
-        assertEquals(bigintType,col2DT);
+        assertEquals(intType,col1DT);
+        assertEquals(doubleType,col2DT);
         assertEquals(bigintType,col3DT);
         assertEquals(objectType,col4DT);
     }
