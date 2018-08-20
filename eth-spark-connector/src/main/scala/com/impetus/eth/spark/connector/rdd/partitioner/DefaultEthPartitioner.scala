@@ -71,7 +71,6 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
     }
 
     def getRangeNodeFromRanges(rngLst: List[(Long, Long)]) = {
-      /*Passing table name null and call setTableName function from physical plan paginate method*/
       val rangeNode = new RangeNode[BigInteger]("", "blocknumber")
       for ((x, y) <- rngLst) {
         rangeNode.getRangeList.addRange(new BlkchRange[BigInteger](new BigInteger(x.toString), new BigInteger(y.toString)))
@@ -85,7 +84,6 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
       case Some(split) =>
         require(split > 0, s"Split should be positive : $split")
         val partitionRowCount = if ((rangesTotalSum / split) * split < rangesTotalSum) (rangesTotalSum / split) + 1 else rangesTotalSum / split
-        //val partitionRowCount = rangesTotalSum / split
         val rangeNodes = getRanges(partitionRowCount, split)
         for ((rangenode, i) <- rangeNodes.zipWithIndex; if rangenode.getRangeList.getRanges.nonEmpty) {
           buffer = buffer :+ new BlkchnPartition(i, rangenode, readConf)
@@ -102,7 +100,6 @@ class DefaultEthPartitioner extends BlkchnPartitioner {
             }
 
           case None =>
-            /*Passing table name null and call setTableName function from physical plan paginate method*/
             val rangeNode = new RangeNode[BigInteger]("", "blocknumber")
             rangeNode.getRangeList.addRange(new BlkchRange[BigInteger](start, new BigInteger(String.valueOf(rangesTotalSum))))
             buffer = buffer :+ new BlkchnPartition(0, rangeNode, readConf)

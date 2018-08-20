@@ -26,13 +26,11 @@ import org.scalatest.{ BeforeAndAfter, FlatSpec }
 @IntegrationTest
 class TestEthSpark extends FlatSpec with BeforeAndAfter with SharedSparkSession {
 
-  //var spark: SparkSession = null
   val ethPartitioner: BlkchnPartitioner = DefaultEthPartitioner
   var readConf: ReadConf = null
   var rdd: BlkchnRDD[Row] = null
 
   before {
-    //spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
     readConf = ReadConf(Some(3), None, "Select * FROM block where blocknumber > 1 and blocknumber < 30")(ethPartitioner)
     rdd = EthSpark.load[Row](spark.sparkContext, readConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
     rdd.cache()

@@ -31,8 +31,7 @@ class DefaultSource extends RelationProvider with SchemaRelationProvider with Lo
       (key, value)
     }
     val rdd = EthSpark.load[Row](sqlContext.sparkContext, readConf, options)
-    val firstRow = rdd.take(1)
-    val schema = if(rdd.isEmpty) rdd.getSchema else firstRow(0).schema
+    val schema = if(rdd.isEmpty) rdd.getSchema else rdd.first().schema
     BlkchnSourceRelation(rdd, schema)(sqlContext)
   }
 

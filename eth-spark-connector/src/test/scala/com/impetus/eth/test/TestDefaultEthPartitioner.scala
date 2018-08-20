@@ -28,13 +28,11 @@ import com.impetus.test.catagory.{ UnitTest }
 @UnitTest
 class TestDefaultEthPartitioner extends FlatSpec with BeforeAndAfter with SharedSparkSession {
 
-  //var spark: SparkSession = null
   var ethConnectorConf: EthConnectorConf = null
   var blkchnConnector: BlkchnConnector = null
   var defaultPartition: DefaultEthPartitioner = null
 
   before {
-    //spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
     Class.forName("com.impetus.eth.jdbc.EthDriver")
     ethConnectorConf = EthConnectorConf(spark.sparkContext.getConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
     blkchnConnector = new BlkchnConnector(ethConnectorConf)

@@ -24,8 +24,6 @@ trait SharedSparkSession extends BeforeAndAfterAll { self: Suite =>
 
   def spark: SparkSession = _spark
 
-  //var conf = new SparkConf(false)
-
   override def beforeAll() {
     _spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
     super.beforeAll()

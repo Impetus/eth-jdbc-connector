@@ -73,8 +73,8 @@ class TestEthSparkSamples extends FunSuite with SharedSparkSession {
 
   test("save dataFrame") {
     var output = spark.createDataFrame(Seq(
-      ("8144c67b144a408abc989728e32965edf37adaa1", 1)
-    )).toDF("address", "value_in_ether")
+      ("8144c67b144a408abc989728e32965edf37adaa1", 2, "ether", "false")
+    )).toDF("toaddress", "value", "unit", "async")
     val transactionStatus = EthSpark.save(output,Map(
       "url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234",
       "KEYSTORE_PATH" -> getClass.getResource("/UTC--2017-09-11T04-53-29.614189140Z--8144c67b144a408abc989728e32965edf37adaa1").getPath,

@@ -15,10 +15,12 @@
  ******************************************************************************/
 package org.apache.spark.sql.eth
 
+import com.impetus.blkch.BlkchnException
 import com.impetus.blkch.spark.connector.BlkchnConnector
 import com.impetus.blkch.spark.connector.rdd.partitioner.BlkchnPartitioner
 import com.impetus.blkch.spark.connector.rdd.{BlkchnRDD, EthRDD, ReadConf}
 import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
+import org.apache.spark.sql.types.{IntegerType, StringType}
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
@@ -41,10 +43,27 @@ case class EthSpark(sparkSession: SparkSession, connector: BlkchnConnector, read
     def createInsertStat(row: Row): String = {
       val sb = new StringBuilder
       sb.append("insert into transaction (toAddress, value, unit, async) values (")
-      sb.append("'" + (if(row.get(0) == null) null else row.get(0).toString) + "',")
-      sb.append(if(row.get(1) == null) null else row.get(1).toString)
-      sb.append(",'ether', false)")
+      sb.append("'" + (if(row.get(0) == null) "0x0" else row.get(0).toString) + "',")
+      sb.append(if(row.get(1) == null) "0" else row.get(1).toString)
+      sb.append(",'" + (if(row.get(2) == null) "ether" else row.get(2).toString) + "',")
+      sb.append(if(row.get(3) == null) "false" else row.get(3).toString)
+      sb.append(s")")
       sb.toString
+    }
+    if(dataFrame.schema.zipWithIndex.size < 4)
+      throw new BlkchnException("Dataframe to save should have four column in sequence of (toaddress, value, unit, async)")
+    else{
+      dataFrame.schema.zipWithIndex.foreach{
+        case (structType, index) =>
+          if(index == 0) require(structType.name == "toaddress" && structType.dataType.typeName == "string",
+            s"column name or type not matched (${structType.name},${structType.dataType.typeName}), should be (toaddress, String)")
+          else if(index == 1) require(structType.name == "value",
+            s"column name not matched (${structType.name}), should be (value)")
+          else if(index == 2) require(structType.name == "unit" && structType.dataType.typeName == "string",
+            s"column name or type not matched (${structType.name},${structType.dataType.typeName}), should be (unit, String)")
+          else if(index == 3) require(structType.name == "async" && structType.dataType.typeName == "string",
+            s"column name or type not matched (${structType.name},${structType.dataType.typeName}), should be (async, String)")
+      }
     }
     dataFrame.foreachPartition {
       rows =>

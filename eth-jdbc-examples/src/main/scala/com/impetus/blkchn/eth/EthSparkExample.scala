@@ -29,6 +29,8 @@ object EthSparkExample {
 
   private val LOGGER = LoggerFactory.getLogger("com.impetus.blkchn.eth.EthSparkExample")
 
+  val url = "<JDBC Connection String>"
+
   lazy val spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
 
   def main(args: Array[String]): Unit = {
@@ -44,7 +46,7 @@ object EthSparkExample {
   def test1 = {
     val readConf = ReadConf(None, Some(30000), "select * from block where blocknumber > 123 and blocknumber < 132 and hash='2f32268b02c2d498c926401f6e74406525c02f735feefe457c5689'")
     val rdd = EthSpark.load[Row](spark.sparkContext, readConf,
-      Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
+      Map("url" -> url))
     LOGGER.info(rdd.collect().size.toString)
     rdd.map(x => x.get(1)).collect().foreach(x => LOGGER.info(x.toString))
     rdd.foreach(x => LOGGER.info(x.schema.toString()))
@@ -53,7 +55,7 @@ object EthSparkExample {
   def test21 = {
     val readConf = ReadConf(Some(4), None, "Select transactions FROM block where blocknumber = 3796441")
     val rdd = EthSpark.load[Row](spark.sparkContext, readConf,
-      Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
+      Map("url" -> url))
     rdd.collect().foreach(x => LOGGER.info(x.toString))
     val transactions = rdd.map { row => row.get(0) }.collect()
     assert(transactions(0).asInstanceOf[ArrayBuffer[_]].forall(_.isInstanceOf[TransactionType]))
@@ -62,7 +64,7 @@ object EthSparkExample {
   def testA1 = {
     val readConf = ReadConf(None, Some(30000), "select * from block where hash = '0x932fb58356934692f5167e4ccf29f01ba2cb3cc4bb1889a1a0a33bad79c6befc'")
     val rdd = EthSpark.load[Row](spark.sparkContext, readConf,
-      Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
+      Map("url" -> url))
     rdd.map(x => x.get(1)).collect().foreach(x => LOGGER.info(x.toString))
     rdd.foreach(x => LOGGER.info(x.schema.toString()))
   }
@@ -70,7 +72,7 @@ object EthSparkExample {
   def test2 = {
     val readConf = ReadConf(Some(3), None, "Select * FROM block where blocknumber > 123 and blocknumber < 150")
     val rdd = EthSpark.load[Row](spark.sparkContext, readConf,
-      Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
+      Map("url" -> url))
     rdd.map(x => (x.get(1), x.get(2))).collect().foreach(x => LOGGER.info(x.toString))
     rdd.collect().foreach(x => LOGGER.info(x.schema.toString()))
   }
@@ -78,7 +80,7 @@ object EthSparkExample {
   def test31 = {
     val blockhash = "0x938ecd8eee580ac0998571d4105cb27266926a24686a66dbcc36cf609ece5f05"
     val readConf = ReadConf(Some(4), None, s"Select * FROM transaction where blockhash = '$blockhash'")
-    val options = readConf.asOptions() ++ Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234") // "spark.blkchn.partitioner" -> "com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner"
+    val options = readConf.asOptions() ++ Map("url" -> url)
     val df = spark.read.format("org.apache.spark.sql.eth").options(options).
       load()
     df.show()
@@ -86,7 +88,7 @@ object EthSparkExample {
 
   def test3 = {
     val readConf = ReadConf(Some(4), None, "Select * FROM transaction where blocknumber > 1 and blocknumber < 145")
-    val options = readConf.asOptions() ++ Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234") // "spark.blkchn.partitioner" -> "com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner"
+    val options = readConf.asOptions() ++ Map("url" -> url)
     val df = spark.read.format("org.apache.spark.sql.eth").options(options).
       load()
     val df1 = df.select(
@@ -105,7 +107,7 @@ object EthSparkExample {
 
   def test4 = {
     val readConf = ReadConf(Some(20), None, "Select * from block where blocknumber > 123 and blocknumber < 150")
-    val option = readConf.asOptions() ++ Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234")
+    val option = readConf.asOptions() ++ Map("url" -> url)
     val df = spark.read.format("org.apache.spark.sql.eth").options(option).load()
     df.show()
     LOGGER.info(df.schema.toString())
@@ -115,7 +117,7 @@ object EthSparkExample {
     val readConf = ReadConf(None, None,
       "insert into transaction (toAddress, value, unit, async) values ('8144c67b144a408abc989728e32965edf37adaa1', 1.11, 'ether', false)")
     val transactionStatus = EthSpark.insertTransaction(readConf, Map(
-      "url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234",
+      "url" -> url,
       "KEYSTORE_PATH" -> "<Path To Keystore>",
       "KEYSTORE_PASSWORD" -> "<password>"))
     LOGGER.info(s"\n\nInsert Transaction ${if (transactionStatus) "succeeded" else "failed"}")
@@ -124,11 +126,11 @@ object EthSparkExample {
 
   def testDataFrameSave ={
     var output = spark.createDataFrame(Seq(
-      ("8144c67b144a408abc989728e32965edf37adaa1", 2),
-      ("8144c67b144a408abc989728e32965edf37adaa1", 2)
-    )).toDF("address", "value_in_ether")
+      ("8144c67b144a408abc989728e32965edf37adaa1", 2, "ether", "false"),
+      ("8144c67b144a408abc989728e32965edf37adaa1", 2, "ether", "false")
+    )).toDF("toaddress", "value", "unit", "async")
     val transactionStatus = EthSpark.save(output,Map(
-      "url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234",
+      "url" -> url,
       "KEYSTORE_PATH" -> "<Path To Keystore>",
       "KEYSTORE_PASSWORD" -> "<password>"))
   }
