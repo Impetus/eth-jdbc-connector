@@ -42,7 +42,6 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<sourceDirectory>src/main/scala</sourceDirectory>
 		<plugins>
 			<plugin>
 				<groupId>net.alchim31.maven</groupId>
