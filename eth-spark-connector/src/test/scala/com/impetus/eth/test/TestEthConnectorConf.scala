@@ -63,4 +63,18 @@ class TestEthConnectorConf extends FlatSpec with BeforeAndAfter {
     assert(ethConnectorConf.toString.contains("impetus123"))
   }
 
+  it should "set ethConnectorConf with spark conf" in {
+    val sparkConf = new SparkConf().set("url", "jdbc:blkchn:ethereum://127.0.0.1:8545").
+      set("KEYSTORE_PASSWORD", "something").set("KEYSTORE_PATH", "keystore_path")
+    ethConnectorConf = EthConnectorConf(sparkConf)
+    assertResult("jdbc:blkchn:ethereum://127.0.0.1:8545")(ethConnectorConf.connectionURL)
+    assertResult("something")(ethConnectorConf.keystorePassword)
+    assertResult("keystore_path")(ethConnectorConf.keystorePath)
+  }
+
+   it should "get default property from ethConnectorConf" in {
+    val sparkConf = new SparkConf().set("url", "jdbc:blkchn:ethereum://127.0.0.1:8545").set("KEYSTORE_PATH", "keystore_path")
+    ethConnectorConf = EthConnectorConf(sparkConf)
+    assertResult(true)(ethConnectorConf.keystorePassword.isEmpty())
+  }
 }

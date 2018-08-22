@@ -53,4 +53,16 @@ class TestDefaultEthPartitioner extends FlatSpec with BeforeAndAfter with Shared
     assert(max.subtract(min).intValue() + 1 == 300000)
   }
 
+  it should "give range size" in {
+    val readConf = ReadConf(Some(5), None, "Select * FROM transaction where blocknumber > 12345 and blocknumber <12390")(defaultPartition)
+    val bufferOfRange = defaultPartition.getPartitions(blkchnConnector, readConf)
+    assertResult(5)(bufferOfRange.size)
+  }
+
+  it should "give partition value" in {
+    val readConf = ReadConf(Some(5), None, "Select * FROM transaction where blocknumber > 12345 and blocknumber <12390")(defaultPartition)
+    val bufferOfRange = defaultPartition.getPartitions(blkchnConnector, readConf)
+    assertResult("12346")(bufferOfRange(0).range.getRangeList.getRanges.get(0).getMin.toString())
+  }
+
 }

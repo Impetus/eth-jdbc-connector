@@ -26,22 +26,21 @@ import org.scalatest.{ BeforeAndAfter, FlatSpec }
 @IntegrationTest
 class TestEthSparkDF extends FlatSpec with BeforeAndAfter with SharedSparkSession {
 
-  //var spark: SparkSession = null
   val ethPartitioner: BlkchnPartitioner = DefaultEthPartitioner
   var readConf: ReadConf = null
   var df: DataFrame = null
 
   before {
-    //spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
-    readConf = ReadConf(Some(3), None, "Select blocknumber, hash, transactions FROM block where blocknumber > 1 and blocknumber < 30")(ethPartitioner)
+    readConf = ReadConf(Some(3), None, "Select blocknumber,hash,transactions FROM block where blocknumber > 5 and blocknumber < 30")(ethPartitioner)
+    val option = readConf.asOptions() ++ Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234")
+    df = spark.read.format("org.apache.spark.sql.eth").options(option).load()
+    df.show()
   }
 
   "Eth Spark Data Frame" should "have rows" in {
-    val option = readConf.asOptions() ++ Map("url" -> "jdbc:blkchn:ethereum://172.25.41.52:8545")
-    df = spark.read.format("org.apache.spark.sql.eth").options(option).load()
     df.cache()
     assert(df.collect().length > 0)
-    assert(df.collect().length == 28)
+    assert(df.collect().length == 24)
   }
 
   it should "have expected number of Column" in {
@@ -58,7 +57,15 @@ class TestEthSparkDF extends FlatSpec with BeforeAndAfter with SharedSparkSessio
         case "transactions" => assert(typeName.dataType.equals(ArrayType(TransactionUTD, true)))
       }
     }
-    //spark.stop()
+  }
+
+  it should "give transaction dataframe" in {
+    readConf = ReadConf(Some(5), None, "Select * FROM transaction where blocknumber > 2245600 and blocknumber < 2245610 or hash='0x8cbb2b443a66fcbfb43e30247dea5de521293d9c64f00631f804e3f4ea79bdca'")(ethPartitioner)
+    val option = readConf.asOptions() ++ Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234")
+    df = spark.read.format("org.apache.spark.sql.eth").options(option).load()
+    df.show(50)
+    assertResult(30)(df.count())
+    assertResult(17)(df.columns.size)
   }
 
 }

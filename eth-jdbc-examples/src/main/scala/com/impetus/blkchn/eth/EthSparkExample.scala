@@ -29,7 +29,7 @@ object EthSparkExample {
 
   private val LOGGER = LoggerFactory.getLogger("com.impetus.blkchn.eth.EthSparkExample")
 
-  val url = "<JDBC Connection String>"
+  val url = "jdbc:blkchn:ethereum://ropsten.infura.io/1234"
 
   lazy val spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
 

@@ -73,9 +73,9 @@ public class EthPhysicalPlan extends PhysicalPlan {
                 EthColumns.PUBLICKEY, EthColumns.R, EthColumns.RAW, EthColumns.S, EthColumns.TO,
                 EthColumns.TRANSACTIONINDEX, EthColumns.V, EthColumns.VALUE));
 
-        Map ethColumnTypeBlckMap = new HashMap<String, Class>();
+        Map ethColumnTypeBlckMap = new LinkedHashMap<String, Class>();
 
-        Map ethColumnTypeTransactionMap = new HashMap<String, Class>();
+        Map ethColumnTypeTransactionMap = new LinkedHashMap<String, Class>();
 
         ethColumnTypeBlckMap.put(EthColumns.BLOCKNUMBER, BigInteger.class);
         ethColumnTypeBlckMap.put(EthColumns.EXTRADATA, String.class);
@@ -160,7 +160,7 @@ public class EthPhysicalPlan extends PhysicalPlan {
         returnCols.clear();
         List<SelectItem> cols = this.getSelectItems();
         Iterator colItterator = cols.iterator();
-        Map<String,Class> lclcolumnTypeMap = (Map) ethTableTypeMap.get(table);
+        Map<String,Class> lclcolumnTypeMap = (LinkedHashMap<String, Class>) ethTableTypeMap.get(table);
         while (colItterator.hasNext()) {
             SelectItem col = (SelectItem) colItterator.next();
             if (col.hasChildType(StarNode.class)) {
@@ -170,7 +170,7 @@ public class EthPhysicalPlan extends PhysicalPlan {
                         mapType.put(entry.getKey(), getSQLType(entry.getValue()));
                     }
                 }
-                returnCols.addAll(lclcolumnTypeMap.keySet());
+                returnCols.addAll(ethTableColumnMap.get(table));
                 break;
             } else if (col.hasChildType(Column.class)) {
                 String colName = ((IdentifierNode) ((Column) col.getChildType(Column.class, 0))

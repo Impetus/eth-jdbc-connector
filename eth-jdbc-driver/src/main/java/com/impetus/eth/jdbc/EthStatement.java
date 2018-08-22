@@ -231,7 +231,7 @@ public class EthStatement implements BlkchnStatement {
                         updateCounts[commandIndex] = execute(sql) ? 1 : 0;
                     } catch (SQLException | BlkchnException ex) {
                         updateCounts[commandIndex] = EXECUTE_FAILED;
-                        System.out.println("Statement : " + batchedArgs.get(commandIndex) + " : "+ex.getMessage());
+                        LOGGER.warn("Statement : " + batchedArgs.get(commandIndex) + " : "+ex.getMessage());
                     }
             }
             return (updateCounts != null) ? updateCounts : new int[0];
@@ -293,7 +293,6 @@ public class EthStatement implements BlkchnStatement {
         List<List<Object>> data = new ArrayList<List<Object>>();
         Map<String, Integer> dataTypeColumnMap = physicalPlan.getColumnTypeMap(tableName);
         List<String> returnCols = physicalPlan.getColumns(tableName);
-
         DataFrame dataframe = new DataFrame(data, returnCols, aliasMapping);
         ResultSet queryResultSet = new EthResultSet(dataframe, rSetType, rSetConcurrency, tableName, dataTypeColumnMap);
         try {
