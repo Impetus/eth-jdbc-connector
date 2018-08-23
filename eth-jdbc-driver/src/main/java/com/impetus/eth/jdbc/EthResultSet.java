@@ -345,11 +345,15 @@ public class EthResultSet extends AbstractResultSet {
             throw new SQLException(String.format(EXCEPTION_MSG, columnIndex));
         }
         lastReadColValue = currentRow[columnIndex - 1];
+        if (currentRow[columnIndex - 1] instanceof BigInteger) {
+            return new BigDecimal((BigInteger) currentRow[columnIndex - 1]);
+        }
         return (BigDecimal) currentRow[columnIndex - 1];
     }
 
     @Override
     public BigDecimal getBigDecimal(String columnLabel) throws SQLException {
+        lastReadColValue = currentRow[getColumnIndex(columnLabel)];
         if (currentRow[getColumnIndex(columnLabel)] instanceof BigInteger) {
             return new BigDecimal((BigInteger) currentRow[getColumnIndex(columnLabel)]);
         }
