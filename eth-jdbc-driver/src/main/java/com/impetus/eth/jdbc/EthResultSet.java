@@ -43,7 +43,6 @@ public class EthResultSet extends AbstractResultSet {
 
     protected static final int AFTER_LAST_ROW = -1;
 
-    /** Has this ResultSet been closed? */
     protected boolean isClosed = false;
 
     protected int currentRowCursor;
@@ -105,7 +104,6 @@ public class EthResultSet extends AbstractResultSet {
         this.resultSetType = resultSetType;
         this.rSetConcurrency = rSetConcurrency;
         this.colTypeMap = new HashMap<>();
-        // Receipt 2000 for SQL JDBC_OBJECT type
         colTypeMap.put("Receipt", 2000);
         this.tableName = "TransactionReceipt";
         currentRowCursor = BEFORE_FIRST_ROW;
