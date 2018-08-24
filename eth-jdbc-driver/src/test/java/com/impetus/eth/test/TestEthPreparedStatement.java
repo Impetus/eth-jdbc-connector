@@ -25,6 +25,9 @@ import com.impetus.eth.jdbc.EthConnection;
 import com.impetus.eth.jdbc.EthPreparedStatement;
 import com.impetus.test.catagory.UnitTest;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 @Category(UnitTest.class)
 public class TestEthPreparedStatement {
 
@@ -75,4 +78,107 @@ public class TestEthPreparedStatement {
         }
         assertEquals(false, status);
     }
+
+    @Test
+    public void testPreparedStatementAddBatchSelect(){
+        EthConnection connection = Mockito.mock(EthConnection.class);
+        String sql = "select * from block where blocknumber = ?";
+        boolean status = true;
+        try{
+            EthPreparedStatement stmt = new EthPreparedStatement(connection, sql, 0, 0);
+            stmt.setInt(1, 111);
+            stmt.addBatch();
+            stmt.close();
+        }catch(Exception e){
+            status = false;
+        }
+        assertEquals(false, status);
+    }
+
+    @Test
+    public void testPreparedStatementBatchAfterClose(){
+        EthConnection connection = Mockito.mock(EthConnection.class);
+        String sql = "insert into block values(?)";
+        int beforeClose = 0;
+        int afterClose = 0;
+        try{
+            EthPreparedStatement stmt = new EthPreparedStatement(connection, sql, 0, 0);
+            stmt.setInt(1, 111);
+            stmt.addBatch();
+
+            stmt.setInt(1, 111);
+            stmt.addBatch();
+
+            stmt.setInt(1, 111);
+            stmt.addBatch();
+
+            beforeClose = stmt.getBatchedArgs().size();
+
+            stmt.close();
+
+            afterClose = stmt.getBatchedArgs().size();
+        }catch(Exception e){
+
+        }
+        assertEquals(3, beforeClose);
+        assertEquals(0, afterClose);
+    }
+
+    @Test
+    public void testPreparedStatementAddBatch(){
+        EthConnection connection = Mockito.mock(EthConnection.class);
+        String sql = "insert into block values(?, ?, ?, ?)";
+        try{
+            EthPreparedStatement stmt = new EthPreparedStatement(connection, sql, 0, 0);
+
+            stmt.setInt(1, 11);
+            stmt.setInt(2, 12);
+            stmt.setInt(3, 13);
+            stmt.setInt(4, 14);
+            stmt.addBatch();
+            Object[] firstBatch = stmt.getBatchedArgs().get(0);
+            assertEquals(firstBatch[0],11);
+            assertEquals(firstBatch[1],12);
+            assertEquals(firstBatch[2],13);
+            assertEquals(firstBatch[3],14);
+
+            stmt.setInt(1, 21);
+            stmt.setInt(3, 23);
+            stmt.setInt(4, 24);
+            stmt.addBatch();
+            Object[] secondBatch = stmt.getBatchedArgs().get(1);
+            assertEquals(firstBatch[0],11);
+            assertEquals(firstBatch[1],12);
+            assertEquals(firstBatch[2],13);
+            assertEquals(firstBatch[3],14);
+            assertEquals(secondBatch[0],21);
+            assertEquals(secondBatch[1],12);
+            assertEquals(secondBatch[2],23);
+            assertEquals(secondBatch[3],24);
+
+            stmt.setInt(1, 31);
+            stmt.addBatch();
+            Object[] thirdBatch = stmt.getBatchedArgs().get(2);
+            assertEquals(firstBatch[0],11);
+            assertEquals(firstBatch[1],12);
+            assertEquals(firstBatch[2],13);
+            assertEquals(firstBatch[3],14);
+            assertEquals(secondBatch[0],21);
+            assertEquals(secondBatch[1],12);
+            assertEquals(secondBatch[2],23);
+            assertEquals(secondBatch[3],24);
+            assertEquals(thirdBatch[0],31);
+            assertEquals(thirdBatch[1],12);
+            assertEquals(thirdBatch[2],23);
+            assertEquals(thirdBatch[3],24);
+
+        }catch(Throwable e){
+            StringWriter stringWriter = new StringWriter();
+            e.printStackTrace(new PrintWriter(stringWriter));
+            fail(stringWriter.toString());
+        }
+
+    }
+
+
 }
