@@ -32,7 +32,7 @@ import com.impetus.test.catagory.IntegrationTest;
 
 @Category(IntegrationTest.class)
 public class TestInsertPreparedStatement {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestAlias.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestInsertPreparedStatement.class);
 
     @Test
     public void testInsertQuery() {
