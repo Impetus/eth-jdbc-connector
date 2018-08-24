@@ -114,7 +114,8 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         }
         DataFrame dataframe = getFromTable();
         if (dataframe.isEmpty()) {
-            return dataframe.select(physicalPlan.getSelectItems());
+            return dataframe;
+            // return dataframe.select(physicalPlan.getSelectItems());
         }
         List<OrderItem> orderItems = null;
         if (logicalPlan.getQuery().hasChildType(OrderByClause.class)) {
@@ -667,22 +668,8 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
 
     protected DataFrame createDataFrame(DataNode<?> dataNode, String tableName) {
         if (dataNode.getKeys().isEmpty()) {
-            if (tableName.equals("block")) {
-                String[] columns = { EthColumns.BLOCKNUMBER, EthColumns.HASH, EthColumns.PARENTHASH, EthColumns.NONCE,
-                        EthColumns.SHA3UNCLES, EthColumns.LOGSBLOOM, EthColumns.TRANSACTIONSROOT, EthColumns.STATEROOT,
-                        EthColumns.RECEIPTSROOT, EthColumns.AUTHOR, EthColumns.MINER, EthColumns.MIXHASH,
-                        EthColumns.TOTALDIFFICULTY, EthColumns.EXTRADATA, EthColumns.SIZE, EthColumns.GASLIMIT,
-                        EthColumns.GASUSED, EthColumns.TIMESTAMP, EthColumns.TRANSACTIONS, EthColumns.UNCLES,
-                        EthColumns.SEALFIELDS };
-                return new DataFrame(new ArrayList<>(), columns, physicalPlan.getColumnAliasMapping());
-            } else if (tableName.equals("transaction")) {
-                String columns[] = { EthColumns.BLOCKHASH, EthColumns.BLOCKNUMBER, EthColumns.CREATES, EthColumns.FROM,
-                        EthColumns.GAS, EthColumns.GASPRICE, EthColumns.HASH, EthColumns.INPUT, EthColumns.NONCE,
-                        EthColumns.PUBLICKEY, EthColumns.R, EthColumns.RAW, EthColumns.S, EthColumns.TO,
-                        EthColumns.TRANSACTIONINDEX, EthColumns.V, EthColumns.VALUE };
-                return new DataFrame(new ArrayList<>(), columns, physicalPlan.getColumnAliasMapping());
-            } else
-                return new DataFrame(new ArrayList<>(), new ArrayList<>(), physicalPlan.getColumnAliasMapping());
+            List<String> columns = ((EthPhysicalPlan) physicalPlan).getColumns(tableName);
+            return new DataFrame(new ArrayList<>(), columns, physicalPlan.getColumnAliasMapping());
         }
         DataFrame df = null;
         List<List<Object>> data = new ArrayList<>();
