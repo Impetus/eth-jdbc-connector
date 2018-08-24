@@ -15,40 +15,39 @@
  ******************************************************************************/
 package com.impetus.eth.test
 
-import com.impetus.blkch.spark.connector.rdd.{ BlkchnRDD, ReadConf }
+import com.impetus.blkch.spark.connector.rdd.{BlkchnRDD, ReadConf}
 import com.impetus.blkch.spark.connector.rdd.partitioner.BlkchnPartitioner
 import com.impetus.eth.jdbc.EthResultSetMetaData
 import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
 import com.impetus.test.catagory.IntegrationTest
 import org.apache.spark.sql.eth.EthSpark
-import org.apache.spark.sql.{ Row, SparkSession }
-import org.scalatest.{ BeforeAndAfter, FlatSpec }
-import org.apache.spark.sql.types.{ ArrayType, StringType, TransactionType }
+import org.apache.spark.sql.Row
+import org.scalatest.{ BeforeAndAfterAll, FlatSpec}
+import org.apache.spark.sql.types.{DecimalType, TransactionType}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConverters._
 import com.impetus.blkch.spark.connector.rdd._
 
 @IntegrationTest
-class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfter with SharedSparkSession {
+class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfterAll with SharedSparkSession {
 
-  //var spark: SparkSession = null
   val ethPartitioner: BlkchnPartitioner = DefaultEthPartitioner
   var readConf: ReadConf = null
   var rdd: BlkchnRDD[Row] = null
   var transactions: Array[Any] = null
   var ethRDD: EthRDD[_] = null
 
-  before {
-    //spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
+  override def beforeAll() {
+    super.beforeAll()
     readConf = ReadConf(Some(3), None, "Select transactions FROM block where blocknumber = 3796441")(ethPartitioner)
     rdd = EthSpark.load[Row](spark.sparkContext, readConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
     ethRDD = new com.impetus.blkch.spark.connector.rdd.EthRDD(spark.sparkContext, null, null)
     rdd.cache()
+    transactions = rdd.map { row => row.get(0) }.collect()
   }
 
   "Transaction" should "give data in Transaction UTD" in {
-    transactions = rdd.map { row => row.get(0) }.collect()
     assert(transactions(0).asInstanceOf[ArrayBuffer[_]].forall(_.isInstanceOf[TransactionType]))
   }
 
@@ -58,15 +57,21 @@ class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfter with SharedSpa
   }
 
   "EthRDD" should "give expected result with handleExtraType" in {
-    val data = new java.util.ArrayList[String]
     val resultSetMetaData = new EthResultSetMetaData("block", Map("blocknumber" -> 0.asInstanceOf[Integer]).asJava,
       Map("blocknumber" -> "blocknumber").asJava, Map("blocknumber" -> (-5).asInstanceOf[Integer]).asJava)
-    data.add("3124")
-    val structType = ethRDD.handleExtraType(1, resultSetMetaData, data)
+    val structType = ethRDD.handleExtraType(1, resultSetMetaData)
     assert(structType.name.equals("blocknumber"))
-    assert(structType.dataType.equals(ArrayType(StringType, true)))
-    val returnData = ethRDD.handleExtraData(1, resultSetMetaData, data)
-    assert(returnData.equals(data.asScala))
+    assert(structType.dataType.equals(DecimalType(38, 0)))
+  }
+
+  it should "give expected result with handleExtraData" in {
+    val data = new java.util.ArrayList[String]
+    data.add("blockhash1")
+    data.add("blockhash2")
+    val resultSetMetaData = new EthResultSetMetaData("block", Map("hash" -> 0.asInstanceOf[Integer]).asJava,
+      Map("hash" -> "hash").asJava, Map("hash" -> 12.asInstanceOf[Integer]).asJava)
+    val structData = ethRDD.handleExtraData(1, resultSetMetaData, data)
+    assert(structData.equals(data.asScala))
   }
 
 }

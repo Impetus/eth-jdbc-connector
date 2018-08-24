@@ -17,16 +17,17 @@ package com.impetus.eth.test
 
 import com.impetus.test.catagory.UnitTest
 import org.apache.spark.SparkConf
-import org.scalatest.{ BeforeAndAfter, FlatSpec }
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, FlatSpec}
 import org.apache.spark.sql.eth._
 
 @UnitTest
-class TestEthConnectorConf extends FlatSpec with BeforeAndAfter {
+class TestEthConnectorConf extends FlatSpec with BeforeAndAfterAll {
 
   var ethConnectorConf: EthConnectorConf = null
   val conf = new SparkConf().set("placeHolder", "Temp")
 
-  before {
+  override def beforeAll() {
+    super.beforeAll()
     ethConnectorConf = new EthConnectorConf(conf, Map(
       "url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234",
       "KEYSTORE_PASSWORD" -> "impetus123", "KEYSTORE_PATH" -> "src/test/resources/UTC--2017-09-11T04-53-29.614189140Z--8144c67b144a408abc989728e32965edf37adaa1"))

@@ -15,15 +15,17 @@
  ******************************************************************************/
 package com.impetus.blkch.spark.connector.rdd
 
-import java.sql.{ ResultSetMetaData }
-import com.impetus.blkch.spark.connector.{ BlkchnConnector }
+import java.sql.{ ResultSetMetaData, Types }
+
+import com.impetus.blkch.spark.connector.BlkchnConnector
+import com.impetus.eth.query.EthColumns
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.types._
-import org.apache.spark.{ SparkContext }
+import org.apache.spark.SparkContext
 import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult
 import org.web3j.protocol.core.methods.response.Transaction
-import scala.collection.JavaConverters._
 
+import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
 
 class EthRDD[R: ClassTag](
@@ -31,14 +33,14 @@ class EthRDD[R: ClassTag](
   private[impetus] override val connector: Broadcast[BlkchnConnector],
   private[impetus] override val readConf: ReadConf) extends BlkchnRDD[R](sc, connector, readConf) {
 
-  override def handleExtraType(index: Int, metadata: ResultSetMetaData, data: java.lang.Object) =
-    if (data.isInstanceOf[java.util.ArrayList[_]] && metadata.getColumnName(index).equalsIgnoreCase("transactions")) {
+  override def handleExtraType(index: Int, metadata: ResultSetMetaData) =
+    if (metadata.getColumnName(index).equalsIgnoreCase(EthColumns.TRANSACTIONS))
       StructField(metadata.getColumnLabel(index), ArrayType(TransactionUTD, true), true)
-    } else if (data.isInstanceOf[java.util.ArrayList[_]]) {
+    else if (metadata.getColumnName(index).equalsIgnoreCase(EthColumns.SEALFIELDS) || metadata.getColumnName(index).equalsIgnoreCase(EthColumns.UNCLES))
       StructField(metadata.getColumnLabel(index), ArrayType(StringType, true), true)
-    } else {
-      StructField(metadata.getColumnLabel(index), ArrayType(StringType, true), true)
-    }
+    else if (metadata.getColumnType(index).equals(Types.BIGINT))
+      StructField(metadata.getColumnLabel(index), DecimalType(38, 0), true)
+    else StructField(metadata.getColumnLabel(index), StringType, true)
 
   override def handleExtraData(index: Int, metadata: ResultSetMetaData, data: java.lang.Object): Any = if (data.isInstanceOf[java.util.ArrayList[_]] && metadata.getColumnName(index).equalsIgnoreCase("transactions")) {
     val transactionList = data.asInstanceOf[java.util.ArrayList[TransactionResult[Transaction]]].asScala.map(x => new TransactionType(x.get()))
@@ -46,9 +48,6 @@ class EthRDD[R: ClassTag](
   } else if (data.isInstanceOf[java.util.ArrayList[_]]) {
     val strList = data.asInstanceOf[java.util.ArrayList[String]].asScala
     strList.asInstanceOf[Any]
-  } else {
-    val dataList = data.asInstanceOf[java.util.ArrayList[_]].asScala
-    dataList.asInstanceOf[Any]
-  }
+  } else data.asInstanceOf[Any]
 
 }

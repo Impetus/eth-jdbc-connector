@@ -27,11 +27,11 @@ class DefaultSource extends RelationProvider with SchemaRelationProvider with Lo
   override def createRelation(sqlContext: SQLContext, parameters: Map[String, String]): BaseRelation = {
     val readConf = ReadConf(sqlContext.sparkContext.conf, parameters)
     val readConfOptions = readConf.asOptions()
-    val options = for ((key, value) <- parameters; if (!readConfOptions.contains(key))) yield {
+    val options = for ((key, value) <- parameters; if !readConfOptions.contains(key)) yield {
       (key, value)
     }
     val rdd = EthSpark.load[Row](sqlContext.sparkContext, readConf, options)
-    val schema = if(rdd.isEmpty) rdd.getSchema else rdd.first().schema
+    val schema = rdd.getSchema()
     BlkchnSourceRelation(rdd, schema)(sqlContext)
   }
 

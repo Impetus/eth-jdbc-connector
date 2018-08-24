@@ -15,37 +15,37 @@
  ******************************************************************************/
 package com.impetus.eth.test
 
-import com.impetus.blkch.spark.connector.rdd.{ BlkchnRDD, ReadConf }
+import com.impetus.blkch.spark.connector.rdd.{ ReadConf }
 import com.impetus.blkch.spark.connector.rdd.partitioner.BlkchnPartitioner
 import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
 import com.impetus.test.catagory.IntegrationTest
-import org.apache.spark.sql.{ DataFrame, SparkSession }
-import org.apache.spark.sql.types.{ ArrayType, DecimalType, StringType, TransactionUTD }
-import org.scalatest.{ BeforeAndAfter, FlatSpec }
+import org.apache.spark.sql.{ DataFrame }
+import org.apache.spark.sql.types.{ArrayType, DecimalType, StringType, TransactionUTD}
+import org.scalatest.{ BeforeAndAfterAll, FlatSpec}
 
 @IntegrationTest
-class TestEthSparkDF extends FlatSpec with BeforeAndAfter with SharedSparkSession {
+class TestEthSparkDF extends FlatSpec with BeforeAndAfterAll with SharedSparkSession {
 
   val ethPartitioner: BlkchnPartitioner = DefaultEthPartitioner
   var readConf: ReadConf = null
   var df: DataFrame = null
 
-  before {
+  override def beforeAll() {
+    super.beforeAll()
     readConf = ReadConf(Some(3), None, "Select blocknumber,hash,transactions FROM block where blocknumber > 5 and blocknumber < 30")(ethPartitioner)
     val option = readConf.asOptions() ++ Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234")
     df = spark.read.format("org.apache.spark.sql.eth").options(option).load()
-    df.show()
+    df.cache()
   }
 
   "Eth Spark Data Frame" should "have rows" in {
-    df.cache()
     assert(df.collect().length > 0)
     assert(df.collect().length == 24)
   }
 
   it should "have expected number of Column" in {
     val valueMap = df.collect().map(_.size)
-    assert(!valueMap.exists(_ != 3))
+     assert(!valueMap.exists(_ != 3))
   }
 
   it should "have same column type as Expected" in {
@@ -62,7 +62,7 @@ class TestEthSparkDF extends FlatSpec with BeforeAndAfter with SharedSparkSessio
   it should "give transaction dataframe" in {
     readConf = ReadConf(Some(5), None, "Select * FROM transaction where blocknumber > 2245600 and blocknumber < 2245610 or hash='0x8cbb2b443a66fcbfb43e30247dea5de521293d9c64f00631f804e3f4ea79bdca'")(ethPartitioner)
     val option = readConf.asOptions() ++ Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234")
-    df = spark.read.format("org.apache.spark.sql.eth").options(option).load()
+    val df = spark.read.format("org.apache.spark.sql.eth").options(option).load()
     df.show(50)
     assertResult(30)(df.count())
     assertResult(17)(df.columns.size)
