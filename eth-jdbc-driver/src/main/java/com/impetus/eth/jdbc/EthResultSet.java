@@ -17,6 +17,7 @@ package com.impetus.eth.jdbc;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -25,6 +26,7 @@ import java.util.*;
 import com.impetus.blkch.BlkchnException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.web3j.protocol.core.methods.response.Transaction;
 
 import com.impetus.blkch.jdbc.AbstractResultSet;
 import com.impetus.blkch.sql.DataFrame;
@@ -284,6 +286,12 @@ public class EthResultSet extends AbstractResultSet {
             return ((BigInteger) currentRow[columnIndex - 1]).toString();
         }
 
+        lastReadColValue = currentRow[columnIndex - 1];
+        if (currentRow[columnIndex - 1] instanceof List<?>) {
+            System.out.println("hello here ");
+            return currentRow[columnIndex - 1].toString();
+        }
+
         return (String) currentRow[columnIndex - 1];
     }
 
@@ -427,6 +435,20 @@ public class EthResultSet extends AbstractResultSet {
     public short getShort(String columnLabel) throws SQLException {
         lastReadColValue = currentRow[getColumnIndex(columnLabel)];
         return (short) currentRow[getColumnIndex(columnLabel)];
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Array getArray(int columnIndex) throws SQLException {
+        lastReadColValue = currentRow[columnIndex - 1];
+        return new EthArray((List<Object>) lastReadColValue);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Array getArray(String columnLabel) throws SQLException {
+        lastReadColValue = currentRow[getColumnIndex(columnLabel)];
+        return new EthArray((List<Object>) lastReadColValue);
     }
 
     @Override
