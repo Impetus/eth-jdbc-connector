@@ -90,10 +90,13 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
         placeholderHandler.setPlaceholderIndex();
         if (!placeholderHandler.isIndexListEmpty())
             this.placeholderValues = new Object[placeholderHandler.getIndexListCount()];
+        //System.out.println("Sql is "+sql);
     }
 
     @Override
     public void addBatch() throws SQLException {
+        if(logicalPlan.getType() == SQLType.QUERY)
+            throw new BlkchnException("BlkchnStatement Batch can only contains insert or call statements !!");
         batchList.add(placeholderValues);
         /*It will clear the previous values*/
         //this.placeholderValues=new Object[placeholderHandler.getIndexListCount()];
@@ -109,6 +112,9 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
         LOGGER.info("Entering into executeBatch Block");
         if (isClosed)
             throw new BlkchnException("No operations allowed after statement closed.");
+        if (this.batchList == null || this.batchList.size() == 0) {
+            return new int[0];
+        }
         int[] updateCounts= new int[batchList.size()];
         Arrays.fill(updateCounts, EXECUTE_FAILED);
         for(int i=0;i<batchList.size();i++){

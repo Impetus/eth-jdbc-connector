@@ -33,8 +33,7 @@ class TestEthSpark extends FlatSpec with BeforeAndAfterAll with SharedSparkSessi
   override def beforeAll() {
     super.beforeAll()
     readConf = ReadConf(Some(3), None, "Select * FROM block where blocknumber > 5 and blocknumber < 30")(ethPartitioner)
-    rdd = EthSpark.load[Row](spark.sparkContext, readConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
-    rdd.cache()
+    rdd = EthSpark.load[Row](spark.sparkContext, readConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234")).cache()
   }
 
   "Eth Spark" should "have Read Conf" in {
@@ -88,7 +87,7 @@ class TestEthSpark extends FlatSpec with BeforeAndAfterAll with SharedSparkSessi
     readConf = ReadConf(Some(3), None, "Select * FROM transaction where blocknumber > 2245600 and blocknumber <2245610")(ethPartitioner)
     rdd = EthSpark.load(spark.sparkContext, readConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
     val rddSchemaList = rdd.getSchema().fields
-    assertResult(29)(rdd.count())
+  assertResult(29)(rdd.count())
     assertResult("blockhash")(rddSchemaList(0).name)
     assertResult("blocknumber")(rddSchemaList(1).name)
     assertResult("creates")(rddSchemaList(2).name)

@@ -458,58 +458,159 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
     @Override
     protected boolean filterField(String fieldName, Object obj, String value, Comparator comparator) {
         boolean retValue = false;
+        if(value != null)
+            value = Utilities.unquote(value);
         if (!comparator.isEQ() && !comparator.isNEQ()) {
             throw new BlkchnException(String.format(
                     "String values in %s field can only be compared for equivalence and non-equivalence", fieldName));
         }
+
         if (obj instanceof Block) {
             Block blockInfo = (Block) obj;
             switch (fieldName) {
                 case EthColumns.HASH:
                     if (comparator.isEQ()) {
-                        retValue = blockInfo.getHash().equals(value.replaceAll("'", ""));
+                        retValue = blockInfo.getHash().equals(value);
                     } else {
-                        retValue = !blockInfo.getHash().equals(value.replaceAll("'", ""));
+                        retValue = !blockInfo.getHash().equals(value);
+                    }
+                    break;
+                case EthColumns.BLOCKNUMBER:
+                    if (comparator.isEQ()) {
+                        retValue = blockInfo.getNumber().toString().equals(value);
+                    } else {
+                        retValue = !blockInfo.getNumber().toString().equals(value);
                     }
                     break;
                 case EthColumns.PARENTHASH:
                     if (comparator.isEQ()) {
-                        retValue = blockInfo.getParentHash().equals(value.replaceAll("'", ""));
+                        retValue = blockInfo.getParentHash().equals(value);
                     } else {
-                        retValue = !blockInfo.getParentHash().equals(value.replaceAll("'", ""));
+                        retValue = !blockInfo.getParentHash().equals(value);
+                    }
+                    break;
+                case EthColumns.NONCE:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(blockInfo.getNonce()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(blockInfo.getNonce()).equals(value);
+                    }
+                    break;
+                case EthColumns.SHA3UNCLES:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(blockInfo.getSha3Uncles()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(blockInfo.getSha3Uncles()).equals(value);
+                    }
+                    break;
+                case EthColumns.LOGSBLOOM:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(blockInfo.getLogsBloom()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(blockInfo.getLogsBloom()).equals(value);
+                    }
+                    break;
+                case EthColumns.TRANSACTIONSROOT:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(blockInfo.getTransactionsRoot()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(blockInfo.getTransactionsRoot()).equals(value);
+                    }
+                    break;
+                case EthColumns.STATEROOT:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(blockInfo.getStateRoot()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(blockInfo.getStateRoot()).equals(value);
+                    }
+                    break;
+                case EthColumns.RECEIPTSROOT:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(blockInfo.getReceiptsRoot()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(blockInfo.getReceiptsRoot()).equals(value);
+                    }
+                    break;
+                case EthColumns.AUTHOR:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(blockInfo.getAuthor()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(blockInfo.getAuthor()).equals(value);
+                    }
+                    break;
+                case EthColumns.MINER:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(blockInfo.getMiner()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(blockInfo.getMiner()).equals(value);
+                    }
+                    break;
+                case EthColumns.MIXHASH:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(blockInfo.getMixHash()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(blockInfo.getMixHash()).equals(value);
+                    }
+                    break;
+                case EthColumns.TOTALDIFFICULTY:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(blockInfo.getTotalDifficulty()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(blockInfo.getTotalDifficulty()).equals(value);
+                    }
+                    break;
+                case EthColumns.EXTRADATA:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(blockInfo.getExtraData()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(blockInfo.getExtraData()).equals(value);
+                    }
+                    break;
+                case EthColumns.SIZE:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(blockInfo.getSize()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(blockInfo.getSize()).equals(value);
+                    }
+                    break;
+                case EthColumns.TIMESTAMP:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(blockInfo.getTimestamp()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(blockInfo.getTimestamp()).equals(value);
                     }
                     break;
                 case EthColumns.GASLIMIT:
                     if (comparator.isEQ()) {
-                        retValue = blockInfo.getGasLimit().toString().equals(value.replaceAll("'", ""));
+                        retValue = blockInfo.getGasLimit().toString().equals(value);
                     } else {
-                        retValue = !blockInfo.getGasLimit().toString().equals(value.replaceAll("'", ""));
+                        retValue = !blockInfo.getGasLimit().toString().equals(value);
                     }
                     break;
                 case EthColumns.GASUSED:
                     if (comparator.isEQ()) {
-                        retValue = blockInfo.getGasUsed().toString().equals(value.replaceAll("'", ""));
+                        retValue = blockInfo.getGasUsed().toString().equals(value);
                     } else {
-                        retValue = !blockInfo.getGasUsed().toString().equals(value.replaceAll("'", ""));
+                        retValue = !blockInfo.getGasUsed().toString().equals(value);
                     }
                     break;
+                    /*Data type not supported for other column for where clause*/
             }
         } else if (obj instanceof Transaction) {
-
             Transaction txnInfo = (Transaction) obj;
             switch (fieldName) {
                 case EthColumns.FROM:
                     if (comparator.isEQ()) {
-                        retValue = txnInfo.getFrom().equals(value.replaceAll("'", ""));
+                        retValue = txnInfo.getFrom().equals(value);
                     } else {
-                        retValue = !txnInfo.getFrom().equals(value.replaceAll("'", ""));
+                        retValue = !txnInfo.getFrom().equals(value);
                     }
                     break;
                 case EthColumns.BLOCKHASH:
                     if (comparator.isEQ()) {
-                        retValue = txnInfo.getBlockHash().equals(value.replaceAll("'", ""));
+                        retValue = txnInfo.getBlockHash().equals(value);
                     } else {
-                        retValue = !txnInfo.getBlockHash().equals(value.replaceAll("'", ""));
+                        retValue = !txnInfo.getBlockHash().equals(value);
                     }
                     break;
                 case EthColumns.GAS:
@@ -519,8 +620,105 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                         retValue = !String.valueOf(txnInfo.getGas()).equals(value);
                     }
                     break;
+                case EthColumns.BLOCKNUMBER:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(txnInfo.getBlockNumber()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(txnInfo.getBlockNumber()).equals(value);
+                    }
+                    break;
+                case EthColumns.CREATES:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(txnInfo.getCreates()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(txnInfo.getCreates()).equals(value);
+                    }
+                    break;
+                case EthColumns.GASPRICE:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(txnInfo.getGasPrice()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(txnInfo.getGasPrice()).equals(value);
+                    }
+                    break;
+                case EthColumns.HASH:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(txnInfo.getHash()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(txnInfo.getHash()).equals(value);
+                    }
+                    break;
+                case EthColumns.INPUT:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(txnInfo.getInput()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(txnInfo.getInput()).equals(value);
+                    }
+                    break;
+                case EthColumns.NONCE:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(txnInfo.getNonce()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(txnInfo.getNonce()).equals(value);
+                    }
+                    break;
+                case EthColumns.PUBLICKEY:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(txnInfo.getPublicKey()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(txnInfo.getPublicKey()).equals(value);
+                    }
+                    break;
+                case EthColumns.R:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(txnInfo.getR()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(txnInfo.getR()).equals(value);
+                    }
+                    break;
+                case EthColumns.RAW:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(txnInfo.getRaw()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(txnInfo.getRaw()).equals(value);
+                    }
+                    break;
+                case EthColumns.S:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(txnInfo.getS()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(txnInfo.getS()).equals(value);
+                    }
+                    break;
+                case EthColumns.TO:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(txnInfo.getTo()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(txnInfo.getTo()).equals(value);
+                    }
+                    break;
+                case EthColumns.TRANSACTIONINDEX:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(txnInfo.getTransactionIndex()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(txnInfo.getTransactionIndex()).equals(value);
+                    }
+                    break;
+                case EthColumns.V:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(txnInfo.getV()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(txnInfo.getGas()).equals(value);
+                    }
+                    break;
+                case EthColumns.VALUE:
+                    if (comparator.isEQ()) {
+                        retValue = String.valueOf(txnInfo.getValue()).equals(value);
+                    } else {
+                        retValue = !String.valueOf(txnInfo.getValue()).equals(value);
+                    }
+                    break;
             }
-
         }
         return retValue;
     }

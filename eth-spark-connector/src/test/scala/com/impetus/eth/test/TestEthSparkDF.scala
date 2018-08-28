@@ -36,7 +36,7 @@ class TestEthSparkDF extends FlatSpec with BeforeAndAfterAll with SharedSparkSes
     val option = readConf.asOptions() ++ Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234")
     df = spark.read.format("org.apache.spark.sql.eth").options(option).load()
     df.cache()
-  }
+}
 
   "Eth Spark Data Frame" should "have rows" in {
     assert(df.collect().length > 0)
