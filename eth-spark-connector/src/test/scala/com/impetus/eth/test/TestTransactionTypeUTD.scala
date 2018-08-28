@@ -15,22 +15,22 @@
  ******************************************************************************/
 package com.impetus.eth.test
 
-import com.impetus.blkch.spark.connector.rdd.{ BlkchnRDD, ReadConf }
+import com.impetus.blkch.spark.connector.rdd.{BlkchnRDD, ReadConf}
 import com.impetus.blkch.spark.connector.rdd.partitioner.BlkchnPartitioner
 import com.impetus.eth.jdbc.EthResultSetMetaData
 import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
 import com.impetus.test.catagory.IntegrationTest
 import org.apache.spark.sql.eth.EthSpark
-import org.apache.spark.sql.{ Row, SparkSession }
-import org.scalatest.{ BeforeAndAfter, FlatSpec }
-import org.apache.spark.sql.types.{ ArrayType, StringType, TransactionType }
+import org.apache.spark.sql.{Row}
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, FlatSpec}
+import org.apache.spark.sql.types.{ArrayType, StringType, TransactionType}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConverters._
 import com.impetus.blkch.spark.connector.rdd._
 
 @IntegrationTest
-class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfter with SharedSparkSession {
+class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfterAll with SharedSparkSession {
 
   val ethPartitioner: BlkchnPartitioner = DefaultEthPartitioner
   var readConf: ReadConf = null
@@ -38,11 +38,12 @@ class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfter with SharedSpa
   var transactions: Array[Any] = null
   var ethRDD: EthRDD[_] = null
 
-  before {
+  override def beforeAll() {
+    super.beforeAll()
     readConf = ReadConf(Some(3), None, "Select transactions FROM block where blocknumber = 3796441")(ethPartitioner)
-    rdd = EthSpark.load[Row](spark.sparkContext, readConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
+    rdd = EthSpark.load[Row](spark.sparkContext, readConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234")).cache()
     ethRDD = new com.impetus.blkch.spark.connector.rdd.EthRDD(spark.sparkContext, null, null)
-    rdd.cache()
+    transactions = rdd.map { row => row.get(0) }.collect()
   }
 
   "Transaction" should "give data in Transaction UTD" in {

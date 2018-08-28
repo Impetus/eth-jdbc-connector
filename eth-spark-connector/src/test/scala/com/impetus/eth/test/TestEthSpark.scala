@@ -15,25 +15,25 @@
  ******************************************************************************/
 package com.impetus.eth.test
 
-import com.impetus.blkch.spark.connector.rdd.{ BlkchnRDD, ReadConf }
+import com.impetus.blkch.spark.connector.rdd.{BlkchnRDD, ReadConf}
 import com.impetus.blkch.spark.connector.rdd.partitioner.BlkchnPartitioner
 import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
 import com.impetus.test.catagory.IntegrationTest
-import org.apache.spark.sql.{ Row }
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.eth.EthSpark
-import org.scalatest.{ BeforeAndAfter, FlatSpec }
+import org.scalatest.{ BeforeAndAfterAll, FlatSpec}
 
 @IntegrationTest
-class TestEthSpark extends FlatSpec with BeforeAndAfter with SharedSparkSession {
+class TestEthSpark extends FlatSpec with BeforeAndAfterAll with SharedSparkSession {
 
   val ethPartitioner: BlkchnPartitioner = DefaultEthPartitioner
   var readConf: ReadConf = null
   var rdd: BlkchnRDD[Row] = null
 
-  before {
+  override def beforeAll() {
+    super.beforeAll()
     readConf = ReadConf(Some(3), None, "Select * FROM block where blocknumber > 5 and blocknumber < 30")(ethPartitioner)
-    rdd = EthSpark.load[Row](spark.sparkContext, readConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
-    rdd.cache()
+    rdd = EthSpark.load[Row](spark.sparkContext, readConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234")).cache()
   }
 
   "Eth Spark" should "have Read Conf" in {
@@ -53,11 +53,11 @@ class TestEthSpark extends FlatSpec with BeforeAndAfter with SharedSparkSession 
     val df = spark.read.format("org.apache.spark.sql.eth").options(option).load()
     assert(df.select(df.col("blocknumber")).collect().length > 0)
   }
-  
-   it should "be able to create block RDD" in {
+
+  it should "be able to create block RDD" in {
     readConf = ReadConf(Some(3), None, "Select * FROM block where blocknumber > 12345 and blocknumber <12350")(ethPartitioner)
-    rdd=EthSpark.load(spark.sparkContext, readConf,Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
-    val rddSchemaList=rdd.getSchema.fields
+    rdd = EthSpark.load(spark.sparkContext, readConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
+    val rddSchemaList = rdd.getSchema.fields
     assertResult(4)(rdd.count())
     assertResult("blocknumber")(rddSchemaList(0).name)
     assertResult("hash")(rddSchemaList(1).name)
@@ -80,13 +80,13 @@ class TestEthSpark extends FlatSpec with BeforeAndAfter with SharedSparkSession 
     assertResult("transactions")(rddSchemaList(18).name)
     assertResult("uncles")(rddSchemaList(19).name)
     assertResult("sealfields")(rddSchemaList(20).name)
-       
+
   }
-   
-      it should "be able to create transaction RDD" in {
+
+  it should "be able to create transaction RDD" in {
     readConf = ReadConf(Some(3), None, "Select * FROM transaction where blocknumber > 2245600 and blocknumber <2245610")(ethPartitioner)
-    rdd=EthSpark.load(spark.sparkContext, readConf,Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
-    val rddSchemaList=rdd.getSchema.fields
+    rdd = EthSpark.load(spark.sparkContext, readConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
+    val rddSchemaList = rdd.getSchema.fields
     assertResult(29)(rdd.count())
     assertResult("blockhash")(rddSchemaList(0).name)
     assertResult("blocknumber")(rddSchemaList(1).name)
@@ -104,7 +104,7 @@ class TestEthSpark extends FlatSpec with BeforeAndAfter with SharedSparkSession 
     assertResult("to")(rddSchemaList(13).name)
     assertResult("transactionindex")(rddSchemaList(14).name)
     assertResult("v")(rddSchemaList(15).name)
-    assertResult("value")(rddSchemaList(16).name)       
+    assertResult("value")(rddSchemaList(16).name)
   }
 
   "Read Conf asOption" should "return Default Partition Name" in {
