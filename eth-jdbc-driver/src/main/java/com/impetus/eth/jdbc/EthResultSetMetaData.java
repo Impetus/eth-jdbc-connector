@@ -44,7 +44,7 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
 
     private Map<String, Integer> columnNamesMap = new HashMap<String, Integer>();
 
-    private Map<Integer, String> indexToColumnMap = null;
+    private Map<Integer, String> indexToColumnMap =  new HashMap<Integer, String>();;
 
     private Map<Integer, String> indexToAliasMap = new HashMap<Integer, String>();
 
@@ -53,13 +53,12 @@ public class EthResultSetMetaData implements BlkchnResultSetMetaData {
     protected Map<String, Integer> colTypeMap;
 
     public EthResultSetMetaData(String tableName, Map<String, Integer> columnNamesMap, Map<String, String> aliasMapping,
-        Map<String, Integer> colTypeMap) {
+        Map<String, Integer> colTypeMap, Map<Integer, String> indexToColumnMap) {
         super();
         LOGGER.info("Instantiating new EthResultSetMetaData Object ");
         this.tableName = tableName;
         this.columnNamesMap = columnNamesMap;
-        indexToColumnMap =
-            columnNamesMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+        this.indexToColumnMap =indexToColumnMap;
         this.aliasMapping = aliasMapping;
         this.colTypeMap = colTypeMap;
         if (!aliasMapping.isEmpty())
