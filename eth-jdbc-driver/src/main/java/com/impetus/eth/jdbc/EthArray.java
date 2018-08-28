@@ -52,11 +52,14 @@ public class EthArray implements BlkchnArray {
     @Override
     public Object getArray() throws SQLException {
         if (baseType == java.sql.Types.JAVA_OBJECT || baseType == java.sql.Types.VARCHAR) {
-            String[] arrayObj = new String[arrayData.size()];
-            for (int i = 0; i < arrayData.size(); i++) {
-                arrayObj[i] = arrayData.get(i).toString();
-            }
-            return arrayObj;
+            if (arrayData != null) {
+                String[] arrayObj = new String[arrayData.size()];
+                for (int i = 0; i < arrayData.size(); i++) {
+                    arrayObj[i] = arrayData.get(i).toString();
+                }
+                return arrayObj;
+            } else
+                return null;
         } else {
             LOGGER.error("Array of type " + baseType + " not supported");
             throw new BlkchnException("Array of type " + baseType + " not supported");
