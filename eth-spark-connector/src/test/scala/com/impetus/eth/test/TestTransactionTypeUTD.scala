@@ -32,7 +32,6 @@ import com.impetus.blkch.spark.connector.rdd._
 @IntegrationTest
 class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfter with SharedSparkSession {
 
-  //var spark: SparkSession = null
   val ethPartitioner: BlkchnPartitioner = DefaultEthPartitioner
   var readConf: ReadConf = null
   var rdd: BlkchnRDD[Row] = null
@@ -40,7 +39,6 @@ class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfter with SharedSpa
   var ethRDD: EthRDD[_] = null
 
   before {
-    //spark = SparkSession.builder().master("local").appName("Test").getOrCreate()
     readConf = ReadConf(Some(3), None, "Select transactions FROM block where blocknumber = 3796441")(ethPartitioner)
     rdd = EthSpark.load[Row](spark.sparkContext, readConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
     ethRDD = new com.impetus.blkch.spark.connector.rdd.EthRDD(spark.sparkContext, null, null)
@@ -60,7 +58,7 @@ class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfter with SharedSpa
   "EthRDD" should "give expected result with handleExtraType" in {
     val data = new java.util.ArrayList[String]
     val resultSetMetaData = new EthResultSetMetaData("block", Map("blocknumber" -> 0.asInstanceOf[Integer]).asJava,
-      Map("blocknumber" -> "blocknumber").asJava, Map("blocknumber" -> (-5).asInstanceOf[Integer]).asJava)
+      Map("blocknumber" -> "blocknumber").asJava, Map("blocknumber" -> (-5).asInstanceOf[Integer]).asJava,Map(0.asInstanceOf[Integer] -> "blocknumber").asJava)
     data.add("3124")
     val structType = ethRDD.handleExtraType(1, resultSetMetaData, data)
     assert(structType.name.equals("blocknumber"))

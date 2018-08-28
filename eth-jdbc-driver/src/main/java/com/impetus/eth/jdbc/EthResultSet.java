@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.impetus.blkch.BlkchnException;
 import org.slf4j.Logger;
@@ -69,6 +70,8 @@ public class EthResultSet extends AbstractResultSet {
 
     protected Object lastReadColValue;
 
+    protected Map<Integer, String> indexToColumnMap;
+
     private static final String EXCEPTION_MSG = "Result set doesn't contain index %d";
 
     public EthResultSet(DataFrame dataframe, int resultSetType, int rSetConcurrency, String tableName) {
@@ -79,6 +82,8 @@ public class EthResultSet extends AbstractResultSet {
         this.rSetConcurrency = rSetConcurrency;
         this.tableName = tableName;
         this.aliasMapping = dataframe.getAliasMapping();
+        this. indexToColumnMap =
+                columnNamesMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
         currentRowCursor = BEFORE_FIRST_ROW;
         totalRowCount = rowData.size();
     }
@@ -93,6 +98,8 @@ public class EthResultSet extends AbstractResultSet {
         this.tableName = tableName;
         this.aliasMapping = dataframe.getAliasMapping();
         this.colTypeMap = colTypeMap;
+        this. indexToColumnMap =
+                columnNamesMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
         currentRowCursor = BEFORE_FIRST_ROW;
         totalRowCount = rowData.size();
     }
@@ -285,13 +292,6 @@ public class EthResultSet extends AbstractResultSet {
         if (currentRow[columnIndex - 1] instanceof BigInteger) {
             return ((BigInteger) currentRow[columnIndex - 1]).toString();
         }
-
-        lastReadColValue = currentRow[columnIndex - 1];
-        if (currentRow[columnIndex - 1] instanceof List<?>) {
-            System.out.println("hello here ");
-            return currentRow[columnIndex - 1].toString();
-        }
-
         return (String) currentRow[columnIndex - 1];
     }
 
@@ -441,14 +441,16 @@ public class EthResultSet extends AbstractResultSet {
     @Override
     public Array getArray(int columnIndex) throws SQLException {
         lastReadColValue = currentRow[columnIndex - 1];
-        return new EthArray((List<Object>) lastReadColValue);
+        int columnType=colTypeMap.get(indexToColumnMap.get(columnIndex - 1));
+        return new EthArray((List<Object>) lastReadColValue,columnType);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Array getArray(String columnLabel) throws SQLException {
         lastReadColValue = currentRow[getColumnIndex(columnLabel)];
-        return new EthArray((List<Object>) lastReadColValue);
+        int columnType=colTypeMap.get(getColumnName(columnLabel));
+        return new EthArray((List<Object>) lastReadColValue,columnType);
     }
 
     @Override
@@ -464,7 +466,7 @@ public class EthResultSet extends AbstractResultSet {
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
         checkClosed();
-        return new EthResultSetMetaData(tableName, columnNamesMap, aliasMapping, colTypeMap);
+        return new EthResultSetMetaData(tableName, columnNamesMap, aliasMapping, colTypeMap,indexToColumnMap);
     }
 
     @Override
@@ -500,6 +502,18 @@ public class EthResultSet extends AbstractResultSet {
                 throw new RuntimeException("Column: " + columnLabel + " is not a part of query");
             }
             return columnNamesMap.get(columnLabel);
+        }
+    }
+    
+    protected String getColumnName(String columnLabel) {
+        if (!aliasMapping.isEmpty() && aliasMapping.containsKey(columnLabel)) {
+            return indexToColumnMap.get(columnNamesMap.get(aliasMapping.get(columnLabel)));
+        } else {
+            if (columnNamesMap.get(columnLabel) == null) {
+                LOGGER.error("Column: " + columnLabel + " is not a part of query");
+                throw new RuntimeException("Column: " + columnLabel + " is not a part of query");
+            }
+            return indexToColumnMap.get(columnNamesMap.get(columnLabel));
         }
     }
 

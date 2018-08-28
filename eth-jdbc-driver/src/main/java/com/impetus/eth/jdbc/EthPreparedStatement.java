@@ -276,7 +276,7 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
             this.rSetType = 0;
             this.rSetConcurrency = 0;
         } catch (Exception e) {
-            LOGGER.error("ERROR : Array index out of bound");
+            LOGGER.error("Error while closing statement");
             throw new BlkchnException("Error while closing statement", e);
         }
     }
