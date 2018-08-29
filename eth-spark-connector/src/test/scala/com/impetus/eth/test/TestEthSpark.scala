@@ -33,7 +33,8 @@ class TestEthSpark extends FlatSpec with BeforeAndAfterAll with SharedSparkSessi
   override def beforeAll() {
     super.beforeAll()
     readConf = ReadConf(Some(3), None, "Select * FROM block where blocknumber > 5 and blocknumber < 30")(ethPartitioner)
-    rdd = EthSpark.load[Row](spark.sparkContext, readConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234")).cache()
+    rdd = EthSpark.load[Row](spark.sparkContext, readConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
+    rdd.cache()
   }
 
   "Eth Spark" should "have Read Conf" in {
