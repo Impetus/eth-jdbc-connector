@@ -39,6 +39,13 @@ class TestEthSparkJDBCTrxs extends FlatSpec with BeforeAndAfterAll with SharedSp
     assert(newDF.count() === 0)
   }
 
+  it should "return empty data frame with single where" in {
+    val newDF = df
+      .where("blocknumber > 123 and blocknumber < 145 and hash='2f3202c2d498c926401f6e74406525c02f735feefe457c5689'")
+      .select("blocknumber", "hash")
+    assert(newDF.count() === 0)
+  }
+
   it should "return expected value with direct API And Schema" in {
     val newDF = df.where("hash = '0x525bd3ec5c5ed2d222ae04ed2a6cc00267d98e206f604e979000ffbc5f99cb4b'")
       .select(df.col("*"))

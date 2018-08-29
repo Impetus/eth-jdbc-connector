@@ -34,7 +34,8 @@ class TestEthSparkDF extends FlatSpec with BeforeAndAfterAll with SharedSparkSes
     super.beforeAll()
     readConf = ReadConf(Some(3), None, "Select blocknumber,hash,transactions FROM block where blocknumber > 5 and blocknumber < 30")(ethPartitioner)
     val option = readConf.asOptions() ++ Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234")
-    df = spark.read.format("org.apache.spark.sql.eth").options(option).load().cache()
+    df = spark.read.format("org.apache.spark.sql.eth").options(option).load()
+    df.cache()
   }
 
   "Eth Spark Data Frame" should "have rows" in {
