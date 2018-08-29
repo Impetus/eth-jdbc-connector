@@ -19,6 +19,8 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -84,28 +86,47 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
             LOGGER.error("ERROR : Unknown Query Type ");
             throw new BlkchnException("ERROR : Unknown Query Type ");
         }
-        System.out.println("Sql is "+sql);
 
         placeholderHandler.setPlaceholderIndex();
         if (!placeholderHandler.isIndexListEmpty())
             this.placeholderValues = new Object[placeholderHandler.getIndexListCount()];
+        //System.out.println("Sql is "+sql);
     }
 
     @Override
     public void addBatch() throws SQLException {
-       batchList.add(placeholderValues);
-       this.placeholderValues=new Object[placeholderHandler.getIndexListCount()];;
+        if(logicalPlan.getType() == SQLType.QUERY)
+            throw new BlkchnException("BlkchnStatement Batch can only contains insert or call statements !!");
+        batchList.add(placeholderValues);
+        /*It will clear the previous values*/
+        //this.placeholderValues=new Object[placeholderHandler.getIndexListCount()];
+        this.placeholderValues=placeholderValues.clone();
+    }
+
+    public List<Object[]> getBatchedArgs() {
+        return this.batchList == null ? null : Collections.unmodifiableList(this.batchList);
     }
     
     @Override
     public int[] executeBatch() throws SQLException {
-        int[] updateCounts= new int[batchList.size()];
-        for(int i=0;i<batchList.size();i++){
-            for(int j=0;j<batchList.get(i).length;j++)
-                System.out.println("batchlist "+i+" object "+j+" value "+batchList.get(i)[j]);
-            this.placeholderValues=batchList.get(i);
-            updateCounts[i]=executeUpdate();
+        LOGGER.info("Entering into executeBatch Block");
+        if (isClosed)
+            throw new BlkchnException("No operations allowed after statement closed.");
+        if (this.batchList == null || this.batchList.size() == 0) {
+            return new int[0];
         }
+        int[] updateCounts= new int[batchList.size()];
+        Arrays.fill(updateCounts, EXECUTE_FAILED);
+        for(int i=0;i<batchList.size();i++){
+            this.placeholderValues=batchList.get(i);
+            try{
+                updateCounts[i]=executeUpdate();
+            }catch (BlkchnException e){
+                updateCounts[i]=EXECUTE_FAILED;
+                LOGGER.warn("PreparedStatement with values " + batchList.get(i).toString() + " gave exception "+e.getMessage());
+            }
+        }
+        batchList.clear();
         return updateCounts;
     }
     @Override
@@ -275,6 +296,7 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
             this.queryResultSet = null;
             this.rSetType = 0;
             this.rSetConcurrency = 0;
+            batchList.clear();
         } catch (Exception e) {
             LOGGER.error("Error while closing statement");
             throw new BlkchnException("Error while closing statement", e);

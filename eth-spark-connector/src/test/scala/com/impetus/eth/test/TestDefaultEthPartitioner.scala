@@ -21,18 +21,19 @@ import com.impetus.blkch.spark.connector.rdd.ReadConf
 import com.impetus.blkch.spark.connector.BlkchnConnector
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.eth.EthConnectorConf
-import org.scalatest.{ BeforeAndAfter, FlatSpec }
+import org.scalatest.{ BeforeAndAfter, BeforeAndAfterAll, FlatSpec }
 import com.impetus.eth.spark.connector.rdd.partitioner.DefaultEthPartitioner
-import com.impetus.test.catagory.{ UnitTest }
+import com.impetus.test.catagory.UnitTest
 
 @UnitTest
-class TestDefaultEthPartitioner extends FlatSpec with BeforeAndAfter with SharedSparkSession {
+class TestDefaultEthPartitioner extends FlatSpec with BeforeAndAfterAll with SharedSparkSession {
 
   var ethConnectorConf: EthConnectorConf = null
   var blkchnConnector: BlkchnConnector = null
   var defaultPartition: DefaultEthPartitioner = null
 
-  before {
+  override def beforeAll() {
+    super.beforeAll()
     Class.forName("com.impetus.eth.jdbc.EthDriver")
     ethConnectorConf = EthConnectorConf(spark.sparkContext.getConf, Map("url" -> "jdbc:blkchn:ethereum://ropsten.infura.io/1234"))
     blkchnConnector = new BlkchnConnector(ethConnectorConf)
