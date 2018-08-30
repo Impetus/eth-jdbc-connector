@@ -41,7 +41,7 @@ public class DriverConstants {
 
     public static final int MAJOR_VERSION = 1;
 
-    public static final int MINOR_VERSION = 0;
+    public static final int MINOR_VERSION = 1;
 
     public static final String IPC_OS = "IPC_OS";
     

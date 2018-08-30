@@ -54,7 +54,7 @@ public class TestDriverConstants extends TestCase
         assertEquals("KEYSTORE_PATH", DriverConstants.KEYSTORE_PATH);
         assertEquals("KEYSTORE_PATH", DriverConstants.KEYSTORE_PATH);
         assertEquals(1,DriverConstants.MAJOR_VERSION);
-        assertEquals(0, DriverConstants.MINOR_VERSION);
+        assertEquals(1, DriverConstants.MINOR_VERSION);
         assertEquals("jdbc:blkchn:", DriverConstants.DRIVERPREFIX);
 
     }
