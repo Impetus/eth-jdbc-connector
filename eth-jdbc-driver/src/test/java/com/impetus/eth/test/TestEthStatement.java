@@ -24,6 +24,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
+import java.lang.reflect.Field;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -33,10 +34,26 @@ import java.util.List;
 @Category(UnitTest.class)
 public class TestEthStatement extends TestCase {
     EthStatement statement = null;
+    Field batchList = null;
 
     @Override
     protected void setUp() {
         statement = new EthStatement(null, 0, 0);
+
+        try {
+            batchList = statement.getClass().getDeclaredField("batchedArgs");
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        batchList.setAccessible(true);
+    }
+
+    List<Object> getBatchList(){
+        try{
+            return (List<Object>) batchList.get(statement);
+        }catch(Exception e){
+            return null;
+        }
     }
 
     @Test
@@ -54,7 +71,7 @@ public class TestEthStatement extends TestCase {
         expected.add("insert into transaction (toAddress, value, unit, async) values ('\"+ address +\"', 1.11, 'ether', true)");
         expected.add("insert into transaction (toAddress, value, unit, async) values ('\"+ address +\"', 1.11, 'ether', true)");
         expected.add("insert into transaction (toAddress, value, unit, async) values ('\"+ address +\"', 1.11, 'ether', true)");
-        assertEquals(statement.getBatchedArgs(), expected);
+        assertEquals(getBatchList(), expected);
     }
 
     @Test
@@ -64,7 +81,7 @@ public class TestEthStatement extends TestCase {
         } catch (SQLException e) {
 
         }
-        assertEquals(statement.getBatchedArgs(), null);
+        assertEquals(getBatchList(), null);
     }
 
 

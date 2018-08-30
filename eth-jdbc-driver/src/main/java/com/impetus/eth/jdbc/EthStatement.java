@@ -134,10 +134,6 @@ public class EthStatement implements BlkchnStatement {
         }
     }
 
-    public List<Object> getBatchedArgs() {
-        return this.batchedArgs == null ? null : Collections.unmodifiableList(this.batchedArgs);
-    }
-
     @Override
     public void clearWarnings() throws SQLException {
         throw new UnsupportedOperationException();

@@ -102,10 +102,6 @@ public class EthPreparedStatement extends AbstractPreparedStatement {
         //this.placeholderValues=new Object[placeholderHandler.getIndexListCount()];
         this.placeholderValues=placeholderValues.clone();
     }
-
-    public List<Object[]> getBatchedArgs() {
-        return this.batchList == null ? null : Collections.unmodifiableList(this.batchList);
-    }
     
     @Override
     public int[] executeBatch() throws SQLException {
