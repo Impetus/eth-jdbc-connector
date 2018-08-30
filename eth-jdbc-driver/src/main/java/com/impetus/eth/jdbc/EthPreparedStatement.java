@@ -20,7 +20,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -39,8 +38,6 @@ import com.impetus.blkch.util.placeholder.InsertPlaceholderHandler;
 import com.impetus.blkch.util.placeholder.PlaceholderHandler;
 import com.impetus.blkch.util.placeholder.QueryPlaceholderHandler;
 import com.impetus.eth.parser.EthQueryExecutor;
-
-import jnr.ffi.Struct.int16_t;
 
 public class EthPreparedStatement extends AbstractPreparedStatement {
 

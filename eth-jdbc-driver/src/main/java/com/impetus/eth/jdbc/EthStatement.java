@@ -22,7 +22,6 @@ import java.util.*;
 import com.impetus.blkch.BlkchnException;
 import com.impetus.blkch.sql.query.RangeNode;
 import com.impetus.eth.parser.EthPhysicalPlan;
-import com.impetus.eth.query.EthColumns;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -471,45 +470,6 @@ public class EthStatement implements BlkchnStatement {
     @Override
     public void setQueryTimeout(int seconds) throws SQLException {
         throw new UnsupportedOperationException();
-    }
-
-    private List<TransactionResult> getTransactions(String blockNumber) throws IOException {
-        LOGGER.info("Getting details of transactions stored in block - " + blockNumber);
-        EthBlock block = connection.getWeb3jClient()
-            .ethGetBlockByNumber(DefaultBlockParameter.valueOf(new BigInteger(blockNumber)), true).send();
-
-        return block.getBlock().getTransactions();
-    }
-
-    private Block getBlock(String blockNumber) throws IOException {
-        LOGGER.info("Getting block - " + blockNumber + " Information ");
-        EthBlock block = connection.getWeb3jClient()
-            .ethGetBlockByNumber(DefaultBlockParameter.valueOf(new BigInteger(blockNumber)), true).send();
-        return block.getBlock();
-    }
-
-    private Block getBlockByHash(String blockHash) throws IOException {
-        LOGGER.info("Getting  information of block with hash - " + blockHash);
-        EthBlock block = connection.getWeb3jClient().ethGetBlockByHash(blockHash, true).send();
-        return block.getBlock();
-    }
-
-    private Transaction getTransactionByHash(String transactionHash) throws IOException {
-        LOGGER.info("Getting information of Transaction by hash - " + transactionHash);
-
-        Transaction transaction =
-            connection.getWeb3jClient().ethGetTransactionByHash(transactionHash).send().getResult();
-        return transaction;
-    }
-
-    private Transaction getTransactionByBlockHashAndIndex(String blockHash, BigInteger transactionIndex)
-        throws IOException {
-        LOGGER.info("Getting information of Transaction by blockhash - " + blockHash + " and transactionIndex"
-            + transactionIndex);
-
-        Transaction transaction = connection.getWeb3jClient()
-            .ethGetTransactionByBlockHashAndIndex(blockHash, transactionIndex).send().getResult();
-        return transaction;
     }
 
     public LogicalPlan getLogicalPlan(String sqlText) {

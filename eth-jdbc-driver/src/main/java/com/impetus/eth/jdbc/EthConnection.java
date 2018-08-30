@@ -43,7 +43,6 @@ import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.ipc.UnixIpcService;
 import org.web3j.protocol.ipc.WindowsIpcService;
 
-import com.impetus.blkch.BlkchnException;
 import com.impetus.blkch.jdbc.BlkchnConnection;
 
 /**

@@ -20,7 +20,6 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.sql.Types;
 
 import com.impetus.blkch.BlkchnException;

@@ -10,7 +10,6 @@ import com.impetus.blkch.jdbc.BlkchnDatabaseMetaData;
 public class EthDatabaseMetadata implements BlkchnDatabaseMetaData {
 
     public EthDatabaseMetadata() {
-        // TODO Auto-generated constructor stub
     }
 
     @Override

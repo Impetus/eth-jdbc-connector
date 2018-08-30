@@ -115,7 +115,6 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         DataFrame dataframe = getFromTable();
         if (dataframe.isEmpty()) {
             return dataframe;
-            // return dataframe.select(physicalPlan.getSelectItems());
         }
         List<OrderItem> orderItems = null;
         if (logicalPlan.getQuery().hasChildType(OrderByClause.class)) {
