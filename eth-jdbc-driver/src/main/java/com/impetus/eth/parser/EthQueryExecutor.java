@@ -186,8 +186,8 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
             } else if (physicalPlan.getWhereClause().hasChildType(DirectAPINode.class)) {
                 DirectAPINode node = physicalPlan.getWhereClause().getChildType(DirectAPINode.class, 0);
                 finalData = getDataNode(node.getTable(), node.getColumn(), node.getValue());
-            } else if (physicalPlan.getWhereClause().hasChildType(EmptyNode.class)) {
-                finalData = createEmptyDataNode(tableName);
+            } else if (physicalPlan.getWhereClause().hasChildType(GetRowsNode.class)) {
+                finalData = createRowsDataNode(tableName);
             } else {
                 RangeNode<?> rangeNode = physicalPlan.getWhereClause().getChildType(RangeNode.class, 0);
                 finalData = executeRangeNode(rangeNode);
@@ -1157,9 +1157,11 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
         }
     }
 
-
-    protected DataNode<?> createEmptyDataNode(String table) {
-
-        return new DataNode<>(table, new ArrayList<>());
+    protected DataNode<?> createRowsDataNode(String table) {
+        if (physicalPlan.getWhereClause().getChildType(GetRowsNode.class, 0).isNone())
+            return new DataNode<>(table, new ArrayList<>());
+        else
+            throw new BlkchnException(
+                    "WhereClasue evaluates to true and it will process all the block/transaction data. Not supported yet");
     }
 }

@@ -58,8 +58,9 @@ class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfterAll with Shared
 
   "EthRDD" should "give expected result with handleExtraType" in {
     val resultSetMetaData = new EthResultSetMetaData("block", Map("blocknumber" -> 0.asInstanceOf[Integer]).asJava,
-      Map("blocknumber" -> "blocknumber").asJava, Map("blocknumber" -> (-5).asInstanceOf[Integer]).asJava)
+      Map("blocknumber" -> "blocknumber").asJava, Map("blocknumber" -> (-5).asInstanceOf[Integer]).asJava,Map(0.asInstanceOf[Integer] -> "blocknumber").asJava)
     val structType = ethRDD.handleExtraType(1, resultSetMetaData)
+
     assert(structType.name.equals("blocknumber"))
     assert(structType.dataType.equals(DecimalType(38, 0)))
   }
@@ -69,7 +70,7 @@ class TestTransactionTypeUTD extends FlatSpec with BeforeAndAfterAll with Shared
     data.add("blockhash1")
     data.add("blockhash2")
     val resultSetMetaData = new EthResultSetMetaData("block", Map("hash" -> 0.asInstanceOf[Integer]).asJava,
-      Map("hash" -> "hash").asJava, Map("hash" -> 12.asInstanceOf[Integer]).asJava)
+      Map("hash" -> "hash").asJava, Map("hash" -> 12.asInstanceOf[Integer]).asJava,Map(0.asInstanceOf[Integer] -> "hash").asJava)
     val structData = ethRDD.handleExtraData(1, resultSetMetaData, data)
     assert(structData.equals(data.asScala))
   }
