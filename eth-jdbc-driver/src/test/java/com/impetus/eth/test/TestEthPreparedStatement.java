@@ -27,6 +27,8 @@ import com.impetus.test.catagory.UnitTest;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
+import java.util.List;
 
 @Category(UnitTest.class)
 public class TestEthPreparedStatement {
@@ -103,8 +105,8 @@ public class TestEthPreparedStatement {
         int afterClose = 0;
         try{
             EthPreparedStatement stmt = new EthPreparedStatement(connection, sql, 0, 0);
-            stmt.setInt(1, 111);
-            stmt.addBatch();
+            Field f = stmt.getClass().getDeclaredField("batchList");
+            f.setAccessible(true);
 
             stmt.setInt(1, 111);
             stmt.addBatch();
@@ -112,11 +114,14 @@ public class TestEthPreparedStatement {
             stmt.setInt(1, 111);
             stmt.addBatch();
 
-            beforeClose = stmt.getBatchedArgs().size();
+            stmt.setInt(1, 111);
+            stmt.addBatch();
+
+            beforeClose = ((List<Object[]>) f.get(stmt)).size();
 
             stmt.close();
 
-            afterClose = stmt.getBatchedArgs().size();
+            afterClose = ((List<Object[]>) f.get(stmt)).size();
         }catch(Exception e){
 
         }
@@ -131,12 +136,15 @@ public class TestEthPreparedStatement {
         try{
             EthPreparedStatement stmt = new EthPreparedStatement(connection, sql, 0, 0);
 
+            Field f = stmt.getClass().getDeclaredField("batchList");
+            f.setAccessible(true);
+
             stmt.setInt(1, 11);
             stmt.setInt(2, 12);
             stmt.setInt(3, 13);
             stmt.setInt(4, 14);
             stmt.addBatch();
-            Object[] firstBatch = stmt.getBatchedArgs().get(0);
+            Object[] firstBatch = ((List<Object[]>) f.get(stmt)).get(0);
             assertEquals(firstBatch[0],11);
             assertEquals(firstBatch[1],12);
             assertEquals(firstBatch[2],13);
@@ -146,7 +154,8 @@ public class TestEthPreparedStatement {
             stmt.setInt(3, 23);
             stmt.setInt(4, 24);
             stmt.addBatch();
-            Object[] secondBatch = stmt.getBatchedArgs().get(1);
+            Object[] secondBatch = ((List<Object[]>) f.get(stmt)).get(1);
+            firstBatch = ((List<Object[]>) f.get(stmt)).get(0);
             assertEquals(firstBatch[0],11);
             assertEquals(firstBatch[1],12);
             assertEquals(firstBatch[2],13);
@@ -158,7 +167,9 @@ public class TestEthPreparedStatement {
 
             stmt.setInt(1, 31);
             stmt.addBatch();
-            Object[] thirdBatch = stmt.getBatchedArgs().get(2);
+            Object[] thirdBatch = ((List<Object[]>) f.get(stmt)).get(2);
+            firstBatch = ((List<Object[]>) f.get(stmt)).get(0);
+            secondBatch = ((List<Object[]>) f.get(stmt)).get(1);
             assertEquals(firstBatch[0],11);
             assertEquals(firstBatch[1],12);
             assertEquals(firstBatch[2],13);
