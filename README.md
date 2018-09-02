@@ -12,7 +12,15 @@ It uses [blkchn-sql-driver](https://github.com/Impetus/blkchn-sql-driver) to par
 |---|---|
 | maven | 3.3.3 |
 |java | 1.8 |
-|web3j | 2.3.0 |
+|web3j | 3.4.0 |
+|spark | 2.0.0|
+
+Features Added with Release 1.1.0
+==========================
+
+* [Smart contract support](https://github.com/Impetus/eth-jdbc-connector/wiki/Ethereum-Smart-Contract-Guide) -User can deploy smart contract and run its fuctions by using jdbc driver
+* [Ethereum with Spark](https://github.com/Impetus/eth-jdbc-connector/wiki/Ethereum-with-Spark)
+* [Batch Transaction](https://github.com/Impetus/eth-jdbc-connector/wiki/Batch-Transaction)- Initiating multiple transactions in a batch
 
 Building ethereum-jdbc-connector
 ==========================
