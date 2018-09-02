@@ -363,7 +363,7 @@ public class EthQueryExecutor extends AbstractQueryExecutor {
                             keys.add(current.toString());
                         }
                     } catch (Exception e) {
-                        throw new BlkchnException("Error query block by number " + current, e);
+                        LOGGER.warn("block "+current+" not found");
                     }
                 } else if (EthTables.TRANSACTION.equals(rangeTable) && EthColumns.BLOCKNUMBER.equals(rangeCol)) {
                     try {

@@ -436,7 +436,7 @@ public class EthConnection implements BlkchnConnection {
     }
 
     protected void verifyConnection() throws SQLException {
-        LOGGER.info("verfying the connection. ");
+        LOGGER.info("verifying the connection. ");
         try {
             web3jClient.web3ClientVersion().send().getWeb3ClientVersion();
         } catch (Exception e) {
