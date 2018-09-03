@@ -32,13 +32,13 @@
 			<groupId>org.specs2</groupId>
 			<artifactId>specs2-core_${scala.compat.version}</artifactId>
 			<version>2.4.16</version>
-			<scope>test</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.scalatest</groupId>
 			<artifactId>scalatest_${scala.compat.version}</artifactId>
 			<version>2.2.4</version>
-			<scope>test</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.spark</groupId>
@@ -59,8 +59,6 @@
 	</dependencies>
 
 	<build>
-		<sourceDirectory>src/main/scala</sourceDirectory>
-		<testSourceDirectory>src/test/scala</testSourceDirectory>
 		<plugins>
 			<plugin>
 				<groupId>net.alchim31.maven</groupId>
