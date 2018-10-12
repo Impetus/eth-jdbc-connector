@@ -56,10 +56,8 @@ Product includes Other 3rd party software as indicated below.
         
 7.      Name                    :logback-classic
         Source                  :http://central.maven.org/maven2/ch/qos/logback/logback-classic/1.0.1/logback-classic-1.0.1.jar
-        Licence                 :Eclipse Public License - v 1.0 & GNU Lesser General Public License
+        Licence                 :Eclipse Public License - v 1.0
         Licence Source          :http://www.eclipse.org/legal/epl-v10.html
-                                :http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
-
         Linking                 :Static
         Modified by Impetus     :No
         Version                 :1.0.1
