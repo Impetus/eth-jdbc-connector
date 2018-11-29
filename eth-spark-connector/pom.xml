@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>eth-jdbc-connector</artifactId>
 		<groupId>com.impetus.eth</groupId>
-		<version>1.1.0</version>
+		<version>1.2.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>eth-spark-connector</artifactId>
 	<name>Ethereum Spark Connector</name>
@@ -16,7 +16,7 @@
 		<spark.version>2.0.0</spark.version>
 		<scala.version>2.11.5</scala.version>
 		<scala.compat.version>2.11</scala.compat.version>
-		<blkchn.driver.version>1.1.0-SNAPSHOT</blkchn.driver.version>
+		<blkchn.driver.version>1.2.0-SNAPSHOT</blkchn.driver.version>
 	</properties>
 
 	<dependencies>
