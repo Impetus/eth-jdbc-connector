@@ -44,7 +44,7 @@ Product includes Other 3rd party software as indicated below.
         Licence Source          :http://www.apache.org/licenses/LICENSE-2.0.html
         Linking                 :Static
         Modified by Impetus     :No
-        Version                 :2.3.0
+        Version                 :3.4.0
         
 6.      Name                    :blkchn-sql-interfaces
         Source                  :
@@ -52,7 +52,7 @@ Product includes Other 3rd party software as indicated below.
         Licence Source          :http://www.apache.org/licenses/LICENSE-2.0.html
         Linking                 :Static
         Modified by Impetus     :Yes
-        Version                 :1.0.0
+        Version                 :1.1.0
         
 7.      Name                    :logback-classic
         Source                  :http://central.maven.org/maven2/ch/qos/logback/logback-classic/1.0.1/logback-classic-1.0.1.jar
@@ -69,3 +69,19 @@ Product includes Other 3rd party software as indicated below.
         Linking                 :Static
         Modified by Impetus     :No
         Version                 :1.7.22
+		
+9.      Name                    :blkchn-spark-connector
+        Source                  :
+        Licence                 :Apache Software License 2.0
+        Licence Source          :http://www.apache.org/licenses/LICENSE-2.0.html
+        Linking                 :Static
+        Modified by Impetus     :Yes
+        Version                 :1.1.0
+		
+10.      Name                   :spark-sql_2.11
+        Source                  :http://central.maven.org/maven2/org/apache/spark/spark-core_2.11/2.0.0/spark-core_2.11-2.0.0.jar
+        Licence                 :Apache Software License 2.0
+        Licence Source          :http://www.apache.org/licenses/LICENSE-2.0.html
+        Linking                 :Static
+        Modified by Impetus     :no
+        Version                 :2.0.0
